@@ -25,16 +25,16 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Share
 import com.example.c001apk.compose.ui.component.design.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.ModalBottomSheet
-import androidx.compose.material3.Surface
+import com.example.c001apk.compose.ui.component.design.Surface
 import com.example.c001apk.compose.ui.component.design.Switch
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
-import androidx.compose.material3.VerticalDivider
+import com.example.c001apk.compose.ui.component.design.VerticalDivider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import com.example.c001apk.compose.ui.component.design.FullScreenDialog as Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.c001apk.compose.logic.model.ProductSpecSection
 import com.example.c001apk.compose.logic.model.ProductSpecItem

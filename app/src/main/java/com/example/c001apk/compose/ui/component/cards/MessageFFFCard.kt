@@ -1,7 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -10,13 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import com.example.c001apk.compose.ui.component.design.Text
+import com.example.c001apk.compose.ui.component.design.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.ui.ffflist.FFFListType
 import com.example.c001apk.compose.ui.history.HistoryType
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.CookieUtil
 
 /**
@@ -47,10 +45,13 @@ fun MessageFFFCard(
     fffList: List<String>,
     onViewFFFList: (String, String) -> Unit,
 ) {
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixAccountStats(modifier, fffList, onViewFFFList)
+        return
+    }
     FFFCardRow(
         modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg()),
+            .contentCard(),
         dataList = listOf(
             FFFCardItem(
                 title = "动态",

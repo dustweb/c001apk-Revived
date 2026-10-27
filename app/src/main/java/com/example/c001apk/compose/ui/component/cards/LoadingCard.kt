@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import com.example.c001apk.compose.ui.component.design.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +71,7 @@ fun LoadingCard(
                     .align(Alignment.Center),
                 text = type.second ?: stringResource(id = R.string.loading_empty),
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.outline,
+                color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
             )
 
             Type.INDICATOR -> androidx.compose.animation.AnimatedVisibility(

@@ -3,7 +3,7 @@ package com.example.c001apk.compose.ui.component.cards
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +23,7 @@ fun ChatTimeCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(12.dp),
-        color = MaterialTheme.colorScheme.outline,
+        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
         style = MaterialTheme.typography.bodySmall,
         textAlign = TextAlign.Center,
     )

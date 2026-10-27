@@ -12,12 +12,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Scaffold
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.SecondaryTabRow
 import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import androidx.compose.runtime.Composable
@@ -67,7 +67,7 @@ fun CoolPicScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = { Text(text = title) },
+                title = title,
             )
         }
     ) { paddingValues ->

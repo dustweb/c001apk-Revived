@@ -70,6 +70,7 @@ fun C001apkComposeTheme(
     fontScale: Float = 1.00f,
     contentScale: Float = 1.00f,
     uiStyle: UiStyle = LocalUserPreferences.current.uiStyle,
+    applySystemBars: Boolean = true,
     content: @Composable () -> Unit
 ) {
 
@@ -112,7 +113,7 @@ fun C001apkComposeTheme(
     }
 
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && applySystemBars) {
         SideEffect {
             val window = (view.context as Activity).window
             @Suppress("DEPRECATION")
@@ -143,7 +144,7 @@ fun C001apkComposeTheme(
     MaterialTheme(
         colorScheme = if (uiStyle == UiStyle.MIUIX) colorScheme.withMiuixSurfaces(miuixColors)
             else colorScheme,
-        typography = Typography,
+        typography = if (uiStyle == UiStyle.MIUIX) MiuixTypography else Typography,
         content = {
             // 挡掉 ripple 的 focus 状态层（左上角元素会莫名其妙保持 Focus，看起来像
             //「一直按着」）。配置必须是恒定值 —— material3 1.3.0 下 LocalRippleConfiguration

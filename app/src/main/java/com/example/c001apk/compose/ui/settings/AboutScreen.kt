@@ -15,9 +15,8 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.ForkRight
 import androidx.compose.material.icons.outlined.Source
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,7 +58,7 @@ fun AboutScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = { Text(text = "关于") },
+                title = "关于",
             )
         }
     ) { paddingValues ->

@@ -25,18 +25,19 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.component.design.TextField
 import androidx.compose.material3.TextFieldDefaults
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
@@ -105,7 +105,7 @@ fun BlackListScreen(
         }
     }
 
-    var textInput by remember { mutableStateOf(TextFieldValue(text = EMPTY_STRING)) }
+    var textInput by rememberSaveable(stateSaver = TextFieldValue.Saver) { mutableStateOf(TextFieldValue(text = EMPTY_STRING)) }
     val textStyle = LocalTextStyle.current
     var showClearDialog by remember { mutableStateOf(false) }
     val rememberScrollState = rememberScrollState()
@@ -199,16 +199,10 @@ fun BlackListScreen(
                             }
                         },
                         textStyle = textStyle.copy(fontSize = 18.sp),
-                        placeholder = {
-                            Text(
-                                text = when (type) {
-                                    BlackListType.USER.name -> "UID"
-                                    BlackListType.TOPIC.name -> "话题"
-                                    else -> EMPTY_STRING
-                                },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        placeholderText = when (type) {
+                            BlackListType.USER.name -> "UID"
+                            BlackListType.TOPIC.name -> "话题"
+                            else -> EMPTY_STRING
                         },
                         trailingIcon = {
                             AnimatedVisibility(
@@ -221,7 +215,7 @@ fun BlackListScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Clear,
-                                        contentDescription = null
+                                        contentDescription = "清空输入"
                                     )
                                 }
                             }
@@ -255,12 +249,12 @@ fun BlackListScreen(
                         IconButton(onClick = {
                             onBackup()
                         }) {
-                            Icon(imageVector = Icons.Default.Upload, contentDescription = null)
+                            Icon(imageVector = Icons.Default.Upload, contentDescription = "导出")
                         }
                         IconButton(onClick = {
                             onRestore()
                         }) {
-                            Icon(imageVector = Icons.Default.Download, contentDescription = null)
+                            Icon(imageVector = Icons.Default.Download, contentDescription = "导入")
                         }
                     }
                 }
@@ -304,7 +298,7 @@ fun BlackListScreen(
                             showClearDialog = true
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.ClearAll, contentDescription = null)
+                        Icon(imageVector = Icons.Default.ClearAll, contentDescription = "清空列表")
                     }
                 }
             }

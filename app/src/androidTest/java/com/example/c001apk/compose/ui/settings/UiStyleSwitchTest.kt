@@ -13,6 +13,7 @@ import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.c001apk.compose.R
 import com.example.c001apk.compose.UiStyle
+import com.example.c001apk.compose.ThemeType
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import com.example.c001apk.compose.ui.feed.reply.ReplyActivity
 import com.example.c001apk.compose.ui.main.MainActivity
@@ -30,6 +31,62 @@ import org.junit.runner.RunWith
 class UiStyleSwitchTest {
     @get:Rule val compose = createEmptyComposeRule()
     private val context = ApplicationProvider.getApplicationContext<Context>()
+
+    @Test
+    fun replyThemeUpdatesPaletteAndFontWithoutReplacingTheEditor() {
+        val intent = Intent(context, ReplyActivity::class.java).putExtra("type", "feed")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        ActivityScenario.launch<ReplyActivity>(intent).use { scenario ->
+            lateinit var repository: UserPreferencesRepository
+            lateinit var editor: TextInputEditText
+            scenario.onActivity {
+                repository = it.userPreferencesRepository
+                editor = it.findViewById(R.id.editText)
+                editor.setText("颜色和字号变化后仍保留草稿")
+            }
+            val original = runBlocking { repository.data.first() }
+            fun buttonColor(): Int? {
+                var color: Int? = null
+                scenario.onActivity {
+                    color = (it.findViewById<android.view.View>(R.id.publish).background as? GradientDrawable)?.color?.defaultColor
+                }
+                return color
+            }
+            try {
+                runBlocking {
+                    repository.setUiStyle(UiStyle.MIUIX)
+                    repository.setMaterialYou(false)
+                    repository.setThemeType(ThemeType.Custom)
+                    repository.setSeedColor("D04020")
+                    repository.setFontScale(1f)
+                }
+                compose.waitUntil(5_000) { buttonColor() != null }
+                compose.waitForIdle()
+                val first = buttonColor()
+                var firstSize = 0f
+                scenario.onActivity { firstSize = editor.textSize }
+                runBlocking { repository.setSeedColor("2060D0"); repository.setFontScale(1.2f) }
+                compose.waitUntil(5_000) { buttonColor() != first }
+                compose.waitUntil(5_000) {
+                    var larger = false
+                    scenario.onActivity { larger = editor.textSize > firstSize * 1.1f }
+                    larger
+                }
+                scenario.onActivity {
+                    assertSame(editor, it.findViewById(R.id.editText))
+                    assertEquals("颜色和字号变化后仍保留草稿", editor.text.toString())
+                }
+            } finally {
+                runBlocking {
+                    repository.setUiStyle(original.uiStyle)
+                    repository.setMaterialYou(original.materialYou)
+                    repository.setThemeType(original.themeType)
+                    repository.setSeedColor(original.seedColor)
+                    repository.setFontScale(original.fontScale)
+                }
+            }
+        }
+    }
 
     @Test
     fun switchAppliesWithoutRestartAndKeepsSettingsScrollPosition() {

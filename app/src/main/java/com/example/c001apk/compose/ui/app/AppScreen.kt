@@ -26,13 +26,13 @@ import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import com.example.c001apk.compose.ui.component.design.SecondaryTabRow
 import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -125,17 +124,7 @@ fun AppScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    Text(
-                        modifier = Modifier
-                            .graphicsLayer {
-                                alpha = if (state.toolbarState.progress == 0f) 1f else 0f
-                            },
-                        text = viewModel.title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
+                title = if (state.toolbarState.progress == 0f) viewModel.title else "",
                 actions = {
                     if (viewModel.appState is LoadingState.Success) {
                         Row(Modifier.wrapContentSize(Alignment.TopEnd)) {
@@ -144,7 +133,7 @@ fun AppScreen(
                                     onSearch(viewModel.title, "apk", viewModel.id)
                                 }
                             ) {
-                                Icon(Icons.Default.Search, contentDescription = null)
+                                Icon(Icons.Default.Search, contentDescription = "搜索")
                             }
                             Box {
                                 MoreMenuButton { dropdownMenuExpanded = true }

@@ -23,18 +23,21 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.component.design.TextField
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,10 +72,10 @@ fun LoginScreen(
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
     val prefs = LocalUserPreferences.current
-    var account by remember { mutableStateOf(EMPTY_STRING) }
-    var password by remember { mutableStateOf(EMPTY_STRING) }
-    var captcha by remember { mutableStateOf(EMPTY_STRING) }
-    var passwordHidden by remember { mutableStateOf(true) }
+    var account by rememberSaveable { mutableStateOf(EMPTY_STRING) }
+    var password by rememberSaveable { mutableStateOf(EMPTY_STRING) }
+    var captcha by rememberSaveable { mutableStateOf(EMPTY_STRING) }
+    var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
     fun onLogin() {
         if (account.isNotEmpty() && password.isNotEmpty()) {
@@ -99,9 +102,7 @@ fun LoginScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    Text(text = "登录")
-                },
+                title = "登录",
                 actions = {
                     TextButton(
                         onClick = onWebLogin,
@@ -115,10 +116,8 @@ fun LoginScreen(
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier.padding(
-                top = paddingValues.calculateTopPadding(),
-                start = paddingValues.calculateLeftPadding(layoutDirection),
-            )
+            modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()
+                .verticalScroll(rememberScrollState())
         ) {
 
             HorizontalDivider()
@@ -127,7 +126,7 @@ fun LoginScreen(
                 value = account,
                 onValueChange = { account = it },
                 singleLine = true,
-                label = { Text("账号") },
+                labelText = "账号",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 20.dp)
@@ -147,7 +146,7 @@ fun LoginScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Rounded.Cancel,
-                                contentDescription = null
+                                contentDescription = "清空输入"
                             )
                         }
                     }
@@ -157,7 +156,7 @@ fun LoginScreen(
                 value = password,
                 onValueChange = { password = it },
                 singleLine = true,
-                label = { Text("密码") },
+                labelText = "密码",
                 visualTransformation =
                 if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = KeyboardOptions(
@@ -173,7 +172,7 @@ fun LoginScreen(
                     IconButton(onClick = { passwordHidden = !passwordHidden }) {
                         val visibilityIcon =
                             if (passwordHidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        Icon(imageVector = visibilityIcon, contentDescription = null)
+                        Icon(imageVector = visibilityIcon, contentDescription = if (passwordHidden) "显示密码" else "隐藏密码")
                     }
                 },
                 modifier = Modifier
@@ -222,7 +221,7 @@ fun LoginScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Rounded.Cancel,
-                                        contentDescription = null
+                                        contentDescription = "清空输入"
                                     )
                                 }
                             }

@@ -21,7 +21,6 @@ import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
@@ -37,7 +36,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityOptionsCompat
@@ -61,7 +59,6 @@ import com.example.c001apk.compose.BuildConfig
 import com.example.c001apk.compose.R
 import com.example.c001apk.compose.ThemeType
 import com.example.c001apk.compose.databinding.ActivityReplyBinding
-import com.example.c001apk.compose.databinding.ItemCaptchaBinding
 import com.example.c001apk.compose.constant.Constants.seedColors
 import com.example.c001apk.compose.logic.model.OSSUploadPrepareModel
 import com.example.c001apk.compose.ui.feed.reply.emoji.EmojiPagerAdapter
@@ -75,7 +72,6 @@ import com.example.c001apk.compose.util.EmojiUtils.emojiList
 import com.example.c001apk.compose.util.FastDeleteAtUserKeyListener
 import com.example.c001apk.compose.util.OSSUtil.getImageDimensionsAndMD5
 import com.example.c001apk.compose.util.OSSUtil.toHex
-import com.example.c001apk.compose.util.OnTextInputListener
 import com.example.c001apk.compose.util.OssUploadUtil.ossUpload
 import com.example.c001apk.compose.util.dp
 import com.example.c001apk.compose.util.makeToast
@@ -83,7 +79,12 @@ import com.example.c001apk.compose.util.performConfiguredHapticFeedback
 import com.example.c001apk.compose.view.SmoothInputLayout
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.MaterialColors
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.c001apk.compose.ui.component.design.showAppDialog
+import com.example.c001apk.compose.ui.component.design.DialogAction
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
+import com.example.c001apk.compose.ui.theme.observeViewTheme
 import com.google.android.material.elevation.SurfaceColors
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -92,10 +93,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 import com.example.c001apk.compose.UiStyle
-import com.example.c001apk.compose.ThemeMode
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -124,6 +123,12 @@ class ReplyActivity : AppCompatActivity(),
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
     private var currentUiStyle = com.example.c001apk.compose.util.CookieUtil.uiStyle
+    private var viewPalette: androidx.compose.material3.ColorScheme? = null
+    private var originalPublishColors: android.content.res.ColorStateList? = null
+    private var originalHintColors: android.content.res.ColorStateList? = null
+    private var originalCheckTint: android.content.res.ColorStateList? = null
+    private var originalIconTints = emptyMap<android.widget.ImageView, android.content.res.ColorStateList?>()
+    private var originalTextSizes = emptyMap<android.widget.TextView, Float>()
     private var styleDarkMode = com.example.c001apk.compose.util.CookieUtil.isDarkMode
 
     private lateinit var binding: ActivityReplyBinding
@@ -142,7 +147,7 @@ class ReplyActivity : AppCompatActivity(),
     }
     private val color: Int
         get() = if (currentUiStyle == UiStyle.MIUIX) {
-            if (styleDarkMode) android.graphics.Color.rgb(36, 36, 36) else android.graphics.Color.WHITE
+            viewPalette?.surfaceContainer?.toArgb() ?: resolveSurfaceContainerColor()
         } else resolveSurfaceContainerColor()
     private val imeScrimDrawable by lazy { ColorDrawable(color) }
     private val externalLaunchScrimDrawable by lazy { ColorDrawable(color) }
@@ -154,7 +159,7 @@ class ReplyActivity : AppCompatActivity(),
     private var imageList = ArrayList<OSSUploadPrepareModel>()
     private var typeList = ArrayList<String>()
     private var md5List = ArrayList<ByteArray?>()
-    private var dialog: AlertDialog? = null
+    private var dialog: android.content.DialogInterface? = null
     private lateinit var atTopicResultLauncher: ActivityResultLauncher<Intent>
     private var isFromAt = false
     private var pendingShowKeyboard = true
@@ -189,6 +194,18 @@ class ReplyActivity : AppCompatActivity(),
         overridePendingTransition(0, 0)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityReplyBinding.inflate(layoutInflater)
+        originalTextSizes = listOfNotNull(binding.title, binding.editText, binding.publish,
+            binding.replyTargetName, binding.checkBox).associateWith { it.textSize }
+        originalPublishColors = binding.publish.textColors
+        originalHintColors = binding.editText.hintTextColors
+        originalCheckTint = binding.checkBox.buttonTintList
+        originalIconTints = listOfNotNull(binding.emojiBtn, binding.imageBtn, binding.otherImageBtn, binding.atBtn, binding.tagBtn)
+            .associateWith { it.imageTintList }
+        binding.emojiBtn?.contentDescription = "表情"
+        binding.imageBtn?.contentDescription = "选择图片"
+        binding.otherImageBtn?.contentDescription = "选择文件"
+        binding.atBtn?.contentDescription = "提及用户"
+        binding.tagBtn?.contentDescription = "添加话题"
         setContentView(binding.root)
         binding.main.post {
             binding.main.translationY = binding.main.height.toFloat()
@@ -206,7 +223,7 @@ class ReplyActivity : AppCompatActivity(),
         binding.main.isFocusable = false
         binding.main.isFocusableInTouchMode = false
         baseRootPaddingBottom = binding.main.paddingBottom
-        
+
         var imeAnimating = false
         ViewCompat.setWindowInsetsAnimationCallback(binding.main, object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
             override fun onPrepare(animation: WindowInsetsAnimationCompat) {
@@ -347,6 +364,7 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     private fun resolvePrimaryColor(): Int {
+        if (currentUiStyle == UiStyle.MIUIX) viewPalette?.let { return it.primary.toArgb() }
         if (materialYou) {
             return MaterialColors.getColor(
                 this,
@@ -508,18 +526,11 @@ class ReplyActivity : AppCompatActivity(),
                         binding.imageLayout.addView(imageView)
                     }
                 }.onFailure {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle("获取图片信息失败")
-                        .setMessage(it.message)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .setNegativeButton("Log") { _, _ ->
-                            MaterialAlertDialogBuilder(this)
-                                .setTitle("Log")
-                                .setMessage(it.stackTraceToString())
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show()
-                        }
-                        .show()
+                    val error = it
+                    showAppDialog(this, "获取图片信息失败", error.message, actions = listOf(
+                        DialogAction("日志") { showAppDialog(this, "日志", error.stackTraceToString()) },
+                        DialogAction(getString(android.R.string.ok), primary = true),
+                    ))
                 }
             }
             binding.imageLayout.isVisible = uriList.isNotEmpty()
@@ -578,38 +589,47 @@ class ReplyActivity : AppCompatActivity(),
         binding.title.setTypeface(null, if (miuix) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
         binding.publish.background = if (miuix) GradientDrawable().apply {
             cornerRadius = 12.dp.toFloat()
-            setColor(ColorUtils.setAlphaComponent(resolvePrimaryColor(), 28))
+            setColor(viewPalette?.primary?.toArgb() ?: resolvePrimaryColor())
         } else null
         binding.textInputLayout.boxBackgroundColor = color
         val textColor = if (miuix) {
-            if (styleDarkMode) android.graphics.Color.rgb(242, 242, 242) else android.graphics.Color.rgb(25, 25, 25)
+            viewPalette?.onSurface?.toArgb() ?: MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK)
         } else MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK)
         binding.title.setTextColor(textColor)
         binding.editText.setTextColor(textColor)
         binding.replyTargetName?.setTextColor(textColor)
         binding.checkBox.setTextColor(textColor)
+        viewPalette?.takeIf { miuix }?.let { palette ->
+            binding.publish.setTextColor(palette.onPrimary.toArgb())
+            binding.editText.setHintTextColor(palette.onSurfaceVariant.toArgb())
+            listOfNotNull(binding.emojiBtn, binding.imageBtn, binding.otherImageBtn, binding.atBtn, binding.tagBtn)
+                .forEach { it.imageTintList = android.content.res.ColorStateList.valueOf(palette.onSurfaceVariant.toArgb()) }
+            binding.checkBox.buttonTintList = android.content.res.ColorStateList.valueOf(palette.primary.toArgb())
+        }
+        if (!miuix) {
+            originalPublishColors?.let { binding.publish.setTextColor(it) }
+            originalHintColors?.let { binding.editText.setHintTextColor(it) }
+            binding.checkBox.buttonTintList = originalCheckTint
+            originalIconTints.forEach { (view, tint) -> view.imageTintList = tint }
+        }
         imeScrimDrawable.color = color
         externalLaunchScrimDrawable.color = color
     }
 
     private fun initObserve() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                userPreferencesRepository.data.map { prefs ->
-                    val dark = when (prefs.themeMode) {
-                        ThemeMode.ALWAYS_ON -> true
-                        ThemeMode.ALWAYS_OFF -> false
-                        else -> resources.configuration.uiMode and
-                            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
-                            android.content.res.Configuration.UI_MODE_NIGHT_YES
-                    }
-                    prefs.uiStyle to dark
-                }.distinctUntilChanged().collect { (style, dark) ->
-                    currentUiStyle = style
-                    styleDarkMode = dark
-                    applyUiStyle()
-                }
-            }
+        observeViewTheme(userPreferencesRepository) { prefs, dark, palette, typography ->
+            currentUiStyle = prefs.uiStyle
+            styleDarkMode = dark
+            viewPalette = palette
+            applyUiStyle()
+            if (prefs.uiStyle == UiStyle.MIUIX) {
+                val scale = prefs.fontScale * prefs.contentScale
+                binding.title.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.title4.fontSize.value * scale)
+                binding.editText.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.main.fontSize.value * scale)
+                binding.publish.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.button.fontSize.value * scale)
+                binding.replyTargetName?.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.body2.fontSize.value * scale)
+                binding.checkBox.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.body2.fontSize.value * scale)
+            } else originalTextSizes.forEach { (view, size) -> view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, size) }
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -703,32 +723,20 @@ class ReplyActivity : AppCompatActivity(),
                 viewModel.captchaImg.collect { img ->
                     img?.let {
                         closeDialog()
-                        val binding = ItemCaptchaBinding.inflate(
-                            LayoutInflater.from(this@ReplyActivity), null, false
-                        )
-                        binding.captchaImg.setImageBitmap(img)
-                        binding.captchaText.highlightColor = ColorUtils.setAlphaComponent(
-                            resolvePrimaryDarkColor(resolvePrimaryColor()),
-                            128
-                        )
-                        MaterialAlertDialogBuilder(this@ReplyActivity).apply {
-                            setView(binding.root)
-                            setTitle("captcha")
-                            setNegativeButton(android.R.string.cancel, null)
-                            setPositiveButton("验证并继续") { _, _ ->
-                                viewModel.requestValidateData = HashMap()
-                                viewModel.requestValidateData["type"] = "err_request_captcha"
-                                viewModel.requestValidateData["code"] =
-                                    binding.captchaText.text.toString()
-                                viewModel.requestValidateData["mobile"] = ""
-                                viewModel.requestValidateData["idcard"] = ""
-                                viewModel.requestValidateData["name"] = ""
+                        val code = mutableStateOf("")
+                        showAppDialog(this@ReplyActivity, "验证", actions = listOf(
+                            DialogAction(getString(android.R.string.cancel)),
+                            DialogAction("验证并继续", primary = true) {
+                                viewModel.requestValidateData = hashMapOf("type" to "err_request_captcha",
+                                    "code" to code.value, "mobile" to "", "idcard" to "", "name" to "")
                                 viewModel.onPostRequestValidate()
-                            }
-                        }.create().apply {
-                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-                            binding.captchaText.requestFocus()
-                        }.show()
+                            },
+                        )) {
+                            androidx.compose.foundation.Image(img.asImageBitmap(), "验证码图片")
+                            com.example.c001apk.compose.ui.component.design.TextField(
+                                value = code.value, onValueChange = { code.value = it },
+                                labelText = "验证码", singleLine = true)
+                        }
                         viewModel.resetCaptcha()
                     }
                 }
@@ -923,7 +931,9 @@ class ReplyActivity : AppCompatActivity(),
         binding.textInputLayout.setBoxStrokeColor(primaryColor)
         binding.textInputLayout.setCounterTextColor(ColorStateList.valueOf(primaryColor))
         binding.textInputLayout.boxBackgroundColor = boxColor
-        binding.textInputLayout.setCursorColor(ColorStateList.valueOf(primaryColor))
+        if (SDK_INT >= 29) {
+            binding.textInputLayout.setCursorColor(ColorStateList.valueOf(primaryColor))
+        }
     }
 
     private fun setCursorColor(editText: TextView, color: Int) {
@@ -1182,27 +1192,10 @@ class ReplyActivity : AppCompatActivity(),
         }
     }
 
-    @SuppressLint("InflateParams")
     private fun showDialog() {
-        dialog = MaterialAlertDialogBuilder(
-            this,
-            R.style.ThemeOverlay_MaterialAlertDialog_Rounded
-        ).apply {
-            setView(
-                LayoutInflater.from(this@ReplyActivity)
-                    .inflate(R.layout.dialog_refresh, null, false)
-            )
-            setCancelable(false)
-        }.create()
-        dialog?.show()
-        val decorView: View? = dialog?.window?.decorView
-        val paddingTop: Int = decorView?.paddingTop ?: 0
-        val paddingBottom: Int = decorView?.paddingBottom ?: 0
-        val paddingLeft: Int = decorView?.paddingLeft ?: 0
-        val paddingRight: Int = decorView?.paddingRight ?: 0
-        val width = 80.dp + paddingLeft + paddingRight
-        val height = 80.dp + paddingTop + paddingBottom
-        dialog?.window?.setLayout(width, height)
+        dialog = showAppDialog(this, "正在提交", actions = emptyList(), cancelable = false) {
+            com.example.c001apk.compose.ui.component.design.ProgressContent()
+        }
     }
 
     private fun launchAtTopic(type: String) {

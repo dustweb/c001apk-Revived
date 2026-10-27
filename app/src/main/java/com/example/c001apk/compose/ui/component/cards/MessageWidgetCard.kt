@@ -1,6 +1,5 @@
 package com.example.c001apk.compose.ui.component.cards
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -10,12 +9,10 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import com.example.c001apk.compose.ui.component.design.contentCard
 import com.example.c001apk.compose.ui.ffflist.FFFListType
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.CookieUtil
 
 /**
@@ -27,11 +24,14 @@ fun MessageWidgetCard(
     onViewFFFList: (String?, String) -> Unit,
     onViewHistory: (String) -> Unit,
 ) {
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixAccountShortcuts(modifier, onViewFFFList, onViewHistory)
+        return
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg())
+            .contentCard()
 
     ) {
         FFFCardRow(

@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.constant.Constants.PREFIX_HTTP
@@ -103,8 +103,7 @@ fun ChatLeftCard(
                     isChat = true,
                     modifier = Modifier
                         .padding(start = 10.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(cardBg())
+                        .contentCard()
                         .width(maxWidth / 2f)
                         .height(imageHeight),
                     onClearFocus = onClearFocus,

@@ -14,8 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.RadioButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Surface
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

@@ -9,12 +9,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import com.example.c001apk.compose.ui.component.design.FilledTonalButton
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import com.example.c001apk.compose.ui.component.design.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -47,6 +47,12 @@ fun MessageHeaderCard(
     onLogout: () -> Unit,
     onViewUser: (String) -> Unit
 ) {
+
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixAccountHeader(modifier, isLogin, userAvatar, userName,
+            level, experience, nextLevelExperience, onLogin, onLogout, onViewUser)
+        return
+    }
 
     val animatedProgress by animateFloatAsState(
         targetValue = (experience.toFloatOrNull() ?: 0f) / (nextLevelExperience.toFloatOrNull()
@@ -167,7 +173,7 @@ fun MessageHeaderCard(
             ) {
                 Icon(
                     Icons.AutoMirrored.Default.Logout,
-                    contentDescription = null
+                    contentDescription = "退出登录"
                 )
             }
         }

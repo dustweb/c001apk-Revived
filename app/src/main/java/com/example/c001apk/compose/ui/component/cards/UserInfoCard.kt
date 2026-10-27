@@ -10,10 +10,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Mail
 import com.example.c001apk.compose.ui.component.design.FilledTonalButton
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.OutlinedIconButton
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -303,7 +303,7 @@ fun UserInfoCard(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Mail,
-                contentDescription = null
+                contentDescription = "发送私信"
             )
         }
 

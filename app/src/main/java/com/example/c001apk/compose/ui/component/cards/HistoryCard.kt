@@ -1,7 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -16,16 +15,17 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Smartphone
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -39,7 +39,6 @@ import com.example.c001apk.compose.logic.model.FeedEntity
 import com.example.c001apk.compose.ui.component.CoilLoader
 import com.example.c001apk.compose.ui.component.IconText
 import com.example.c001apk.compose.ui.component.LinkText
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.CookieUtil.isLogin
 import com.example.c001apk.compose.util.DateUtils.fromToday
 import com.example.c001apk.compose.util.ReportType
@@ -68,8 +67,7 @@ fun HistoryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg())
+            .contentCard()
             .combinedClickable(
                 onClick = {
                     onViewFeed(data.id, false)
@@ -162,7 +160,7 @@ fun HistoryHeader(
                     top.linkTo(username.bottom)
                 },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-            color = MaterialTheme.colorScheme.outline,
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -198,7 +196,7 @@ fun HistoryHeader(
             ) {
                 Icon(
                     imageVector = Icons.Default.ExpandMore,
-                    contentDescription = null,
+                    contentDescription = "更多选项",
                     tint = MaterialTheme.colorScheme.outline
                 )
             }

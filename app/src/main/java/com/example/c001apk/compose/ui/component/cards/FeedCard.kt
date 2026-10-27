@@ -27,10 +27,10 @@ import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -255,7 +255,7 @@ fun FeedBottomInfo(
                 else EMPTY_STRING
             } else fromToday(dateline),
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         IconText(
@@ -321,7 +321,7 @@ fun FeedMessage(
             Text(
                 text = "动态已被删除",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.outline,
+                color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                 modifier = modifier
                     .padding(top = 10.dp)
                     .clip(MaterialTheme.shapes.medium)
@@ -645,7 +645,7 @@ fun FeedHeader(
                     data.dateline ?: 0
                 ) else data.infoHtml.orEmpty().richToString(),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                color = MaterialTheme.colorScheme.outline,
+                color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -690,7 +690,7 @@ fun FeedHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ExpandMore,
-                        contentDescription = null,
+                        contentDescription = "更多选项",
                         tint = MaterialTheme.colorScheme.outline
                     )
                 }

@@ -26,19 +26,19 @@ import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import com.example.c001apk.compose.ui.component.design.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import com.example.c001apk.compose.ui.component.design.SecondaryScrollableTabRow
-import androidx.compose.material3.Surface
+import com.example.c001apk.compose.ui.component.design.Surface
 import com.example.c001apk.compose.ui.component.design.Switch
 import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
@@ -61,7 +61,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import com.example.c001apk.compose.ui.component.design.FullScreenDialog as Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -125,7 +125,7 @@ private fun HomeTabEditorDialog(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("编辑首页板块") },
+                        title = "编辑首页板块",
                         navigationIcon = {
                             IconButton(onClick = onDismiss) {
                                 Icon(
@@ -164,7 +164,7 @@ private fun HomeTabEditorDialog(
                                 Text(
                                     text = "已启用 ${selectedTabs.size} / ${tabs.size}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.outline,
+                                    color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                                 )
                             }
                         }
@@ -246,7 +246,7 @@ private fun HomeTabEditorDialog(
                                 supportingContent = {
                                     Text(
                                         text = if (checked) "已显示" else "已隐藏",
-                                        color = MaterialTheme.colorScheme.outline,
+                                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                                     )
                                 },
                                 trailingContent = {

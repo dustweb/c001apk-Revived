@@ -14,12 +14,12 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Scaffold
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.SecondaryScrollableTabRow
 import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import androidx.compose.runtime.Composable
@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.c001apk.compose.logic.model.HomeFeedResponse
@@ -89,13 +88,7 @@ fun CarouselScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    Text(
-                        text = viewModel.pageTitle,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                title = viewModel.pageTitle
             )
         }
     ) { paddingValues ->

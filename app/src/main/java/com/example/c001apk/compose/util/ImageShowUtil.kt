@@ -6,29 +6,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.activity.ComponentDialog
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -39,7 +20,6 @@ import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.constant.Constants.SUFFIX_THUMBNAIL
 import com.example.c001apk.compose.view.CircleIndexIndicator
 import com.example.c001apk.compose.view.NineGridImageView
-import com.example.c001apk.compose.ui.theme.C001apkComposeTheme
 import com.example.c001apk.media.HdrMojitoActivityCoverLoader
 import com.example.c001apk.media.LivePhotoVideoUrlResolver
 import com.example.c001apk.media.MojitoMediaImageFactory
@@ -47,7 +27,6 @@ import com.example.c001apk.media.MojitoMediaPlaybackSession
 import com.example.c001apk.media.RichMediaHint
 import com.example.c001apk.media.coolApkRichMediaHint
 import com.example.c001apk.media.mayContainCoolApkRichMedia
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -282,105 +261,13 @@ object ImageShowUtil {
         mediaFactory: MojitoMediaImageFactory?,
     ) {
         val actions = saveDialogActions(mediaFactory)
-        if (context is FragmentActivity) {
-            showSaveImgDialogCompose(context, url, urlList, userAgent, mediaFactory, actions)
-            return
-        }
-        MaterialAlertDialogBuilder(context).apply {
-            setItems(actions.map { it.title }.toTypedArray()) { _, position: Int ->
-                handleSaveDialogAction(
-                    context,
-                    url,
-                    urlList,
-                    userAgent,
-                    mediaFactory,
-                    actions[position],
-                )
-            }
-            show()
-        }
-    }
-
-    private fun showSaveImgDialogCompose(
-        activity: FragmentActivity,
-        url: String,
-        urlList: List<String>?,
-        userAgent: String?,
-        mediaFactory: MojitoMediaImageFactory?,
-        actions: List<SaveImageAction>,
-    ) {
-        val dialog = ComponentDialog(activity)
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val composeView = ComposeView(activity).apply {
-            setViewCompositionStrategy(
-                ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-            )
-            setContent {
-                C001apkComposeTheme(
-                    darkTheme = CookieUtil.isDarkMode,
-                    themeType = CookieUtil.themeType,
-                    seedColor = CookieUtil.seedColor,
-                    materialYou = CookieUtil.materialYou,
-                    pureBlack = CookieUtil.pureBlack,
-                    paletteStyle = CookieUtil.paletteStyle,
-                    fontScale = CookieUtil.fontScale,
-                    contentScale = CookieUtil.contentScale,
-                ) {
-                    SaveImageDialogContent(
-                        items = actions.map { it.title },
-                        onClick = { index ->
-                            handleSaveDialogAction(
-                                activity,
-                                url,
-                                urlList,
-                                userAgent,
-                                mediaFactory,
-                                actions[index],
-                            )
-                            dialog.dismiss()
-                        }
-                    )
+        com.example.c001apk.compose.ui.component.design.showAppDialog(
+            context, "图片操作", actions = emptyList(), choices = actions.map { action ->
+                com.example.c001apk.compose.ui.component.design.DialogAction(action.title) {
+                    handleSaveDialogAction(context, url, urlList, userAgent, mediaFactory, action)
                 }
-            }
-        }
-        dialog.setContentView(composeView)
-        dialog.show()
-        dialog.window?.setLayout(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
+            },
         )
-    }
-
-    @Composable
-    private fun SaveImageDialogContent(
-        items: List<String>,
-        onClick: (Int) -> Unit,
-    ) {
-        Surface(
-            modifier = Modifier
-                .widthIn(max = 320.dp)
-                .padding(horizontal = 24.dp),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 6.dp,
-            color = MaterialTheme.colorScheme.surface
-        ) {
-            Column(
-                modifier = Modifier.padding(PaddingValues(vertical = 10.dp)),
-            ) {
-                items.forEachIndexed { index, item ->
-                    Text(
-                        text = item,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onClick(index) }
-                            .padding(horizontal = 20.dp, vertical = 12.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
     }
 
     private fun handleSaveDialogAction(

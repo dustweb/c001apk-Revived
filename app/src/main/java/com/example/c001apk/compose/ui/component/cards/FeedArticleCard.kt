@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
+import com.example.c001apk.compose.ui.component.design.Text
+import com.example.c001apk.compose.ui.component.design.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +69,7 @@ fun FeedArticleCard(
                     Text(
                         text = item.description,
                         style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-                        color = MaterialTheme.colorScheme.outline,
+                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                         modifier = Modifier
                             .padding(top = 4.dp)
                             .align(Alignment.CenterHorizontally),

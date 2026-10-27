@@ -2,7 +2,6 @@ package com.example.c001apk.compose.ui.component.settings
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +36,6 @@ fun PreferenceTopBar(
             )
         }
     } else {
-        TopAppBar(title = { Text(title) }, navigationIcon = navigation, actions = actions)
+        TopAppBar(title = title, navigationIcon = navigation, actions = actions)
     }
 }

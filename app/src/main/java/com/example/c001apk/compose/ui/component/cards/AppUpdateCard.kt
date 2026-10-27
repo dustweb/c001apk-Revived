@@ -1,7 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,13 +9,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.c001apk.compose.ui.component.design.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,7 +26,6 @@ import androidx.constraintlayout.compose.Dimension
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.logic.model.HomeFeedResponse
 import com.example.c001apk.compose.ui.component.CoilLoader
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.DateUtils.fromToday
 import com.example.c001apk.compose.util.Utils.getAppVersion
 import com.example.c001apk.compose.util.noRippleClickable
@@ -48,8 +47,7 @@ fun AppUpdateCard(
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg())
+            .contentCard()
             .clickable {
                 onViewApp(data.packageName.orEmpty())
             }
@@ -93,7 +91,7 @@ fun AppUpdateCard(
                     top.linkTo(title.top)
                 },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         Text(
@@ -114,7 +112,7 @@ fun AppUpdateCard(
                     width = Dimension.fillToConstraints
                 },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         Text(
@@ -126,7 +124,7 @@ fun AppUpdateCard(
                     top.linkTo(version.bottom)
                 },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         Text(
@@ -138,7 +136,7 @@ fun AppUpdateCard(
                     top.linkTo(version.bottom)
                 },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         Text(
@@ -155,7 +153,7 @@ fun AppUpdateCard(
                     expanded = !expanded
                 },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline,
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
             maxLines = if (expanded) Int.MAX_VALUE else 2,
             overflow = TextOverflow.Ellipsis,
         )

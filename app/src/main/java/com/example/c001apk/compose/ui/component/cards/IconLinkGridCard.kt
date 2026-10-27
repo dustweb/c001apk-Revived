@@ -1,6 +1,5 @@
 package com.example.c001apk.compose.ui.component.cards
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,17 +9,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.logic.model.HomeFeedResponse
 import com.example.c001apk.compose.ui.component.CoilLoader
-import com.example.c001apk.compose.ui.theme.cardBg
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/5
@@ -37,8 +35,7 @@ fun IconLinkGridCard(
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.shapes.medium)
-                .background(cardBg())
+                .contentCard()
         ) {
             HorizontalPager(
                 modifier = Modifier.fillMaxWidth(),

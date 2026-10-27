@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Badge
+import com.example.c001apk.compose.ui.component.design.Badge
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,7 +104,7 @@ fun MessageCard(
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                 },
-            color = MaterialTheme.colorScheme.outline,
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
             style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp)
         )
 

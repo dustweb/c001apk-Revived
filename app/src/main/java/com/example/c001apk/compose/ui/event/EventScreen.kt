@@ -30,12 +30,12 @@ import androidx.compose.material.icons.outlined.SupervisorAccount
 import com.example.c001apk.compose.ui.component.design.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Surface
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -79,7 +79,7 @@ fun EventScreen(
                 windowInsets = WindowInsets.systemBars
                     .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
                 navigationIcon = { BackButton(onBackClick) },
-                title = { Text("酷安众测") },
+                title = "酷安众测",
             )
         },
     ) { paddingValues ->
@@ -171,7 +171,7 @@ private fun EventContent(
                         Text(
                             text = registrationPeriod(event),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline,
+                            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                         )
                     }
                     Button(
@@ -212,7 +212,7 @@ private fun EventContent(
                         Text(
                             text = "众测须知",
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.outline,
+                            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                         )
                     }
                 }

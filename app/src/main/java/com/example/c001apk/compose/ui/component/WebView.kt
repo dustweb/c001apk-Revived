@@ -29,7 +29,6 @@ import com.example.c001apk.compose.util.copyText
 import com.example.c001apk.compose.util.decode
 import com.example.c001apk.compose.util.makeToast
 import com.example.c001apk.compose.util.openInBrowser
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.net.URISyntaxException
 
 /**
@@ -102,14 +101,11 @@ fun WebView(
 
                 setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
                     val fileName = URLUtil.guessFileName(url, contentDisposition, mimetype).decode
-                    MaterialAlertDialogBuilder(context).apply {
-                        setTitle("确定下载文件吗？")
-                        setMessage(fileName)
-                        setNeutralButton("外部打开") { _, _ ->
-                            context.openInBrowser(url)
-                        }
-                        setNegativeButton(android.R.string.cancel, null)
-                        setPositiveButton(android.R.string.ok) { _, _ ->
+                    com.example.c001apk.compose.ui.component.design.showAppDialog(
+                        context, "确定下载文件吗？", fileName, actions = listOf(
+                            com.example.c001apk.compose.ui.component.design.DialogAction("取消"),
+                            com.example.c001apk.compose.ui.component.design.DialogAction("外部打开") { context.openInBrowser(url) },
+                            com.example.c001apk.compose.ui.component.design.DialogAction("下载", primary = true) {
                             try {
                                 val request = DownloadManager.Request(Uri.parse(url))
                                     .setMimeType(mimetype)
@@ -132,9 +128,9 @@ fun WebView(
                                 context.copyText(url)
                                 e.printStackTrace()
                             }
-                        }
-                        show()
-                    }
+                            },
+                        ),
+                    )
                 }
 
                 webViewClient = object : WebViewClient() {

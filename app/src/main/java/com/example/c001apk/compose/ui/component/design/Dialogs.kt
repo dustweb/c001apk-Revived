@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -54,8 +55,8 @@ fun AlertDialog(
                     title?.let {
                         CompositionLocalProvider(LocalTextStyle provides MiuixTheme.textStyles.title4) { it() }
                     }
-                    text?.invoke()
-                    Row(
+                    if (text != null) Box(Modifier.weight(1f, fill = false)) { text() }
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
                     ) {

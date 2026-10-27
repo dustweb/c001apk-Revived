@@ -2,7 +2,6 @@ package com.example.c001apk.compose.ui.chat
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -42,22 +40,20 @@ import androidx.compose.material.icons.automirrored.outlined.Backspace
 import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material3.CardDefaults
-import com.example.c001apk.compose.ui.component.design.CircularProgressIndicator
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import com.example.c001apk.compose.ui.component.design.IconButton
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
-import androidx.compose.material3.VerticalDivider
+import com.example.c001apk.compose.ui.component.design.VerticalDivider
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.ui.component.design.MenuAction
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +71,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -102,6 +97,7 @@ import com.example.c001apk.compose.util.ReportType
 import com.example.c001apk.compose.util.copyText
 import com.example.c001apk.compose.util.makeToast
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -206,7 +202,7 @@ fun ChatScreen(
                         onBackClick()
                     }
                 },
-                title = { Text(text = username) },
+                title = username,
                 actions = {
                     Box {
                         MoreMenuButton { dropdownMenuExpanded = true }
@@ -385,7 +381,12 @@ fun ChatScreen(
         }
 
         showDialog -> {
-            Dialog(onDismissRequest = { showDialog = false }) {
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                com.example.c001apk.compose.ui.component.design.ActionDialog("消息操作", buildList {
+                    add(MenuAction("删除") { viewModel.onDeleteMsg() })
+                    if (viewModel.pic.isEmpty()) add(MenuAction("复制") { context.copyText(viewModel.message) })
+                }, { showDialog = false })
+            } else Dialog(onDismissRequest = { showDialog = false }) {
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),
@@ -433,28 +434,30 @@ fun ChatScreen(
     }
 
     viewModel.uploadImage?.let { responseData ->
-        scope.launch(Dispatchers.IO) {
-            ossUpload(
-                context = context,
-                responseData = responseData,
-                uriList = viewModel.uriList,
-                typeList = viewModel.typeList,
-                md5List = viewModel.md5List,
-                iOnSuccess = {
-                    viewModel.onSendMessage(
-                        uid,
-                        EMPTY_STRING,
-                        "/${responseData.fileInfo.getOrNull(0)?.uploadFileName}"
-                    )
-                },
-                iOnFailure = {
-                    viewModel.showUploadDialog = false
-                    context.makeToast("图片上传失败")
-                },
-                closeDialog = {
-                    viewModel.showUploadDialog = false
-                }
-            )
+        LaunchedEffect(responseData) {
+            withContext(Dispatchers.IO) {
+                ossUpload(
+                    context = context,
+                    responseData = responseData,
+                    uriList = viewModel.uriList,
+                    typeList = viewModel.typeList,
+                    md5List = viewModel.md5List,
+                    iOnSuccess = {
+                        viewModel.onSendMessage(
+                            uid,
+                            EMPTY_STRING,
+                            "/${responseData.fileInfo.getOrNull(0)?.uploadFileName}"
+                        )
+                    },
+                    iOnFailure = {
+                        viewModel.showUploadDialog = false
+                        context.makeToast("图片上传失败")
+                    },
+                    closeDialog = {
+                        viewModel.showUploadDialog = false
+                    }
+                )
+            }
             viewModel.resetUploadImage()
         }
     }
@@ -645,13 +648,13 @@ fun ChatBottom(
                                                     context.theme
                                                 )
                                             ),
-                                            contentDescription = null,
+                                            contentDescription = emojiName,
                                             modifier = Modifier.size(28.dp)
                                         )
                                     } else if (it == 27) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Outlined.Backspace,
-                                            contentDescription = null,
+                                            contentDescription = "删除一个字符",
                                             modifier = Modifier.size(28.dp)
                                         )
                                     }
@@ -670,7 +673,14 @@ fun ChatBottom(
                 }
             }
             HorizontalDivider()
-            Row(
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                val scope = rememberCoroutineScope()
+                top.yukonga.miuix.kmp.basic.TabRow(
+                    tabs = listOf("最近", "默认", "酷币"), selectedTabIndex = pagerState.currentPage,
+                    onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                )
+            } else Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
@@ -734,18 +744,5 @@ fun RowScope.TextIndicator(
 
 @Composable
 private fun LoadingDialog() {
-    Dialog(
-        onDismissRequest = {},
-        properties = DialogProperties(dismissOnClickOutside = false, dismissOnBackPress = false)
-    ) {
-        Surface(
-            modifier = Modifier.size(100.dp), shape = RoundedCornerShape(20.dp)
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-    }
+    com.example.c001apk.compose.ui.component.design.ProgressDialog("正在上传")
 }

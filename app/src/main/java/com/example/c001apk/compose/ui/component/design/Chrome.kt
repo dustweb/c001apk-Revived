@@ -11,12 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
@@ -36,7 +36,7 @@ fun TopAppBar(
     navigationIcon: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
-    colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(),
+    colors: TopAppBarColors? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     if (isMiuix()) {
@@ -47,7 +47,7 @@ fun TopAppBar(
             }
         }
         top.yukonga.miuix.kmp.basic.Surface(
-            modifier = modifier, color = MiuixTheme.colorScheme.surface,
+            modifier = modifier, color = colors?.containerColor ?: MiuixTheme.colorScheme.surface,
         ) {
             Row(
                 Modifier.fillMaxWidth().windowInsetsPadding(windowInsets).height(64.dp)
@@ -58,9 +58,7 @@ fun TopAppBar(
                 Box(Modifier.weight(1f).padding(horizontal = 10.dp), contentAlignment = Alignment.CenterStart) {
                     CompositionLocalProvider(
                         LocalContentColor provides MiuixTheme.colorScheme.onSurface,
-                        LocalTextStyle provides MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 22.sp, fontWeight = FontWeight.SemiBold,
-                        ),
+                        LocalTextStyle provides MiuixTheme.textStyles.title3.copy(color = MiuixTheme.colorScheme.onSurface),
                         content = title,
                     )
                 }
@@ -69,26 +67,50 @@ fun TopAppBar(
         }
     } else {
         androidx.compose.material3.TopAppBar(title, modifier, navigationIcon, actions,
-            windowInsets = windowInsets, colors = colors, scrollBehavior = scrollBehavior)
+            windowInsets = windowInsets, colors = colors ?: TopAppBarDefaults.topAppBarColors(), scrollBehavior = scrollBehavior)
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopAppBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
+    windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
+    colors: TopAppBarColors? = null,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    if (isMiuix()) {
+        SideEffect { scrollBehavior?.state?.let { it.heightOffsetLimit = 0f; it.heightOffset = 0f } }
+        top.yukonga.miuix.kmp.basic.SmallTopAppBar(title = title,
+            modifier = modifier.windowInsetsPadding(windowInsets),
+            defaultWindowInsetsPadding = false, navigationIcon = navigationIcon, actions = actions,
+            color = colors?.containerColor ?: MiuixTheme.colorScheme.surface)
+    } else androidx.compose.material3.TopAppBar(title = { androidx.compose.material3.Text(title) },
+        modifier = modifier, navigationIcon = navigationIcon, actions = actions,
+        windowInsets = windowInsets, colors = colors ?: TopAppBarDefaults.topAppBarColors(), scrollBehavior = scrollBehavior)
 }
 
 @Composable
 fun ElevatedCard(
     modifier: Modifier = Modifier,
     shape: Shape = CardDefaults.elevatedShape,
-    colors: CardColors = CardDefaults.elevatedCardColors(),
+    colors: CardColors? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    if (isMiuix()) {
-        top.yukonga.miuix.kmp.basic.Card(
-            modifier = modifier, insideMargin = PaddingValues(0.dp),
-            colors = top.yukonga.miuix.kmp.basic.CardColors(colors.containerColor, colors.contentColor),
-        ) {
-            CompositionLocalProvider(LocalContentColor provides colors.contentColor) { content() }
-        }
-    } else {
-        androidx.compose.material3.ElevatedCard(modifier, shape, colors, content = content)
+    val miuix = isMiuix()
+    val resolved = colors ?: if (miuix) null else CardDefaults.elevatedCardColors()
+    val nativeColors = resolved?.let {
+        top.yukonga.miuix.kmp.basic.CardColors(it.containerColor, it.contentColor)
+    } ?: top.yukonga.miuix.kmp.basic.CardDefaults.defaultColors()
+    top.yukonga.miuix.kmp.basic.Card(
+        modifier = if (miuix) modifier else modifier.shadow(1.dp, shape).clip(shape),
+        cornerRadius = if (miuix) top.yukonga.miuix.kmp.basic.CardDefaults.CornerRadius else 0.dp,
+        colors = nativeColors,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides nativeColors.contentColor) { content() }
     }
 }
 

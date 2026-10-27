@@ -9,21 +9,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -70,7 +66,6 @@ fun MessageScreen(
         }
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    val state = rememberPullToRefreshState()
 
     LaunchedEffect(prefs.isLogin) {
         if (prefs.isLogin && viewModel.fffList.isEmpty()) {
@@ -78,6 +73,7 @@ fun MessageScreen(
         }
     }
 
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { paddingValues ->
@@ -105,21 +101,13 @@ fun MessageScreen(
 
             HorizontalDivider()
 
-            PullToRefreshBox(
+            RefreshContainer(
                 modifier = Modifier.padding(
                     start = paddingValues.calculateLeftPadding(layoutDirection),
                 ),
-                state = state,
                 isRefreshing = viewModel.isRefreshing,
                 onRefresh = viewModel::refresh,
-                indicator = {
-                    PullToRefreshDefaults.Indicator(
-                        modifier = Modifier.align(Alignment.TopCenter),
-                        isRefreshing = viewModel.isRefreshing,
-                        state = state,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
+
             ) {
                 LazyColumn(
                     Modifier.fillMaxSize(),
@@ -142,18 +130,38 @@ fun MessageScreen(
                         )
                     }
 
-                    items(5) { index ->
-                        MessageListCard(
-                            modifier = Modifier.padding(horizontal = 10.dp),
-                            background = backgroundList[index],
-                            imageVector = iconList[index],
-                            title = titleList[index],
-                            count = viewModel.badgeList.getOrNull(index),
-                            onViewNotice = {
-                                viewModel.clearBadge(index)
-                                onViewNotice(NoticeType.entries[index].name)
+                    if (miuix) {
+                        item(key = "notifications") {
+                            top.yukonga.miuix.kmp.basic.Card(Modifier.padding(horizontal = 16.dp)) {
+                                repeat(5) { index ->
+                                    MessageListCard(
+                                        modifier = Modifier,
+                                        background = backgroundList[index],
+                                        imageVector = iconList[index],
+                                        title = titleList[index],
+                                        count = viewModel.badgeList.getOrNull(index),
+                                        onViewNotice = {
+                                            viewModel.clearBadge(index)
+                                            onViewNotice(NoticeType.entries[index].name)
+                                        }
+                                    )
+                                }
                             }
-                        )
+                        }
+                    } else {
+                        items(5) { index ->
+                            MessageListCard(
+                                modifier = Modifier.padding(horizontal = 10.dp),
+                                background = backgroundList[index],
+                                imageVector = iconList[index],
+                                title = titleList[index],
+                                count = viewModel.badgeList.getOrNull(index),
+                                onViewNotice = {
+                                    viewModel.clearBadge(index)
+                                    onViewNotice(NoticeType.entries[index].name)
+                                }
+                            )
+                        }
                     }
 
                     ItemCard(

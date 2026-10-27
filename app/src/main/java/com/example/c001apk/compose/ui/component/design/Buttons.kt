@@ -15,6 +15,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -37,7 +39,7 @@ fun Button(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: ButtonColors? = null,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    contentPadding: PaddingValues? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
@@ -46,7 +48,7 @@ fun Button(
                 it.contentColor, it.disabledContentColor)
         } ?: MiuixButtonDefaults.buttonColorsPrimary()
         val foreground = if (enabled) nativeColors.contentColor else nativeColors.disabledContentColor
-        MiuixButton(onClick, modifier, enabled, insideMargin = contentPadding, colors = nativeColors) {
+        MiuixButton(onClick, modifier, enabled, insideMargin = contentPadding ?: MiuixButtonDefaults.InsideMargin, colors = nativeColors) {
             CompositionLocalProvider(
                 LocalContentColor provides foreground,
                 LocalTextStyle provides MiuixTheme.textStyles.button.copy(
@@ -58,7 +60,7 @@ fun Button(
         }
     } else {
         androidx.compose.material3.Button(onClick, modifier, enabled, colors = colors ?: ButtonDefaults.buttonColors(),
-            contentPadding = contentPadding, content = content)
+            contentPadding = contentPadding ?: ButtonDefaults.ContentPadding, content = content)
     }
 }
 
@@ -67,15 +69,15 @@ fun OutlinedButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    contentPadding: PaddingValues? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        Button(onClick, modifier.border(1.dp, MiuixTheme.colorScheme.outline, RoundedCornerShape(16.dp)),
+        Button(onClick, modifier.squircleBorder(1.dp, MiuixTheme.colorScheme.outline, MiuixButtonDefaults.CornerRadius),
             enabled, colors = ButtonDefaults.outlinedButtonColors(), contentPadding = contentPadding, content = content)
     } else {
         androidx.compose.material3.OutlinedButton(onClick, modifier, enabled,
-            contentPadding = contentPadding, content = content)
+            contentPadding = contentPadding ?: ButtonDefaults.ContentPadding, content = content)
     }
 }
 
@@ -160,8 +162,13 @@ fun OutlinedIconButton(
     content: @Composable () -> Unit,
 ) {
     if (isMiuix()) {
-        MiuixIconButton(onClick, if (border != null) modifier.border(border, RoundedCornerShape(12.dp)) else modifier,
-            minWidth = 48.dp, minHeight = 48.dp, content = content)
+        val outlined = when (val brush = border?.brush) {
+            is SolidColor -> modifier.squircleBorder(border.width, brush.value,
+                top.yukonga.miuix.kmp.basic.IconButtonDefaults.CornerRadius)
+            null -> modifier
+            else -> modifier.border(border, RoundedCornerShape(top.yukonga.miuix.kmp.basic.IconButtonDefaults.CornerRadius))
+        }
+        MiuixIconButton(onClick, outlined, minWidth = 48.dp, minHeight = 48.dp, content = content)
     } else {
         androidx.compose.material3.OutlinedIconButton(onClick, modifier, border = border, content = content)
     }

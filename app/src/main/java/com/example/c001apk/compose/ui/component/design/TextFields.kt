@@ -5,7 +5,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,7 +24,9 @@ fun TextField(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     label: (@Composable () -> Unit)? = null,
+    labelText: String? = null,
     placeholder: (@Composable () -> Unit)? = null,
+    placeholderText: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = false,
@@ -39,6 +40,7 @@ fun TextField(
         FieldDecoration(modifier, value.isEmpty(), label, placeholder, leadingIcon != null) {
             top.yukonga.miuix.kmp.basic.TextField(
                 value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
+                label = labelText ?: placeholderText.orEmpty(), useLabelAsPlaceholder = labelText == null,
                 textStyle = textStyle.copy(color = MiuixTheme.colorScheme.onSurface),
                 colors = top.yukonga.miuix.kmp.basic.TextFieldDefaults.textFieldColors(
                     backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer),
@@ -49,7 +51,8 @@ fun TextField(
         }
     } else {
         androidx.compose.material3.TextField(value, onValueChange, modifier, textStyle = textStyle,
-            label = label, placeholder = placeholder, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
+            label = label ?: labelText?.let { { androidx.compose.material3.Text(it) } },
+            placeholder = placeholder ?: placeholderText?.let { { androidx.compose.material3.Text(it) } }, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
             singleLine = singleLine, maxLines = maxLines, keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions, visualTransformation = visualTransformation,
             colors = colors ?: androidx.compose.material3.TextFieldDefaults.colors())
@@ -63,7 +66,9 @@ fun TextField(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     label: (@Composable () -> Unit)? = null,
+    labelText: String? = null,
     placeholder: (@Composable () -> Unit)? = null,
+    placeholderText: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = false,
@@ -77,6 +82,7 @@ fun TextField(
         FieldDecoration(modifier, value.text.isEmpty(), label, placeholder, leadingIcon != null) {
             top.yukonga.miuix.kmp.basic.TextField(
                 value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
+                label = labelText ?: placeholderText.orEmpty(), useLabelAsPlaceholder = labelText == null,
                 textStyle = textStyle.copy(color = MiuixTheme.colorScheme.onSurface),
                 colors = top.yukonga.miuix.kmp.basic.TextFieldDefaults.textFieldColors(
                     backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer),
@@ -87,7 +93,8 @@ fun TextField(
         }
     } else {
         androidx.compose.material3.TextField(value, onValueChange, modifier, textStyle = textStyle,
-            label = label, placeholder = placeholder, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
+            label = label ?: labelText?.let { { androidx.compose.material3.Text(it) } },
+            placeholder = placeholder ?: placeholderText?.let { { androidx.compose.material3.Text(it) } }, leadingIcon = leadingIcon, trailingIcon = trailingIcon,
             singleLine = singleLine, maxLines = maxLines, keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions, visualTransformation = visualTransformation,
             colors = colors ?: androidx.compose.material3.TextFieldDefaults.colors())
@@ -100,15 +107,16 @@ fun OutlinedTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: (@Composable () -> Unit)? = null,
+    placeholderText: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = false,
 ) {
     if (isMiuix()) {
-        TextField(value, onValueChange, modifier, placeholder = placeholder,
+        TextField(value, onValueChange, modifier, placeholder = placeholder, placeholderText = placeholderText,
             leadingIcon = leadingIcon, singleLine = singleLine)
     } else {
         androidx.compose.material3.OutlinedTextField(value, onValueChange, modifier,
-            placeholder = placeholder, leadingIcon = leadingIcon, singleLine = singleLine)
+            placeholder = placeholder ?: placeholderText?.let { { androidx.compose.material3.Text(it) } }, leadingIcon = leadingIcon, singleLine = singleLine)
     }
 }
 
@@ -118,15 +126,16 @@ fun OutlinedTextField(
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: (@Composable () -> Unit)? = null,
+    placeholderText: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     singleLine: Boolean = false,
 ) {
     if (isMiuix()) {
-        TextField(value, onValueChange, modifier, placeholder = placeholder,
+        TextField(value, onValueChange, modifier, placeholder = placeholder, placeholderText = placeholderText,
             leadingIcon = leadingIcon, singleLine = singleLine)
     } else {
         androidx.compose.material3.OutlinedTextField(value, onValueChange, modifier,
-            placeholder = placeholder, leadingIcon = leadingIcon, singleLine = singleLine)
+            placeholder = placeholder ?: placeholderText?.let { { androidx.compose.material3.Text(it) } }, leadingIcon = leadingIcon, singleLine = singleLine)
     }
 }
 
@@ -146,7 +155,7 @@ private fun FieldDecoration(
             if (empty && placeholder != null) {
                 Box(Modifier.align(Alignment.CenterStart)
                     .padding(start = if (hasLeadingIcon) 52.dp else 16.dp, end = 16.dp)) {
-                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant) {
+                    CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onSurfaceVariantSummary) {
                         placeholder()
                     }
                 }

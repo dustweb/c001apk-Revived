@@ -23,13 +23,13 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Search
 import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.component.design.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -103,7 +103,16 @@ fun SearchScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                com.example.c001apk.compose.ui.component.design.SearchInputBar(
+                    query = textInput.text,
+                    onQueryChange = { textInput = TextFieldValue(it, androidx.compose.ui.text.TextRange(it.length)) },
+                    onSearch = { onCheckSearch(it) },
+                    hint = if (!title.isNullOrEmpty()) stringResource(R.string.search_hint_in, title)
+                        else stringResource(R.string.search_hint),
+                    onBack = onBackClick, focusRequester = focusRequest,
+                )
+            } else TopAppBar(
                 windowInsets = WindowInsets.systemBars
                     .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
                 navigationIcon = {
@@ -141,7 +150,7 @@ fun SearchScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Clear,
-                                        contentDescription = null
+                                        contentDescription = "清空输入"
                                     )
                                 }
                             }
@@ -167,7 +176,7 @@ fun SearchScreen(
                     IconButton(onClick = {
                         onCheckSearch()
                     }) {
-                        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "搜索")
                     }
                 }
             )
@@ -210,7 +219,7 @@ fun SearchScreen(
                             showClearDialog = true
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.ClearAll, contentDescription = null)
+                        Icon(imageVector = Icons.Default.ClearAll, contentDescription = "清空列表")
                     }
                 }
             }

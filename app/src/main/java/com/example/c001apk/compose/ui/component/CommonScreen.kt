@@ -8,13 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -60,7 +56,6 @@ fun CommonScreen(
 
     val view = LocalView.current
     val layoutDirection = LocalLayoutDirection.current
-    val state = rememberPullToRefreshState()
 
     LaunchedEffect(refreshState) {
         if (refreshState == true) {
@@ -76,23 +71,15 @@ fun CommonScreen(
         it(lazyListState.isScrollingUp())
     }
 
-    PullToRefreshBox(
+    RefreshContainer(
         modifier = Modifier.padding(
             start = paddingValues.calculateLeftPadding(layoutDirection),
             end = paddingValues.calculateRightPadding(layoutDirection),
             top = if (needTopPadding) paddingValues.calculateTopPadding() else 0.dp
         ),
-        state = state,
         isRefreshing = viewModel.isRefreshing,
         onRefresh = viewModel::refresh,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = viewModel.isRefreshing,
-                state = state,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
+
     ) {
         LazyColumn(
             modifier = Modifier

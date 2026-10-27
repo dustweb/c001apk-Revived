@@ -1,7 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -13,16 +12,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,7 +34,6 @@ import com.example.c001apk.compose.R
 import com.example.c001apk.compose.logic.model.HomeFeedResponse
 import com.example.c001apk.compose.ui.component.CoilLoader
 import com.example.c001apk.compose.ui.component.LinkText
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.DateUtils
 import com.example.c001apk.compose.util.ReportType
 import org.jsoup.Jsoup
@@ -62,8 +61,7 @@ fun NotificationCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg())
+            .contentCard()
             .combinedClickable(
                 onClick = {
                     if (isFollow) {
@@ -141,7 +139,7 @@ fun NotificationCard(
                     top.linkTo(message.bottom)
                 },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         Box(
@@ -158,7 +156,7 @@ fun NotificationCard(
             ) {
                 Icon(
                     imageVector = Icons.Default.ExpandMore,
-                    contentDescription = null,
+                    contentDescription = "更多选项",
                     tint = MaterialTheme.colorScheme.outline
                 )
             }

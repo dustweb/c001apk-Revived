@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -141,7 +141,7 @@ fun AppCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 16.sp),
-            color = MaterialTheme.colorScheme.outline,
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
         )
 
         Text(
@@ -165,7 +165,7 @@ fun AppCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 16.sp),
-            color = MaterialTheme.colorScheme.outline,
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
         )
 
         if (appCardType in listOf(AppCardType.USER, AppCardType.CONTACTS)) {
@@ -186,7 +186,7 @@ fun AppCard(
                     fontSize = 13.sp,
                     lineHeight = 16.sp
                 ),
-                color = MaterialTheme.colorScheme.outline,
+                color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
             )
 
             if (appCardType == AppCardType.USER) {

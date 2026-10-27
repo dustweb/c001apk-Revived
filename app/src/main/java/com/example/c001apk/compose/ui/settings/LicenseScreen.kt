@@ -1,18 +1,14 @@
 package com.example.c001apk.compose.ui.settings
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import com.example.c001apk.compose.ui.component.BackButton
 import com.example.c001apk.compose.ui.component.settings.BasicListItem
 import com.example.c001apk.compose.util.openInBrowser
@@ -26,8 +22,6 @@ fun LicenseScreen(
     onBackClick: () -> Unit
 ) {
 
-    val layoutDirection = LocalLayoutDirection.current
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -35,27 +29,16 @@ fun LicenseScreen(
                 navigationIcon = {
                     BackButton(onBackClick)
                 },
-                title = {
-                    Text(text = "Open Source License")
-                },
+                title = "开源许可证",
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateLeftPadding(layoutDirection),
-                    end = paddingValues.calculateRightPadding(layoutDirection),
-                ),
-            contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding())
+        androidx.compose.foundation.layout.Column(
+            Modifier.fillMaxSize().padding(paddingValues)
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
         ) {
-            items(
-                items = licenseList,
-                key = { it.url }
-            ) { item ->
-                LicenseRow(item = item)
+            com.example.c001apk.compose.ui.component.settings.PreferenceGroup("使用的开源组件", showTitleInMd3 = false) {
+                licenseList.forEach { LicenseRow(it) }
             }
         }
     }
@@ -196,10 +179,14 @@ private fun getLicense(type: LicenseType): String =
 @Composable
 fun LicenseRow(item: LicenseItem) {
     val context = LocalContext.current
-    BasicListItem(
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        top.yukonga.miuix.kmp.preference.ArrowPreference(
+            title = item.name, summary = "${item.author} · ${getLicense(item.type)}",
+            onClick = { context.openInBrowser(item.url) },
+        )
+    } else BasicListItem(
         headlineText = "${item.name} - ${item.author}",
-        supportingText = "${item.url}\n${getLicense(item.type)}"
-    ) {
-        context.openInBrowser(item.url)
-    }
+        supportingText = "${item.url}\n${getLicense(item.type)}",
+        onClick = { context.openInBrowser(item.url) },
+    )
 }

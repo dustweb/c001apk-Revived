@@ -15,10 +15,11 @@ import androidx.compose.material3.CardDefaults
 import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.ui.component.design.MenuAction
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,20 +88,14 @@ fun NoticeScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    Text(
-                        text = when (type) {
+                title = when (type) {
                             NoticeType.AT.name -> "@我的动态"
                             NoticeType.COMMENT.name -> "@我的评论"
                             NoticeType.LIKE.name -> "我收到的赞"
                             NoticeType.FOLLOW.name -> "好友关注"
                             NoticeType.MESSAGE.name -> "私信"
                             else -> throw IllegalArgumentException("invalid type: $type")
-                        },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                        }
             )
         }
     ) { paddingValues ->
@@ -135,7 +129,12 @@ fun NoticeScreen(
 
     when {
         showMessageDialog -> {
-            Dialog(onDismissRequest = { showMessageDialog = false }) {
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                com.example.c001apk.compose.ui.component.design.ActionDialog("对话操作", listOf(
+                    MenuAction(if (viewModel.isTop == 1) "移除置顶" else "置顶") { viewModel.onHandleMessage(FFFContentViewModel.ActionType.TOP) },
+                    MenuAction("删除此对话") { viewModel.onHandleMessage(FFFContentViewModel.ActionType.DELETE) },
+                ), { showMessageDialog = false })
+            } else Dialog(onDismissRequest = { showMessageDialog = false }) {
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),

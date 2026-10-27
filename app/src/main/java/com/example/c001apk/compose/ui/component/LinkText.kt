@@ -49,7 +49,7 @@ fun LinkText(
                 setParams(
                     isReply = isReply,
                     size = textSize,
-                    fontScale = userPreference.fontScale,
+                    fontScale = userPreference.fontScale * userPreference.contentScale,
                 )
                 if (isBold)
                     setTypeface(typeface, Typeface.BOLD)
@@ -65,7 +65,7 @@ fun LinkText(
             }
         },
         update = { textView ->
-            textView.setParams(isReply = isReply, size = textSize, fontScale = userPreference.fontScale)
+            textView.setParams(isReply = isReply, size = textSize, fontScale = userPreference.fontScale * userPreference.contentScale)
             textView.setTextColor(color ?: contentColor.toArgb())
             textView.setTypeface(textView.typeface, if (isBold) Typeface.BOLD else Typeface.NORMAL)
             textView.setLineSpacing(0f, lineSpacingMultiplier)

@@ -2,7 +2,7 @@ package com.example.c001apk.compose.ui.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -53,7 +53,7 @@ fun MoreMenuButton(onClick: () -> Unit) {
     IconButton(onClick = rememberHapticClick(onClick = onClick)) {
         Icon(
             imageVector = Icons.Default.MoreVert,
-            contentDescription = Icons.Default.MoreVert.name
+            contentDescription = "更多选项"
         )
     }
 }

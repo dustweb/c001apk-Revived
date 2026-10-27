@@ -20,17 +20,14 @@ import com.example.c001apk.compose.ui.component.design.AlertDialog
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -44,7 +41,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.c001apk.compose.R
@@ -86,7 +82,6 @@ fun UserScreen(
     val layoutDirection = LocalLayoutDirection.current
 
     val context = LocalContext.current
-    val state = rememberPullToRefreshState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val viewModel =
         hiltViewModel<UserViewModel, UserViewModel.ViewModelFactory>(key = uid) { factory ->
@@ -106,16 +101,10 @@ fun UserScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    Text(
-                        text = if (firstVisibleItemIndex > 0)
+                title = if (firstVisibleItemIndex > 0)
                             (viewModel.userState as? LoadingState.Success)?.response?.username
                                 ?: uid
                         else EMPTY_STRING,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
                 actions = {
                     if (viewModel.userState is LoadingState.Success) {
                         Row(Modifier.wrapContentSize(Alignment.TopEnd)) {
@@ -124,7 +113,7 @@ fun UserScreen(
                                     onSearch(viewModel.username, "user", viewModel.uid)
                                 }
                             ) {
-                                Icon(Icons.Default.Search, contentDescription = null)
+                                Icon(Icons.Default.Search, contentDescription = "搜索")
                             }
                             Box {
                                 MoreMenuButton { dropdownMenuExpanded = true }
@@ -188,24 +177,16 @@ fun UserScreen(
         }
     ) { paddingValues ->
 
-        PullToRefreshBox(
+        RefreshContainer(
             modifier = Modifier.padding(
                 start = paddingValues.calculateLeftPadding(layoutDirection),
             ),
-            state = state,
             isRefreshing = viewModel.isRefreshing,
             onRefresh = {
                 viewModel.isPull = true
                 viewModel.refresh()
             },
-            indicator = {
-                PullToRefreshDefaults.Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = viewModel.isRefreshing,
-                    state = state,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -302,13 +283,13 @@ fun UserScreen(
                     Text(
                         text = """
                                 UID: ${data.uid}
-                                
+
                                 等级: Lv.${data.level}
-                                
+
                                 性别: ${if (data.gender == 0) "女" else if (data.gender == 1) "男" else "未知"}
-                                
+
                                 注册时长: ${((System.currentTimeMillis() / 1000 - (data.regdate ?: 0)) / 24 / 3600)} 天
-                                
+
                                 注册时间: ${timeStamp2Date(data.regdate ?: 0)}
                             """.trimIndent()
                     )

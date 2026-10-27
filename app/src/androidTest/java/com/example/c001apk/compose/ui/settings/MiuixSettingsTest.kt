@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.c001apk.compose.ThemeMode
+import com.example.c001apk.compose.R
 import com.example.c001apk.compose.UiStyle
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import com.example.c001apk.compose.ui.main.MainActivity
@@ -104,6 +105,25 @@ class MiuixSettingsTest {
         scenario.onActivity { assertSame(activity, it) }
         pressBack()
         compose.onNodeWithTag("ui-style-MD3").performScrollTo().assertIsSelected()
+    }
+
+    @Test
+    fun parameterDraftSurvivesStyleSwitchAndLicensePageUsesGroupedRows() = withSettings { repository, _, _ ->
+        val originalVersion = runBlocking { repository.data.first().versionName }
+        compose.onNodeWithText("机型参数").performScrollTo().performClick()
+        compose.onNodeWithText(context.getString(R.string.params_version_name)).performClick()
+        compose.onNode(hasSetTextAction()).performTextReplacement("temporary-draft")
+        runBlocking { repository.setUiStyle(UiStyle.MD3) }
+        compose.onNode(hasSetTextAction()).assertTextContains("temporary-draft")
+        compose.onNodeWithText(context.getString(android.R.string.cancel)).performClick()
+        assertTrue(runBlocking { repository.data.first().versionName } == originalVersion)
+        runBlocking { repository.setUiStyle(UiStyle.MIUIX) }
+        pressBack()
+        compose.onNodeWithText("关于").performScrollTo().performClick()
+        compose.onNodeWithText("开源许可证").performClick()
+        compose.onNodeWithText("Miuix").assertExists()
+        compose.onNodeWithTag("preference-group-使用的开源组件").assertExists()
+        capture("license-audit")
     }
 
     private fun withSettings(block: (UserPreferencesRepository, ActivityScenario<MainActivity>, MainActivity) -> Unit) {

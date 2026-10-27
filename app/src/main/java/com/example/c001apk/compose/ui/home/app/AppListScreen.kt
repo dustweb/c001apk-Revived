@@ -16,13 +16,10 @@ import androidx.compose.material.icons.filled.Update
 import com.example.c001apk.compose.ui.component.design.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.FloatingActionButton
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.Text
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -56,7 +53,6 @@ fun AppListScreen(
     val prefs = LocalUserPreferences.current
     val context = LocalContext.current
     val view = LocalView.current
-    val state = rememberPullToRefreshState()
     val lazyListState = rememberLazyListState()
 
     LaunchedEffect(refreshState) {
@@ -69,18 +65,10 @@ fun AppListScreen(
         }
     }
 
-    PullToRefreshBox(
-        state = state,
+    RefreshContainer(
         isRefreshing = viewModel.isRefreshing,
         onRefresh = viewModel::refresh,
-        indicator = {
-            PullToRefreshDefaults.Indicator(
-                modifier = Modifier.align(Alignment.TopCenter),
-                isRefreshing = viewModel.isRefreshing,
-                state = state,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
+
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

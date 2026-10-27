@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,14 +77,11 @@ fun AppUpdateScreen(
                 navigationIcon = {
                     BackButton { onBackClick() }
                 },
-                title = {
-                    val title = if (count == 0) {
+                title = if (count == 0) {
                         stringResource(id = R.string.update_title)
                     } else {
                         stringResource(id = R.string.update_title_with_count, count)
-                    }
-                    Text(text = title)
-                },
+                    },
             )
         }
     ) { paddingValues ->

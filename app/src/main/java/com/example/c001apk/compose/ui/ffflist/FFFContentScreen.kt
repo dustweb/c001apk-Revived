@@ -9,8 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.ui.component.design.MenuAction
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,7 +95,13 @@ fun FFFContentScreen(
 
     when {
         showRecentDialog -> {
-            Dialog(onDismissRequest = { showRecentDialog = false }) {
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                com.example.c001apk.compose.ui.component.design.ActionDialog("常去操作", listOf(
+                    MenuAction(if (viewModel.isTop == 1) "移除置顶" else "置顶") { viewModel.onHandleRecentHistory(FFFContentViewModel.ActionType.TOP) },
+                    MenuAction("删除") { viewModel.onHandleRecentHistory(FFFContentViewModel.ActionType.DELETE) },
+                    MenuAction("清空全部") { viewModel.onHandleRecentHistory(FFFContentViewModel.ActionType.DELETE_ALL) },
+                ), { showRecentDialog = false })
+            } else Dialog(onDismissRequest = { showRecentDialog = false }) {
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(28.dp),

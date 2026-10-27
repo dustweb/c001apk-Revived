@@ -8,7 +8,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.annotation.ColorInt
 import androidx.annotation.IntRange
 import androidx.annotation.Px
@@ -23,7 +23,7 @@ open class RoundedImageView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) :
-    ImageView(context, attrs, defStyleAttr) {
+    AppCompatImageView(context, attrs, defStyleAttr) {
     private var radii: FloatArray? = null
     private val radiusPath = Path()
     private val radiusPaint = Paint(Paint.ANTI_ALIAS_FLAG)

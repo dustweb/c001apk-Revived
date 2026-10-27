@@ -48,9 +48,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.OutlinedTextField
 import com.example.c001apk.compose.ui.component.design.RadioButton
-import androidx.compose.material3.Scaffold
+import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.Slider
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -126,6 +126,8 @@ fun SettingsScreen(
     val rememberScrollState = rememberScrollState()
     val layoutDirection = LocalLayoutDirection.current
     val context = LocalContext.current
+    val iconChangedMessage = stringResource(R.string.icon_changed)
+    val iconChangeFailedMessage = stringResource(R.string.icon_change_failed)
 
     val imageQualityList by lazy { listOf("网络自适应", "原图", "普清") }
     val themeList by lazy { listOf("跟随系统", "总是开启", "总是关闭") }
@@ -473,9 +475,7 @@ fun SettingsScreen(
                         } else {
                             viewModel.setLauncherIcon(icon) { success ->
                                 if (success) showLauncherIconDialog = false
-                                context.makeToast(context.getString(
-                                    if (success) R.string.icon_changed else R.string.icon_change_failed
-                                ))
+                                context.makeToast(if (success) iconChangedMessage else iconChangeFailedMessage)
                             }
                         }
                     },
@@ -680,6 +680,15 @@ fun ListItemDialogItem(
     val hapticClick = rememberHapticClick(strength = hapticStrength) {
         onClick()
     }
+    if (isMiuix()) {
+        androidx.compose.runtime.CompositionLocalProvider(
+            androidx.compose.ui.platform.LocalHapticFeedback provides com.example.c001apk.compose.ui.component.design.NoNativeHaptics
+        ) {
+            top.yukonga.miuix.kmp.preference.RadioButtonPreference(title = title, selected = selected,
+                onClick = hapticClick)
+        }
+        return
+    }
     Row(
         modifier = Modifier.clickable { hapticClick() }
     ) {
@@ -756,11 +765,7 @@ fun EditTextDialog(
                         text = it
                     }
                 },
-                placeholder = {
-                    hint?.let {
-                        Text(text = it)
-                    }
-                }
+                placeholderText = hint
             )
         },
     )

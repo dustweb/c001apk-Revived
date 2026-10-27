@@ -10,7 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toPixelMap
-import androidx.compose.ui.platform.LocalContext
+import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -52,7 +52,7 @@ class NavigationTransitionTest {
         var mainCreated = 0
         var mainDisposed = 0
         compose.setContent {
-            activity = LocalContext.current as ComponentActivity
+            activity = LocalActivity.current as ComponentActivity
             controller = rememberNavController()
             CompositionLocalProvider(LocalUiStyle provides if (miuix) UiStyle.MIUIX else UiStyle.MD3) {
             MaterialTheme {

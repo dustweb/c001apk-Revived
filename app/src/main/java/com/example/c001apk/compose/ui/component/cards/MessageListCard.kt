@@ -15,12 +15,13 @@ import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.outlined.Mail
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material3.Badge
+import com.example.c001apk.compose.ui.component.design.Badge
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -28,7 +29,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.example.c001apk.compose.ui.theme.cardBg
 import com.example.c001apk.compose.util.CookieUtil
 
 /**
@@ -55,11 +55,23 @@ fun MessageListCard(
     onViewNotice: () -> Unit,
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        top.yukonga.miuix.kmp.preference.ArrowPreference(title = title, enabled = CookieUtil.isLogin,
+            modifier = modifier, onClick = onViewNotice,
+            startAction = {
+                top.yukonga.miuix.kmp.basic.Icon(imageVector, null, Modifier.padding(end = 12.dp),
+                    tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary)
+            }, endActions = {
+                count?.takeIf { it > 0 }?.let { value ->
+                    top.yukonga.miuix.kmp.basic.Badge { top.yukonga.miuix.kmp.basic.Text(value.toString()) }
+                }
+            })
+        return
+    }
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(cardBg())
+            .contentCard()
             .clickable {
                 if (CookieUtil.isLogin) {
                     onViewNotice()
@@ -141,7 +153,7 @@ private fun MessageCardLogo(
         Image(
             imageVector = imageVector,
             contentDescription = null,
-            colorFilter = ColorFilter.tint(Color.White)
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
         )
     }
 }

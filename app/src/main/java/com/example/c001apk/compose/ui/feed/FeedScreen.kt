@@ -31,16 +31,13 @@ import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import com.example.c001apk.compose.ui.component.design.HorizontalDivider
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.ModalBottomSheet
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -123,7 +120,6 @@ fun FeedScreen(
     val context = LocalContext.current
     val miuix = isMiuix()
     val layoutDirection = LocalLayoutDirection.current
-    val state = rememberPullToRefreshState()
     val lazyListState = rememberLazyListState()
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
 
@@ -353,26 +349,18 @@ fun FeedScreen(
         },
     ) { paddingValues ->
 
-        PullToRefreshBox(
+        RefreshContainer(
             modifier = Modifier.padding(
                 top = paddingValues.calculateTopPadding(),
                 end = paddingValues.calculateEndPadding(layoutDirection),
                 start = paddingValues.calculateStartPadding(layoutDirection)
             ),
-            state = state,
             isRefreshing = viewModel.isRefreshing,
             onRefresh = {
                 viewModel.isPull = true
                 viewModel.refresh()
             },
-            indicator = {
-                PullToRefreshDefaults.Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = viewModel.isRefreshing,
-                    state = state,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

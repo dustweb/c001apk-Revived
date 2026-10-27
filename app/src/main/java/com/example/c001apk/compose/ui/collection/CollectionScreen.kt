@@ -1,6 +1,5 @@
 package com.example.c001apk.compose.ui.collection
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,12 +19,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Scaffold
+import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import com.example.c001apk.compose.ui.component.design.RefreshContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.logic.state.LoadingState
 import com.example.c001apk.compose.ui.component.BackButton
 import com.example.c001apk.compose.ui.component.CoilLoader
@@ -72,7 +68,6 @@ fun CollectionScreen(
         }
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
-    val state = rememberPullToRefreshState()
     val lazyListState = rememberLazyListState()
     val shouldShowTitle by remember {
         derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }
@@ -89,41 +84,22 @@ fun CollectionScreen(
                         onBackClick()
                     }
                 },
-                title = {
-                    AnimatedContent(
-                        shouldShowTitle,
-                        label = EMPTY_STRING,
-                    ) {
-                        if (it) {
-                            Text(text = viewModel.title)
-                        } else {
-                            Text(text = "收藏单")
-                        }
-                    }
-                }
+                title = if (shouldShowTitle) viewModel.title else "收藏单"
             )
         }
     ) { paddingValues ->
 
-        PullToRefreshBox(
+        RefreshContainer(
             modifier = Modifier.padding(
                 top = paddingValues.calculateTopPadding(),
                 start = paddingValues.calculateLeftPadding(layoutDirection),
             ),
-            state = state,
             isRefreshing = viewModel.isRefreshing,
             onRefresh = {
                 viewModel.isPull = true
                 viewModel.refresh()
             },
-            indicator = {
-                PullToRefreshDefaults.Indicator(
-                    modifier = Modifier.align(Alignment.TopCenter),
-                    isRefreshing = viewModel.isRefreshing,
-                    state = state,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -181,7 +157,7 @@ fun CollectionScreen(
                                     )
                                     Text(
                                         text = response.username.orEmpty(),
-                                        color = MaterialTheme.colorScheme.outline,
+                                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
@@ -189,7 +165,7 @@ fun CollectionScreen(
                                     )
                                     Text(
                                         text = "${fromToday(response.lastupdate ?: 0)}更新",
-                                        color = MaterialTheme.colorScheme.outline,
+                                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         modifier = Modifier
                                             .weight(1f)
@@ -199,7 +175,7 @@ fun CollectionScreen(
                                     )
                                     Text(
                                         text = response.followNum.toString() + "人关注",
-                                        color = MaterialTheme.colorScheme.outline,
+                                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,

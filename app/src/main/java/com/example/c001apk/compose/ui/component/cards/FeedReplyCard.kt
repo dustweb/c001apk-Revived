@@ -21,10 +21,10 @@ import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
-import androidx.compose.material3.Icon
+import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.c001apk.compose.ui.component.design.contentCard
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -240,7 +241,7 @@ fun FeedReplyCard(
                         end.linkTo(parent.end)
                 },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
-            color = MaterialTheme.colorScheme.outline
+            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor()
         )
 
         if (isLikeReply) {
@@ -295,7 +296,7 @@ fun FeedReplyCard(
                     text = data.message.orEmpty(),
                     onOpenLink = onOpenLink,
                     textSize = 12f,
-                    color = MaterialTheme.colorScheme.outline.toArgb(),
+                    color = com.example.c001apk.compose.ui.component.design.secondaryTextColor().toArgb(),
                     maxLines = 1,
                     modifier = Modifier
                         .padding(start = if (data.pic.isNullOrEmpty()) 0.dp else 10.dp)
@@ -389,7 +390,7 @@ fun FeedReplyCard(
                         text = data.feed.message.orEmpty(),
                         onOpenLink = onOpenLink,
                         textSize = 12f,
-                        color = MaterialTheme.colorScheme.outline.toArgb(),
+                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor().toArgb(),
                         maxLines = 1,
                         modifier = Modifier
                             .padding(start = if (data.feed.pic.isNullOrEmpty()) 0.dp else 10.dp)
@@ -463,7 +464,7 @@ fun FeedReplyCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ExpandMore,
-                        contentDescription = null,
+                        contentDescription = "更多选项",
                         tint = MaterialTheme.colorScheme.outline
                     )
                 }
@@ -523,8 +524,7 @@ fun FeedReplyCard(
                 ReplyRows(
                     modifier = Modifier
                         .padding(start = 10.dp, top = 10.dp, end = 16.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(cardBg())
+                        .contentCard()
                         .constrainAs(replyRows) {
                             top.linkTo(dateLine.bottom)
                             start.linkTo(avatar.end)
