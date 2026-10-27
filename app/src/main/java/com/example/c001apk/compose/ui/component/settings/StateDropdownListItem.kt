@@ -1,8 +1,8 @@
 package com.example.c001apk.compose.ui.component.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.example.c001apk.compose.ui.component.design.DropdownMenu
+import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

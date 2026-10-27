@@ -71,7 +71,7 @@ val buildVersionName = buildString {
 
 android {
     namespace = "com.example.c001apk.compose"
-    compileSdk = 35
+    compileSdk = 36
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
@@ -189,6 +189,9 @@ protobuf {
 }
 
 dependencies {
+
+    implementation(libs.miuix)
+    implementation(libs.miuix.shapes)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

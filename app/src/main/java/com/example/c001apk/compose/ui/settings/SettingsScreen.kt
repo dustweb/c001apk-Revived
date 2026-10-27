@@ -39,20 +39,20 @@ import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.TravelExplore
-import androidx.compose.material3.AlertDialog
+import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
+import com.example.c001apk.compose.ui.component.design.DropdownMenu
+import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
+import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import com.example.c001apk.compose.ui.component.design.OutlinedTextField
+import com.example.c001apk.compose.ui.component.design.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
+import com.example.c001apk.compose.ui.component.design.Slider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import com.example.c001apk.compose.ui.component.design.TextButton
+import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -202,6 +202,8 @@ fun SettingsScreen(
             }
 
             BasicListItem(leadingText = "主题")
+            BasicListItem(headlineText = "界面风格", supportingText = "切换后立即生效")
+            UiStyleSelector(prefs.uiStyle, viewModel::setUiStyle)
             BasicListItem(
                 leadingImageVector = Icons.Outlined.Image,
                 headlineText = stringResource(R.string.app_icon),

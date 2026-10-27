@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Density
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import com.example.c001apk.compose.ThemeType
+import com.example.c001apk.compose.UiStyle
+import com.example.c001apk.compose.logic.providable.LocalUserPreferences
 import com.example.c001apk.compose.constant.Constants.seedColors
 import com.example.c001apk.compose.ui.component.SuppressFocusStateLayer
 import com.materialkolor.PaletteStyle
@@ -67,6 +69,7 @@ fun C001apkComposeTheme(
     paletteStyle: Int = 0,
     fontScale: Float = 1.00f,
     contentScale: Float = 1.00f,
+    uiStyle: UiStyle = LocalUserPreferences.current.uiStyle,
     content: @Composable () -> Unit
 ) {
 
@@ -128,8 +131,10 @@ fun C001apkComposeTheme(
         }
     }
 
+    val miuixColors = colorScheme.miuixColors(darkTheme, pureBlack)
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (uiStyle == UiStyle.MIUIX) colorScheme.withMiuixSurfaces(miuixColors)
+            else colorScheme,
         typography = Typography,
         content = {
             // 挡掉 ripple 的 focus 状态层（左上角元素会莫名其妙保持 Focus，看起来像
@@ -142,7 +147,7 @@ fun C001apkComposeTheme(
                         LocalDensity.current.fontScale * fontScale,
                     )
                 ) {
-                    content()
+                    UiStyleTheme(uiStyle, miuixColors, content)
                 }
             }
         }

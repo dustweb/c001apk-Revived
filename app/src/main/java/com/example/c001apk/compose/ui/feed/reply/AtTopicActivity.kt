@@ -20,16 +20,21 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.example.c001apk.compose.ui.component.design.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.c001apk.compose.logic.providable.LocalUserPreferences
+import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
+import javax.inject.Inject
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,6 +58,7 @@ import com.example.c001apk.compose.R
 
 @AndroidEntryPoint
 class AtTopicActivity : ComponentActivity() {
+    @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,24 +76,29 @@ class AtTopicActivity : ComponentActivity() {
         }
         val type = intent.getStringExtra("type") ?: "user"
         setContent {
-            C001apkComposeTheme(
-                darkTheme = CookieUtil.isDarkMode,
-                themeType = CookieUtil.themeType,
-                seedColor = CookieUtil.seedColor,
-                materialYou = CookieUtil.materialYou,
-                pureBlack = CookieUtil.pureBlack,
-                paletteStyle = CookieUtil.paletteStyle,
-                fontScale = CookieUtil.fontScale,
-                contentScale = CookieUtil.contentScale,
-            ) {
-                AtTopicScreen(
-                    type = type,
-                    onBack = { finish() },
-                    onSelect = { selected ->
-                        setResult(RESULT_OK, Intent().putExtra("data", selected))
-                        finish()
-                    }
-                )
+            val preferences by userPreferencesRepository.data.collectAsStateWithLifecycle(initialValue = null)
+            val prefs = preferences ?: return@setContent
+            CompositionLocalProvider(LocalUserPreferences provides prefs) {
+                C001apkComposeTheme(
+                    darkTheme = prefs.isDarkMode(),
+                    themeType = prefs.themeType,
+                    seedColor = prefs.seedColor,
+                    materialYou = prefs.materialYou,
+                    pureBlack = prefs.pureBlack,
+                    paletteStyle = prefs.paletteStyle,
+                    fontScale = prefs.fontScale,
+                    contentScale = prefs.contentScale,
+                    uiStyle = prefs.uiStyle,
+                ) {
+                    AtTopicScreen(
+                        type = type,
+                        onBack = { finish() },
+                        onSelect = { selected ->
+                            setResult(RESULT_OK, Intent().putExtra("data", selected))
+                            finish()
+                        }
+                    )
+                }
             }
         }
     }

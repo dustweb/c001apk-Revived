@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import com.example.c001apk.compose.FollowType
 import com.example.c001apk.compose.ThemeMode
 import com.example.c001apk.compose.ThemeType
+import com.example.c001apk.compose.UiStyle
 import com.example.c001apk.compose.logic.model.HapticStrength
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,6 +14,10 @@ class UserPreferencesDataSource @Inject constructor(
     private val userPreferences: DataStore<UserPreferencesCompat>
 ) {
     val data get() = userPreferences.data
+
+    suspend fun setUiStyle(value: UiStyle) = withContext(Dispatchers.IO) {
+        userPreferences.updateData { it.copy(uiStyle = value) }
+    }
 
     suspend fun setThemeMode(value: ThemeMode) = withContext(Dispatchers.IO) {
         userPreferences.updateData { it.copy(themeMode = value) }

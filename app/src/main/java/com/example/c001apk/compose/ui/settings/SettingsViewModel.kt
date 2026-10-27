@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.c001apk.compose.FollowType
 import com.example.c001apk.compose.ThemeMode
 import com.example.c001apk.compose.ThemeType
+import com.example.c001apk.compose.UiStyle
 import com.example.c001apk.compose.logic.model.HapticStrength
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import com.example.c001apk.compose.ui.base.PrefsViewModel
@@ -26,6 +27,10 @@ class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val launcherIconManager: LauncherIconManager,
 ) : PrefsViewModel(userPreferencesRepository) {
+
+    fun setUiStyle(value: UiStyle) {
+        viewModelScope.launch { userPreferencesRepository.setUiStyle(value) }
+    }
 
     var launcherIcon by mutableStateOf(launcherIconManager.current)
         private set

@@ -31,6 +31,7 @@
 
 ## 功能
 
+- **界面风格** — 支持 MD3／miuix 切换，选择后立即生效，无需重启，并保存上次选择。
 - **实况与 HDR 图片** — 支持实况图片播放、声音开关、重播与保存，以及 Ultra HDR 图片显示。
 - **图片浏览** — 全屏预览、手势缩放、滑动切换与长按保存，支持保存原始 GIF。
 - **产品参数** — 原生参数页面，支持同机型不同配置和跨机型对比，最多同时比较 10 组配置。
@@ -58,7 +59,7 @@
 <details>
 <summary>本地构建</summary>
 
-需要 JDK 17 或兼容的更高版本、Android SDK 35 和 Build Tools 36.0.0。在项目根目录执行：
+需要 JDK 17 或兼容的更高版本、Android SDK 36 和 Build Tools 36.0.0。在项目根目录执行：
 
 ```powershell
 .\gradlew assembleDebug

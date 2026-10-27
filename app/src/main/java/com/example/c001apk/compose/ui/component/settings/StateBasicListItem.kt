@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 @Composable
 fun StateBasicListItem(
@@ -26,6 +27,12 @@ fun StateBasicListItem(
     trailingContent: @Composable () -> Unit = {},
     onClick: (() -> Unit)? = null,
 ) {
+    if (isMiuix()) {
+        BasicListItem(modifier = modifier, headlineText = headlineText, supportingText = supportingText,
+            leadingImageVector = leadingImageVector, leadingPainter = leadingPainter, leadingText = leadingText,
+            trailingContent = trailingContent, enabled = isEnable, onClick = onClick)
+        return
+    }
     val textColor =
         if (isEnable)
             MaterialTheme.colorScheme.onSurface

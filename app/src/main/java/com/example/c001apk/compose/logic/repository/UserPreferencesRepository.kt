@@ -3,6 +3,7 @@ package com.example.c001apk.compose.logic.repository
 import com.example.c001apk.compose.FollowType
 import com.example.c001apk.compose.ThemeMode
 import com.example.c001apk.compose.ThemeType
+import com.example.c001apk.compose.UiStyle
 import com.example.c001apk.compose.logic.datastore.UserPreferencesDataSource
 import com.example.c001apk.compose.logic.model.HapticStrength
 import javax.inject.Inject
@@ -13,6 +14,8 @@ class UserPreferencesRepository @Inject constructor(
     private val userPreferencesDataSource: UserPreferencesDataSource
 ) {
     val data get() = userPreferencesDataSource.data
+
+    suspend fun setUiStyle(value: UiStyle) = userPreferencesDataSource.setUiStyle(value)
 
     suspend fun setThemeMode(value: ThemeMode) = userPreferencesDataSource.setThemeMode(value)
 

@@ -19,10 +19,10 @@ import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.ThumbUpAlt
 import androidx.compose.material.icons.filled.ThumbUpOffAlt
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import com.example.c001apk.compose.ui.component.design.DropdownMenu
+import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -63,6 +63,12 @@ fun LicenseScreen(
 }
 
 private val licenseList = listOf(
+    LicenseItem(
+        "compose-miuix-ui contributors",
+        "Miuix",
+        "https://github.com/compose-miuix-ui/miuix",
+        LicenseType.Apache2
+    ),
     LicenseItem(
         "Google",
         "Jetpack Compose",

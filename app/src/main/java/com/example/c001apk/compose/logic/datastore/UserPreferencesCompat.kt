@@ -6,6 +6,7 @@ import com.example.c001apk.compose.FollowType
 import com.example.c001apk.compose.ThemeMode
 import com.example.c001apk.compose.ThemeType
 import com.example.c001apk.compose.UserPreferences
+import com.example.c001apk.compose.UiStyle
 import com.example.c001apk.compose.constant.Constants.API_VERSION
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.constant.Constants.VERSION_CODE
@@ -58,6 +59,7 @@ data class UserPreferencesCompat(
     val hapticStrength: HapticStrength,
     val customHaptics: Boolean,
     val reverseHapticEffects: Boolean,
+    val uiStyle: UiStyle = UiStyle.MD3,
 ) {
     constructor(original: UserPreferences) : this(
         themeMode = original.themeMode,
@@ -105,6 +107,7 @@ data class UserPreferencesCompat(
         hapticStrength = HapticStrength.fromProtoValue(original.hapticStrength),
         customHaptics = original.customHaptics,
         reverseHapticEffects = original.reverseHapticEffects,
+        uiStyle = original.uiStyle.takeUnless { it == UiStyle.UNRECOGNIZED } ?: UiStyle.MD3,
     )
 
     @Composable
@@ -160,6 +163,7 @@ data class UserPreferencesCompat(
         .setHapticStrength(hapticStrength.protoValue)
         .setCustomHaptics(customHaptics)
         .setReverseHapticEffects(reverseHapticEffects)
+        .setUiStyle(uiStyle)
         .build()
 
     companion object {

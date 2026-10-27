@@ -3,7 +3,7 @@ package com.example.c001apk.compose.ui.component
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.c001apk.compose.util.composeClick

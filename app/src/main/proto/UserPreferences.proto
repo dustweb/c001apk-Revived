@@ -49,6 +49,12 @@ message UserPreferences {
   int32 hapticStrength = 43;
   bool customHaptics = 44;
   bool reverseHapticEffects = 45;
+  UiStyle uiStyle = 46;
+}
+
+enum UiStyle {
+  MD3 = 0;
+  MIUIX = 1;
 }
 
 enum ThemeType{

@@ -14,11 +14,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryScrollableTabRow
-import androidx.compose.material3.Tab
+import com.example.c001apk.compose.ui.component.design.SecondaryScrollableTabRow
+import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

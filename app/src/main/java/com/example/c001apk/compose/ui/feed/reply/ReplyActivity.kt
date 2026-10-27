@@ -90,6 +90,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Inject
+import com.example.c001apk.compose.UiStyle
+import com.example.c001apk.compose.ThemeMode
+import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -116,6 +122,10 @@ import kotlin.math.roundToInt
 class ReplyActivity : AppCompatActivity(),
     View.OnClickListener, OnTouchListener, SmoothInputLayout.OnVisibilityChangeListener {
 
+    @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
+    private var currentUiStyle = com.example.c001apk.compose.util.CookieUtil.uiStyle
+    private var styleDarkMode = com.example.c001apk.compose.util.CookieUtil.isDarkMode
+
     private lateinit var binding: ActivityReplyBinding
     private val viewModel by viewModels<ReplyViewModel>()
     private val type: String? by lazy { intent.getStringExtra("type") }
@@ -130,7 +140,10 @@ class ReplyActivity : AppCompatActivity(),
     private val imm by lazy {
         getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
-    private val color by lazy { resolveSurfaceContainerColor() }
+    private val color: Int
+        get() = if (currentUiStyle == UiStyle.MIUIX) {
+            if (styleDarkMode) android.graphics.Color.rgb(36, 36, 36) else android.graphics.Color.WHITE
+        } else resolveSurfaceContainerColor()
     private val imeScrimDrawable by lazy { ColorDrawable(color) }
     private val externalLaunchScrimDrawable by lazy { ColorDrawable(color) }
     private val recentList = ArrayList<List<Pair<String, Int>>>()
@@ -538,7 +551,13 @@ class ReplyActivity : AppCompatActivity(),
         binding.out.setOnTouchListener(this)
         (binding.main as? SmoothInputLayout)?.setOnVisibilityChangeListener(this)
         (binding.main as? SmoothInputLayout)?.setOnKeyboardChangeListener(null)
-        val radius = listOf(16.dp.toFloat(), 16.dp.toFloat(), 0f, 0f)
+        applyUiStyle()
+    }
+
+    private fun applyUiStyle() {
+        val miuix = currentUiStyle == UiStyle.MIUIX
+        val topRadius = if (miuix) 28.dp.toFloat() else 16.dp.toFloat()
+        val radius = listOf(topRadius, topRadius, 0f, 0f)
         val radiusBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             setColor(this@ReplyActivity.color)
@@ -554,9 +573,42 @@ class ReplyActivity : AppCompatActivity(),
             binding.emojiLayout.setBackgroundColor(color)
         } else
             binding.bottomLayout?.background = radiusBg
+        binding.title.setTypeface(null, if (miuix) android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+        binding.publish.background = if (miuix) GradientDrawable().apply {
+            cornerRadius = 12.dp.toFloat()
+            setColor(ColorUtils.setAlphaComponent(resolvePrimaryColor(), 28))
+        } else null
+        binding.textInputLayout.boxBackgroundColor = color
+        val textColor = if (miuix) {
+            if (styleDarkMode) android.graphics.Color.rgb(242, 242, 242) else android.graphics.Color.rgb(25, 25, 25)
+        } else MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface, android.graphics.Color.BLACK)
+        binding.title.setTextColor(textColor)
+        binding.editText.setTextColor(textColor)
+        binding.replyTargetName?.setTextColor(textColor)
+        binding.checkBox.setTextColor(textColor)
+        imeScrimDrawable.color = color
+        externalLaunchScrimDrawable.color = color
     }
 
     private fun initObserve() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                userPreferencesRepository.data.map { prefs ->
+                    val dark = when (prefs.themeMode) {
+                        ThemeMode.ALWAYS_ON -> true
+                        ThemeMode.ALWAYS_OFF -> false
+                        else -> resources.configuration.uiMode and
+                            android.content.res.Configuration.UI_MODE_NIGHT_MASK ==
+                            android.content.res.Configuration.UI_MODE_NIGHT_YES
+                    }
+                    prefs.uiStyle to dark
+                }.distinctUntilChanged().collect { (style, dark) ->
+                    currentUiStyle = style
+                    styleDarkMode = dark
+                    applyUiStyle()
+                }
+            }
+        }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.uploadImage.collect { responseData ->

@@ -162,6 +162,7 @@ class MainActivity : ComponentActivity() {
                 hapticStrength = preferences.hapticStrength
                 customHaptics = preferences.customHaptics
                 reverseHapticEffects = preferences.reverseHapticEffects
+                com.example.c001apk.compose.util.CookieUtil.uiStyle = preferences.uiStyle
 
                 C001apkComposeTheme(
                     darkTheme = preferences.isDarkMode(),
@@ -172,6 +173,7 @@ class MainActivity : ComponentActivity() {
                     paletteStyle = preferences.paletteStyle,
                     fontScale = preferences.fontScale,
                     contentScale = preferences.contentScale,
+                    uiStyle = preferences.uiStyle,
                 ) {
                     Surface(
                         modifier = Modifier
