@@ -5,10 +5,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.ui.component.BackButton
 import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.theme.isMiuix
@@ -24,7 +23,8 @@ fun PreferenceTopBar(
 ) {
     val navigation: @Composable () -> Unit = { onBack?.let { BackButton(it) } }
     if (isMiuix()) {
-        val wide = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() >= 600.dp }
+        val displayDensity = LocalContext.current.resources.displayMetrics.density
+        val wide = LocalWindowInfo.current.containerSize.width / displayDensity >= 600f
         if (wide) {
             top.yukonga.miuix.kmp.basic.SmallTopAppBar(
                 title = title, scrollBehavior = scrollBehavior, navigationIcon = navigation,
