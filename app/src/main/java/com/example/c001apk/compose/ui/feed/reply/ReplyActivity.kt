@@ -177,6 +177,8 @@ class ReplyActivity : AppCompatActivity(),
     private val externalLaunchTimeout = Runnable { runPendingExternalLaunch(force = true) }
     private var baseRootPaddingBottom = 0
     private var isExiting = false
+    private val exitHandler = Handler(Looper.getMainLooper())
+    private val finishFallback = Runnable { finishAfterExitAnimation() }
     private var pendingExternalReturn = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -938,6 +940,7 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     override fun onDestroy() {
+        exitHandler.removeCallbacks(finishFallback)
         super.onDestroy()
         cancelEmojiPanelEntranceAnimation()
         closeDialog()
@@ -1412,6 +1415,8 @@ class ReplyActivity : AppCompatActivity(),
     override fun finish() {
         if (isExiting) return
         isExiting = true
+        // IME 回调可能取消退出动画，仍需保证 Activity 能正常结束。
+        exitHandler.postDelayed(finishFallback, 800L)
         imeHideSuppressed = true
         if (isEmojiPanelVisible) {
             cancelEmojiPanelEntranceAnimation()
@@ -1446,11 +1451,17 @@ class ReplyActivity : AppCompatActivity(),
             .setDuration(200L)
             .setInterpolator(android.view.animation.PathInterpolator(0.4f, 0f, 0.2f, 1f))
             .withEndAction {
-                super.finish()
-                @Suppress("DEPRECATION")
-                overridePendingTransition(0, 0)
+                finishAfterExitAnimation()
             }
             .start()
+    }
+
+    private fun finishAfterExitAnimation() {
+        exitHandler.removeCallbacks(finishFallback)
+        if (isFinishing || isDestroyed) return
+        super.finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(0, 0)
     }
 
 }
