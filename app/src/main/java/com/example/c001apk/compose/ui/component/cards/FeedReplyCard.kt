@@ -52,6 +52,9 @@ import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.NineImageView
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import com.example.c001apk.compose.ui.theme.cardBg
+import com.example.c001apk.compose.ui.theme.isMiuix
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixReplyCard
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixReplyRows
 import com.example.c001apk.compose.util.CookieUtil
 import com.example.c001apk.compose.util.CookieUtil.isLogin
 import com.example.c001apk.compose.util.DateUtils.fromToday
@@ -79,6 +82,11 @@ fun FeedReplyCard(
     onReply: ((String, String, String, String?, String?) -> Unit)? = null, // rid, uid/fuid, uname, frid?, avatar
     replyUserAvatars: Map<String, String> = emptyMap(),
 ) {
+    if (isMiuix()) {
+        MiuixReplyCard(modifier, data, onViewUser, onShowTotalReply, onOpenLink, onCopyText,
+            onReport, isTotalReply, isTopReply, isReply2Reply, onLike, onDelete, onBlockUser, onReply, replyUserAvatars)
+        return
+    }
 
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
     val performHapticClick = rememberHapticClick {}
@@ -661,7 +669,7 @@ private fun ReplyRelationWithBodyRow(
     }
 }
 
-private fun replyBody(message: String?): String {
+internal fun replyBody(message: String?): String {
     val value = message.orEmpty()
     val relationEnd = Regex(
         "^<a[^>]*>.*?</a>回复<a[^>]*>.*?</a>:\\s*",
@@ -670,7 +678,7 @@ private fun replyBody(message: String?): String {
     return if (relationEnd != null) value.substring(relationEnd) else value
 }
 
-private fun parseGeneratedRelation(username: String?): Pair<String, String>? {
+internal fun parseGeneratedRelation(username: String?): Pair<String, String>? {
     val value = username ?: return null
     val match = Regex(
         "(<a[^>]*>.*?</a>)回复(<a[^>]*>.*?</a>)",
@@ -712,6 +720,11 @@ fun ReplyRows(
     replyUserAvatars: Map<String, String> = emptyMap(),
     showReplyTargetAvatar: Boolean = false,
 ) {
+    if (isMiuix()) {
+        MiuixReplyRows(modifier, data, replyRowsMore, replyNum, onShowTotalReply, onOpenLink,
+            onCopyText, onReport, onBlockUser, onDelete, onReply, replyUserAvatars, showReplyTargetAvatar)
+        return
+    }
 
     var dropdownMenuExpanded by remember { mutableIntStateOf(-1) }
     val performHapticClick = rememberHapticClick {}

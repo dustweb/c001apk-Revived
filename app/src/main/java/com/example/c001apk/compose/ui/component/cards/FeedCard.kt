@@ -57,6 +57,11 @@ import com.example.c001apk.compose.ui.component.IconText
 import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.NineImageView
 import com.example.c001apk.compose.ui.theme.cardBg
+import com.example.c001apk.compose.ui.theme.isMiuix
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixFeedCard
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixFeedHeader
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixFeedBottomInfo
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixFeedRows
 import com.example.c001apk.compose.util.CookieUtil
 import com.example.c001apk.compose.util.CookieUtil.isLogin
 import com.example.c001apk.compose.util.DateUtils.fromToday
@@ -83,6 +88,11 @@ fun FeedCard(
     onDelete: ((String, LikeType, String?) -> Unit)? = null,
     onBlockUser: (String) -> Unit,
 ) {
+    if (isMiuix()) {
+        MiuixFeedCard(modifier, isFeedContent, isFeedTop, data, onViewUser, onViewFeed,
+            onOpenLink, onCopyText, onReport, onLike, onDelete, onBlockUser)
+        return
+    }
     val horizontal = if (isFeedContent) 16.dp else 10.dp
     // val vertical = if (isFeedContent) 12.dp else 10.dp
     Column(
@@ -174,6 +184,10 @@ fun FeedRows(
     targetRow: HomeFeedResponse.TargetRow?,
     onOpenLink: (String, String?) -> Unit
 ) {
+    if (isMiuix()) {
+        MiuixFeedRows(relationRows, targetRow, onOpenLink, modifier.padding(horizontal = 16.dp))
+        return
+    }
     val dataList = relationRows?.toMutableList() ?: ArrayList()
     targetRow?.let {
         dataList.add(
@@ -224,6 +238,10 @@ fun FeedBottomInfo(
     onLike: () -> Unit,
     like: Int?,
 ) {
+    if (isMiuix()) {
+        MiuixFeedBottomInfo(modifier, isFeedContent, ip, dateline, replyNum, likeNum, onViewFeed, onLike, like)
+        return
+    }
 
     Row(
         modifier = modifier
@@ -540,6 +558,10 @@ fun FeedHeader(
     onDelete: ((String, LikeType, String?) -> Unit)? = null,
     onBlockUser: ((String) -> Unit)? = null,
 ) {
+    if (isMiuix()) {
+        MiuixFeedHeader(modifier, data, onViewUser, isFeedContent, isFeedTop, onReport, onDelete, onBlockUser)
+        return
+    }
 
     val vertical = if (isFeedContent) 12.dp else 10.dp
     var dropdownMenuExpanded by remember { mutableStateOf(false) }

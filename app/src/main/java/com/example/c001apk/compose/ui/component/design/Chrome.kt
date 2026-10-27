@@ -5,6 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,8 +16,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.dialog
+import androidx.compose.ui.semantics.semantics
 import com.example.c001apk.compose.ui.theme.isMiuix
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,16 +153,34 @@ fun ModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
+    title: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val miuix = isMiuix()
+    if (isMiuix()) {
+        val visible = remember { mutableStateOf(true) }
+        val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.88f
+        SuperDialog(show = visible, onDismissRequest = onDismissRequest,
+            modifier = modifier.heightIn(max = maxHeight).testTag("miuix-sheet").semantics { dialog() },
+            insideMargin = DpSize(0.dp, 8.dp)) {
+            Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
+                Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    top.yukonga.miuix.kmp.basic.Text(title.orEmpty(), Modifier.weight(1f),
+                        style = MiuixTheme.textStyles.title4, color = MiuixTheme.colorScheme.onBackground)
+                    top.yukonga.miuix.kmp.basic.IconButton(onClick = onDismissRequest) {
+                        top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Useful.Cancel, "关闭",
+                            Modifier.size(22.dp), tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                    }
+                }
+                Column(Modifier.fillMaxWidth().weight(1f, fill = false), content = content)
+            }
+        }
+        return
+    }
     androidx.compose.material3.ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
         sheetState = sheetState,
-        shape = if (miuix) androidx.compose.foundation.shape.RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-            else BottomSheetDefaults.ExpandedShape,
-        containerColor = if (miuix) MiuixTheme.colorScheme.background else BottomSheetDefaults.ContainerColor,
         content = content,
     )
 }

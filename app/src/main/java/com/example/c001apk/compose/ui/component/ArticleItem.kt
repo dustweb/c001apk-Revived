@@ -15,6 +15,8 @@ import com.example.c001apk.compose.ui.component.cards.FeedArticleCard
 import com.example.c001apk.compose.ui.component.cards.FeedBottomInfo
 import com.example.c001apk.compose.ui.component.cards.FeedHeader
 import com.example.c001apk.compose.ui.component.cards.FeedRows
+import com.example.c001apk.compose.ui.theme.isMiuix
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/17
@@ -54,15 +56,21 @@ fun LazyListScope.ArticleItem(
     }
     if (!response.title.isNullOrEmpty()) {
         item(key = "title") {
-            Text(
-                text = response.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 12.dp),
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
+            if (isMiuix()) {
+                top.yukonga.miuix.kmp.basic.Text(response.title, Modifier.fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp), fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp, color = MiuixTheme.colorScheme.onSurface)
+            } else {
+                Text(
+                    text = response.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 12.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
         }
     }
 

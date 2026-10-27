@@ -18,6 +18,8 @@ import com.example.c001apk.compose.logic.model.FeedArticleContentBean
 import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.NineImageView
 import com.example.c001apk.compose.util.longClick
+import com.example.c001apk.compose.ui.theme.isMiuix
+import com.example.c001apk.compose.ui.component.cards.miuix.MiuixArticleContent
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/8
@@ -28,6 +30,10 @@ fun FeedArticleCard(
     onOpenLink: (String, String?) -> Unit,
     onCopyText: (String) -> Unit,
 ) {
+    if (isMiuix()) {
+        MiuixArticleContent(item, onOpenLink, onCopyText)
+        return
+    }
 
     when (item.type) {
         "text" -> {

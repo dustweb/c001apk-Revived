@@ -93,11 +93,13 @@ import com.example.c001apk.compose.util.noRippleClickable
 import com.example.c001apk.compose.util.shareText
 import kotlinx.coroutines.launch
 import com.example.c001apk.compose.ui.component.MoreMenuButton
+import com.example.c001apk.compose.ui.theme.isMiuix
+import androidx.compose.foundation.ExperimentalFoundationApi
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/4
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun FeedScreen(
     modifier: Modifier = Modifier,
@@ -119,6 +121,7 @@ fun FeedScreen(
 
 
     val context = LocalContext.current
+    val miuix = isMiuix()
     val layoutDirection = LocalLayoutDirection.current
     val state = rememberPullToRefreshState()
     val lazyListState = rememberLazyListState()
@@ -192,6 +195,19 @@ fun FeedScreen(
             context, R.anim.anim_bottom_sheet_slide_up, R.anim.anim_bottom_sheet_slide_down
         )
         replyLauncher.launch(intent, options)
+    }
+
+    val commentHeader: @Composable () -> Unit = {
+        FeedReplySortCard(
+            replyCount = viewModel.replyCount,
+            selected = selected,
+            updateSortReply = { index ->
+                setReplyType(index)
+                if (shouldShowSortCard) viewModel.isViewReply = true
+                viewModel.refresh()
+            },
+        )
+        if (!miuix) HorizontalDivider()
     }
 
     Scaffold(
@@ -427,19 +443,8 @@ fun FeedScreen(
                             }
                         }
 
-                        item(key = "sort") {
-                            FeedReplySortCard(
-                                replyCount = viewModel.replyCount,
-                                selected = selected,
-                                updateSortReply = { index ->
-                                    setReplyType(index)
-                                    if (shouldShowSortCard)
-                                        viewModel.isViewReply = true
-                                    viewModel.refresh()
-                                }
-                            )
-                            HorizontalDivider()
-                        }
+                        if (miuix) stickyHeader(key = "sort") { commentHeader() }
+                        else item(key = "sort") { commentHeader() }
 
                         if (viewModel.listType == "lastupdate_desc") {
                             if (!response.topReplyRows.isNullOrEmpty()) {
@@ -472,7 +477,7 @@ fun FeedScreen(
                                                 launchReply()
                                             },
                                         )
-                                        HorizontalDivider()
+                                        if (!miuix) HorizontalDivider()
                                     }
                                 }
                             }
@@ -507,7 +512,7 @@ fun FeedScreen(
                                                 launchReply()
                                             },
                                         )
-                                        HorizontalDivider()
+                                        if (!miuix) HorizontalDivider()
                                     }
                                 }
                             }
@@ -563,7 +568,7 @@ fun FeedScreen(
                 }
 
             }
-            if (shouldShowSortCard) {
+            if (shouldShowSortCard && !miuix) {
                 FeedReplySortCard(
                     replyCount = viewModel.replyCount,
                     selected = selected,
@@ -594,6 +599,7 @@ fun FeedScreen(
             },
             modifier = Modifier.padding(top = topInset),
             sheetState = bottomSheetState,
+            title = "全部回复",
         ) {
             // 该界面没有横向手势语义，正文把拖拽交还给父级，斜向滑动同样能滚动
             CompositionLocalProvider(LocalDragHandoffToParent provides true) {

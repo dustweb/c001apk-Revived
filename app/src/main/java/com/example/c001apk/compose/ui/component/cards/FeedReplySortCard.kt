@@ -19,6 +19,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.ui.component.rememberHapticClick
+import com.example.c001apk.compose.ui.theme.isMiuix
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/12
@@ -30,6 +35,25 @@ fun FeedReplySortCard(
     selected: Int = 0,
     updateSortReply: (Int) -> Unit,
 ) {
+    if (isMiuix()) {
+        Column(modifier.fillMaxWidth().background(MiuixTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 8.dp).testTag("miuix-comment-sort"),
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                top.yukonga.miuix.kmp.basic.Text("评论", Modifier.weight(1f), fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold, color = MiuixTheme.colorScheme.onSurface)
+                top.yukonga.miuix.kmp.basic.Text("共 $replyCount 回复", fontSize = 12.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+            }
+            val haptic = rememberHapticClick {}
+            top.yukonga.miuix.kmp.basic.TabRow(
+                tabs = listOf("默认", "最新", "热门", "楼主"),
+                selectedTabIndex = selected.coerceIn(0, 3), modifier = Modifier.fillMaxWidth(),
+                onTabSelected = { haptic(); updateSortReply(it) },
+            )
+        }
+        return
+    }
 
     Column(
         modifier = modifier

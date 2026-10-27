@@ -34,6 +34,7 @@ import com.example.c001apk.compose.ui.component.cards.ProductListCard
 import com.example.c001apk.compose.ui.component.cards.TextCard
 import com.example.c001apk.compose.ui.component.cards.TitleCard
 import com.example.c001apk.compose.util.ReportType
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/10
@@ -213,7 +214,7 @@ fun LazyListScope.ItemCard(
                             isReply2Reply = if (index == 0) isReply2Reply else false,
                             onReply = onReply,
                         )
-                        if (item.fetchType == "feed_reply")
+                        if (item.fetchType == "feed_reply" && !isMiuix())
                             HorizontalDivider()
                     }
 
