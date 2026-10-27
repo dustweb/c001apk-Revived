@@ -216,6 +216,11 @@ class MiuixFeedContentTest {
         compose.onNodeWithContentDescription("关闭").performClick()
         compose.onNodeWithTag("miuix-sheet").assertDoesNotExist()
         assertFalse(visible)
+        compose.runOnIdle { visible = true }
+        compose.onNodeWithTag("miuix-sheet").assertExists()
+        androidx.test.espresso.Espresso.pressBack()
+        compose.onNodeWithTag("miuix-sheet").assertDoesNotExist()
+        assertFalse(visible)
     }
 
     @Test

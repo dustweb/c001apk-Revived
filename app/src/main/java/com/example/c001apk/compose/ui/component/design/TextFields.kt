@@ -40,7 +40,8 @@ fun TextField(
             top.yukonga.miuix.kmp.basic.TextField(
                 value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
                 textStyle = textStyle.copy(color = MiuixTheme.colorScheme.onSurface),
-                backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer,
+                colors = top.yukonga.miuix.kmp.basic.TextFieldDefaults.textFieldColors(
+                    backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer),
                 leadingIcon = leadingIcon, trailingIcon = trailingIcon, singleLine = singleLine,
                 maxLines = maxLines, keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
                 visualTransformation = visualTransformation,
@@ -77,7 +78,8 @@ fun TextField(
             top.yukonga.miuix.kmp.basic.TextField(
                 value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(),
                 textStyle = textStyle.copy(color = MiuixTheme.colorScheme.onSurface),
-                backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer,
+                colors = top.yukonga.miuix.kmp.basic.TextFieldDefaults.textFieldColors(
+                    backgroundColor = colors?.unfocusedContainerColor ?: MiuixTheme.colorScheme.secondaryContainer),
                 leadingIcon = leadingIcon, trailingIcon = trailingIcon, singleLine = singleLine,
                 maxLines = maxLines, keyboardOptions = keyboardOptions, keyboardActions = keyboardActions,
                 visualTransformation = visualTransformation,

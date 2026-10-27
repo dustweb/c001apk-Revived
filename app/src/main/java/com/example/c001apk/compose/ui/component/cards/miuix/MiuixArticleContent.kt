@@ -7,14 +7,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.logic.model.FeedArticleContentBean
 import com.example.c001apk.compose.ui.component.NineImageView
 import com.example.c001apk.compose.util.longClick
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -25,7 +24,7 @@ fun MiuixArticleContent(item: FeedArticleContentBean, onOpenLink: (String, Strin
         "text" -> ContentRichText(item.message, onOpenLink, Modifier.fillMaxWidth()
             .longClick { onCopyText(item.message.orEmpty()) }.padding(horizontal = 20.dp, vertical = 8.dp))
         "image" -> Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-            NineImageView(modifier = Modifier.clip(ContinuousRoundedRectangle(16.dp)),
+            NineImageView(modifier = Modifier.squircleClip(16.dp),
                 pic = null, picArr = listOf(item.url.orEmpty()), feedType = null, isSingle = true)
             if (!item.description.isNullOrBlank()) Text(item.description,
                 Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp), fontSize = 12.sp,

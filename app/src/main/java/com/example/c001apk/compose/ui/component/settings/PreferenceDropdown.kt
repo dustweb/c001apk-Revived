@@ -8,7 +8,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.example.c001apk.compose.ui.component.rememberHapticClick
-import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 
 @Composable
 internal fun PreferenceDropdown(
@@ -28,7 +28,7 @@ internal fun PreferenceDropdown(
     }
     PreferenceFrame {
         CompositionLocalProvider(LocalHapticFeedback provides haptics) {
-            SuperDropdown(title = title, summary = summary, items = items, selectedIndex = selectedIndex,
+            OverlayDropdownPreference(title = title, summary = summary, items = items, selectedIndex = selectedIndex,
                 enabled = enabled, modifier = modifier, onSelectedIndexChange = onSelectedIndexChange)
         }
     }

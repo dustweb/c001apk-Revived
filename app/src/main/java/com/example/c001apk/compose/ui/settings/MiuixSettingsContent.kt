@@ -1,8 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
 import android.os.Build
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,7 +14,6 @@ import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.TravelExplore
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,15 +25,11 @@ import com.example.c001apk.compose.R
 import com.example.c001apk.compose.logic.providable.LocalUserPreferences
 import com.example.c001apk.compose.ui.blacklist.BlackListType
 import com.example.c001apk.compose.ui.component.LauncherIconImage
-import com.example.c001apk.compose.ui.component.settings.BasicListItem
 import com.example.c001apk.compose.ui.component.settings.DropdownListItem
 import com.example.c001apk.compose.ui.component.settings.PreferenceGroup
 import com.example.c001apk.compose.ui.component.settings.SelectionItem
 import com.example.c001apk.compose.ui.component.settings.SwitchListItem
-import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -112,11 +105,8 @@ internal fun PreferenceLink(
     onClick: () -> Unit,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    BasicListItem(headlineText = title, supportingText = summary, onClick = onClick,
-        trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                trailing?.invoke()
-                Icon(MiuixIcons.Basic.ArrowRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
-            }
-        })
+    top.yukonga.miuix.kmp.preference.ArrowPreference(
+        title = title, summary = summary, onClick = onClick,
+        endActions = { trailing?.invoke() },
+    )
 }

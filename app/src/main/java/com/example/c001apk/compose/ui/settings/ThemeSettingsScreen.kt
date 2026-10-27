@@ -39,7 +39,8 @@ import com.example.c001apk.compose.ui.component.design.TextButton
 import com.example.c001apk.compose.ui.theme.isMiuix
 import com.materialkolor.PaletteStyle
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Slider
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Reset
 import kotlin.math.roundToInt
 
 @Composable
@@ -91,19 +92,26 @@ fun ThemeSettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel = hiltV
 @Composable
 private fun ScalePreference(title: String, value: Float, onCommit: (Float) -> Unit) {
     var preview by remember(value) { mutableFloatStateOf(value) }
-    BasicListItem(headlineText = title, supportingText = "${(preview * 100).roundToInt()}%",
-        trailingContent = {
-            TextButton(onClick = { preview = 1f; onCommit(1f) }) {
-                androidx.compose.material3.Text("重置")
-            }
-        })
     if (isMiuix()) {
-        Slider(value = preview, onValueChange = { preview = it }, valueRange = 0.8f..1.3f,
+        top.yukonga.miuix.kmp.preference.SliderPreference(
+            title = title, summary = "${(preview * 100).roundToInt()}%",
+            value = preview, onValueChange = { preview = it }, valueRange = 0.8f..1.3f,
             onValueChangeFinished = { onCommit(preview) },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp)
-                .testTag("scale-$title"),
-            hapticEffect = top.yukonga.miuix.kmp.basic.SliderDefaults.SliderHapticEffect.None)
+            modifier = Modifier.testTag("scale-$title"),
+            endActions = {
+                top.yukonga.miuix.kmp.basic.IconButton(onClick = { preview = 1f; onCommit(1f) }) {
+                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Reset, "重置$title")
+                }
+            },
+            hapticEffect = top.yukonga.miuix.kmp.basic.SliderDefaults.SliderHapticEffect.None,
+        )
     } else {
+        BasicListItem(headlineText = title, supportingText = "${(preview * 100).roundToInt()}%",
+            trailingContent = {
+                TextButton(onClick = { preview = 1f; onCommit(1f) }) {
+                    androidx.compose.material3.Text("重置")
+                }
+            })
         androidx.compose.material3.Slider(value = preview, onValueChange = { preview = it },
             valueRange = 0.8f..1.3f, onValueChangeFinished = { onCommit(preview) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).testTag("scale-$title"))

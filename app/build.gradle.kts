@@ -71,7 +71,7 @@ val buildVersionName = buildString {
 
 android {
     namespace = "com.example.c001apk.compose"
-    compileSdk = 36
+    compileSdk = 37
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
@@ -141,10 +141,6 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.15"
-    }
-
     packagingOptions.resources.excludes += setOf(
         "META-INF/**",
         "okhttp3/**",
@@ -190,8 +186,9 @@ protobuf {
 
 dependencies {
 
-    implementation(libs.miuix)
-    implementation(libs.miuix.shapes)
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.preference)
+    implementation(libs.miuix.icons)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

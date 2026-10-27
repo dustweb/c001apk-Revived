@@ -42,7 +42,7 @@ fun BasicListItem(
                 BasicComponent(
                     title = headlineText, summary = supportingText,
                     modifier = modifier, enabled = enabled,
-                    leftAction = if (!grouped && (leadingImageVector != null || leadingPainter != null)) ({
+                    startAction = if (!grouped && (leadingImageVector != null || leadingPainter != null)) ({
                         Box(Modifier.padding(end = 12.dp)) {
                             if (leadingImageVector != null) Icon(leadingImageVector, null,
                                 tint = if (enabled) MiuixTheme.colorScheme.onBackground
@@ -50,7 +50,7 @@ fun BasicListItem(
                             else if (leadingPainter != null) Image(leadingPainter, null, Modifier.size(24.dp))
                         }
                     }) else null,
-                    rightActions = { trailingContent() },
+                    endActions = { trailingContent() },
                     onClick = onClick,
                 )
             }

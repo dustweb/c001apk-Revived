@@ -280,7 +280,15 @@ fun SearchResultScreen(
         ) {
 
             if (pageType.isNullOrEmpty()) {
+                val onTabSelected: (Int) -> Unit = { index ->
+                    if (pagerState.currentPage == index) {
+                        refreshState = true
+                    }
+                    scope.launch { pagerState.animateScrollToPage(index) }
+                }
                 SecondaryScrollableTabRow(
+                    labels = tabList.map { searchTypeTitle(it) },
+                    onTabSelected = onTabSelected,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
@@ -302,12 +310,7 @@ fun SearchResultScreen(
                     tabList.forEachIndexed { index, tab ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = rememberHapticClick {
-                                if (pagerState.currentPage == index) {
-                                    refreshState = true
-                                }
-                                scope.launch { pagerState.animateScrollToPage(index) }
-                            },
+                            onClick = rememberHapticClick { onTabSelected(index) },
                             text = { Text(text = searchTypeTitle(tab)) }
                         )
                     }

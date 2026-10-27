@@ -324,7 +324,15 @@ fun TopicScreen(
                             pageCount = { tabList.size }
                         )
 
+                        val onTabSelected: (Int) -> Unit = { index ->
+                            if (pagerState.currentPage == index) {
+                                refreshState = true
+                            }
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        }
                         SecondaryScrollableTabRow(
+                            labels = tabList.map { it.title.orEmpty() },
+                            onTabSelected = onTabSelected,
                             modifier = Modifier.padding(
                                 start = paddingValues.calculateLeftPadding(layoutDirection),
                             ),
@@ -344,12 +352,7 @@ fun TopicScreen(
                             tabList.forEachIndexed { index, tab ->
                                 Tab(
                                     selected = pagerState.currentPage == index,
-                                    onClick = rememberHapticClick {
-                                        if (pagerState.currentPage == index) {
-                                            refreshState = true
-                                        }
-                                        scope.launch { pagerState.animateScrollToPage(index) }
-                                    },
+                                    onClick = rememberHapticClick { onTabSelected(index) },
                                     text = { Text(text = tab.title.orEmpty()) }
                                 )
                             }

@@ -1,6 +1,14 @@
 package com.example.c001apk.compose.ui.theme
 
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.remember
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
@@ -12,63 +20,44 @@ import androidx.compose.ui.graphics.Color
 import com.example.c001apk.compose.UiStyle
 import top.yukonga.miuix.kmp.theme.Colors
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.MiuixPopupUtils.Companion.MiuixPopupHost
-import top.yukonga.miuix.kmp.theme.darkColorScheme as miuixDarkColors
-import top.yukonga.miuix.kmp.theme.lightColorScheme as miuixLightColors
 
 val LocalUiStyle = compositionLocalOf { UiStyle.MD3 }
 
 @Composable
 fun isMiuix() = LocalUiStyle.current == UiStyle.MIUIX
 
-fun ColorScheme.miuixColors(dark: Boolean, pureBlack: Boolean): Colors {
-    val base = if (dark) miuixDarkColors() else miuixLightColors()
-    val pageColor = if (dark && pureBlack) Color.Black else if (dark) background else surfaceContainerLow
-    val cardColor = if (dark && pureBlack) Color.Black else if (dark) surfaceContainerLow else surfaceContainerLowest
-    return base.copy(
-        primary = primary,
-        onPrimary = onPrimary,
-        primaryVariant = primary,
-        onPrimaryVariant = onPrimary,
-        primaryContainer = primary,
-        onPrimaryContainer = onPrimary,
-        disabledPrimary = primary.copy(alpha = 0.35f),
-        disabledOnPrimary = onPrimary.copy(alpha = 0.5f),
-        disabledPrimaryButton = primary.copy(alpha = 0.35f),
-        disabledOnPrimaryButton = onPrimary.copy(alpha = 0.5f),
-        disabledPrimarySlider = primary.copy(alpha = 0.35f),
-        tertiaryContainer = primaryContainer,
-        onTertiaryContainer = onPrimaryContainer,
-        secondaryVariant = surfaceContainerHigh,
-        onSecondaryVariant = onSurface,
-        secondaryContainer = surfaceContainerHigh,
-        onSecondaryContainer = onSurfaceVariant,
-        secondaryContainerVariant = surfaceContainerHighest,
-        onSecondaryContainerVariant = onSurfaceVariant,
-        // Miuix pages use surface; cards and popups use surfaceContainer.
-        surface = pageColor,
-        background = cardColor,
-        onSurface = onSurface,
-        onBackground = onSurface,
-        onBackgroundVariant = primary,
-        surfaceVariant = surfaceContainerHigh,
-        onSurfaceSecondary = onSurfaceVariant,
-        onSurfaceVariantSummary = onSurfaceVariant,
-        onSurfaceVariantActions = onSurfaceVariant,
-        disabledOnSurface = onSurface.copy(alpha = 0.38f),
-        surfaceContainer = cardColor,
-        onSurfaceContainer = onSurface,
-        onSurfaceContainerVariant = onSurfaceVariant,
-        surfaceContainerHigh = surfaceContainerHigh,
-        onSurfaceContainerHigh = onSurface,
-        surfaceContainerHighest = surfaceContainerHighest,
-        onSurfaceContainerHighest = onSurface,
-        outline = outline,
-        dividerLine = outlineVariant,
-    )
+@Composable
+fun rememberMiuixController(
+    dark: Boolean,
+    keyColor: Color?,
+    pureBlack: Boolean,
+    paletteStyle: String,
+): ThemeController {
+    val controller = remember(dark, keyColor, paletteStyle) {
+        ThemeController(
+            colorSchemeMode = if (dark) ColorSchemeMode.MonetDark else ColorSchemeMode.MonetLight,
+            keyColor = keyColor,
+            paletteStyle = ThemePaletteStyle.entries.firstOrNull { it.name == paletteStyle }
+                ?: ThemePaletteStyle.TonalSpot,
+        )
+    }
+    val colors = controller.currentColors()
+    return if (dark && pureBlack) remember(colors) {
+        ThemeController(ColorSchemeMode.Dark,
+            darkColors = colors.copy(background = Color.Black, surface = Color.Black, surfaceContainer = Color.Black))
+    } else controller
 }
 
 fun ColorScheme.withMiuixSurfaces(colors: Colors): ColorScheme = copy(
+    primary = colors.primary,
+    onPrimary = colors.onPrimary,
+    primaryContainer = colors.tertiaryContainer,
+    onPrimaryContainer = colors.onTertiaryContainer,
+    error = colors.error,
+    onError = colors.onError,
+    errorContainer = colors.errorContainer,
+    onErrorContainer = colors.onErrorContainer,
+    outline = colors.outline,
     background = colors.surface,
     onBackground = colors.onSurface,
     surface = colors.background,
@@ -84,18 +73,23 @@ fun ColorScheme.withMiuixSurfaces(colors: Colors): ColorScheme = copy(
 )
 
 @Composable
-fun UiStyleTheme(style: UiStyle, colors: Colors, content: @Composable () -> Unit) {
+fun UiStyleTheme(style: UiStyle, controller: ThemeController, content: @Composable () -> Unit) {
     val materialIndication = LocalIndication.current
+    val materialOverscroll = LocalOverscrollFactory.current
     // Keep the provider tree stable so a style change does not discard page state.
-    MiuixTheme(colors = colors) {
+    MiuixTheme(controller = controller) {
         CompositionLocalProvider(
             LocalUiStyle provides style,
+            LocalOverscrollFactory provides if (style == UiStyle.MIUIX) LocalOverscrollFactory.current else materialOverscroll,
             LocalIndication provides if (style == UiStyle.MIUIX) LocalIndication.current
                 else materialIndication,
         ) {
-            Box(Modifier.fillMaxSize()) {
-                content()
-                if (style == UiStyle.MIUIX) MiuixPopupHost()
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            ) { padding ->
+                Box(Modifier.fillMaxSize().padding(padding)) { content() }
             }
         }
     }

@@ -3,13 +3,14 @@ package com.example.c001apk.compose.ui.component.design
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
@@ -23,9 +24,9 @@ import androidx.compose.ui.semantics.dialog
 import androidx.compose.ui.semantics.semantics
 import com.example.c001apk.compose.ui.theme.isMiuix
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.window.WindowBottomSheet
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Cancel
+import top.yukonga.miuix.kmp.icon.extended.Close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,8 +133,8 @@ fun ListItem(
     if (isMiuix()) {
         top.yukonga.miuix.kmp.basic.BasicComponent(
             modifier = modifier,
-            leftAction = leadingContent?.let { { Box(Modifier.padding(end = 12.dp)) { it() } } },
-            rightActions = { trailingContent?.invoke() },
+            startAction = leadingContent?.let { { Box(Modifier.padding(end = 12.dp)) { it() } } },
+            endActions = { trailingContent?.invoke() },
         ) {
             overlineContent?.invoke()
             headlineContent()
@@ -157,23 +158,20 @@ fun ModalBottomSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        val visible = remember { mutableStateOf(true) }
+        var visible by remember { mutableStateOf(true) }
         val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.88f
-        SuperDialog(show = visible, onDismissRequest = onDismissRequest,
-            modifier = modifier.heightIn(max = maxHeight).testTag("miuix-sheet").semantics { dialog() },
-            insideMargin = DpSize(0.dp, 8.dp)) {
-            Column(Modifier.fillMaxWidth().heightIn(max = maxHeight)) {
-                Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    top.yukonga.miuix.kmp.basic.Text(title.orEmpty(), Modifier.weight(1f),
-                        style = MiuixTheme.textStyles.title4, color = MiuixTheme.colorScheme.onBackground)
-                    top.yukonga.miuix.kmp.basic.IconButton(onClick = onDismissRequest) {
-                        top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Useful.Cancel, "关闭",
-                            Modifier.size(22.dp), tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                    }
+        WindowBottomSheet(
+            show = visible, title = title,
+            onDismissRequest = { visible = false }, onDismissFinished = onDismissRequest,
+            modifier = modifier.testTag("miuix-sheet").semantics { dialog() },
+            insideMargin = DpSize(0.dp, 8.dp),
+            endAction = {
+                top.yukonga.miuix.kmp.basic.IconButton(onClick = { visible = false }) {
+                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Close, "关闭")
                 }
-                Column(Modifier.fillMaxWidth().weight(1f, fill = false), content = content)
-            }
+            },
+        ) {
+            Column(Modifier.fillMaxWidth().heightIn(max = maxHeight), content = content)
         }
         return
     }

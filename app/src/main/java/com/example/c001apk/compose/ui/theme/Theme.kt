@@ -131,7 +131,15 @@ fun C001apkComposeTheme(
         }
     }
 
-    val miuixColors = colorScheme.miuixColors(darkTheme, pureBlack)
+    val miuixController = rememberMiuixController(
+        dark = darkTheme,
+        keyColor = if (SDK_INT >= S && materialYou) null else Color(
+            seedColors.getOrNull(ThemeType.entries.indexOf(themeType))
+                ?: "FF$seedColor".toLongOrNull(16) ?: seedColors[0]),
+        pureBlack = pureBlack,
+        paletteStyle = PaletteStyle.entries[paletteStyle].name,
+    )
+    val miuixColors = miuixController.currentColors()
     MaterialTheme(
         colorScheme = if (uiStyle == UiStyle.MIUIX) colorScheme.withMiuixSurfaces(miuixColors)
             else colorScheme,
@@ -147,7 +155,7 @@ fun C001apkComposeTheme(
                         LocalDensity.current.fontScale * fontScale,
                     )
                 ) {
-                    UiStyleTheme(uiStyle, miuixColors, content)
+                    UiStyleTheme(uiStyle, miuixController, content)
                 }
             }
         }

@@ -391,7 +391,16 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                val onTabSelected: (Int) -> Unit = { index ->
+                    if (pagerState.currentPage == index) {
+                        onRefresh()
+                    }
+                    selectedTabType = tabList[index]
+                    scope.launch { pagerState.animateScrollToPage(index) }
+                }
                 SecondaryScrollableTabRow(
+                    labels = tabList.map { tabTitle(it) },
+                    onTabSelected = onTabSelected,
                     modifier = Modifier.weight(1f),
                     selectedTabIndex = selectedTabIndex,
                     indicator = {
@@ -406,13 +415,7 @@ fun HomeScreen(
                     tabList.forEachIndexed { index, tab ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = rememberHapticClick {
-                                if (pagerState.currentPage == index) {
-                                    onRefresh()
-                                }
-                                selectedTabType = tab
-                                scope.launch { pagerState.animateScrollToPage(index) }
-                            },
+                            onClick = rememberHapticClick { onTabSelected(index) },
                             text = { Text(text = tabTitle(tab)) }
                         )
                     }

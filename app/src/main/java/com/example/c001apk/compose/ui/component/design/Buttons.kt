@@ -19,7 +19,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.c001apk.compose.ui.theme.isMiuix
 import top.yukonga.miuix.kmp.basic.Button as MiuixButton
 import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
@@ -27,7 +27,7 @@ import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 internal val LocalPrimaryDialogAction = compositionLocalOf { false }
-private val NoNativeHaptics = object : HapticFeedback {
+internal val NoNativeHaptics = object : HapticFeedback {
     override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) = Unit
 }
 
@@ -36,24 +36,28 @@ fun Button(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: ButtonColors = ButtonDefaults.buttonColors(),
+    colors: ButtonColors? = null,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        MiuixButton(onClick, modifier, enabled, insideMargin = contentPadding,
-            colors = MiuixButtonDefaults.buttonColors(colors.containerColor, colors.disabledContainerColor)) {
+        val nativeColors = colors?.let {
+            MiuixButtonDefaults.buttonColors(it.containerColor, it.disabledContainerColor,
+                it.contentColor, it.disabledContentColor)
+        } ?: MiuixButtonDefaults.buttonColorsPrimary()
+        val foreground = if (enabled) nativeColors.contentColor else nativeColors.disabledContentColor
+        MiuixButton(onClick, modifier, enabled, insideMargin = contentPadding, colors = nativeColors) {
             CompositionLocalProvider(
-                LocalContentColor provides if (enabled) colors.contentColor else colors.disabledContentColor,
+                LocalContentColor provides foreground,
                 LocalTextStyle provides MiuixTheme.textStyles.button.copy(
-                    color = if (enabled) colors.contentColor else colors.disabledContentColor,
+                    color = foreground,
                 ),
             ) {
                 content()
             }
         }
     } else {
-        androidx.compose.material3.Button(onClick, modifier, enabled, colors = colors,
+        androidx.compose.material3.Button(onClick, modifier, enabled, colors = colors ?: ButtonDefaults.buttonColors(),
             contentPadding = contentPadding, content = content)
     }
 }
@@ -67,7 +71,7 @@ fun OutlinedButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        Button(onClick, modifier.border(1.dp, MiuixTheme.colorScheme.outline, ContinuousRoundedRectangle(16.dp)),
+        Button(onClick, modifier.border(1.dp, MiuixTheme.colorScheme.outline, RoundedCornerShape(16.dp)),
             enabled, colors = ButtonDefaults.outlinedButtonColors(), contentPadding = contentPadding, content = content)
     } else {
         androidx.compose.material3.OutlinedButton(onClick, modifier, enabled,
@@ -84,14 +88,14 @@ fun StyleButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        val foreground = if (primary) MiuixTheme.colorScheme.onPrimary
-            else MiuixTheme.colorScheme.onSecondaryVariant
+        val nativeColors = if (primary) MiuixButtonDefaults.buttonColorsPrimary()
+            else MiuixButtonDefaults.buttonColors()
+        val foreground = if (enabled) nativeColors.contentColor else nativeColors.disabledContentColor
         MiuixButton(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
-            colors = if (primary) MiuixButtonDefaults.buttonColorsPrimary()
-                else MiuixButtonDefaults.buttonColors(),
+            colors = nativeColors,
         ) {
             CompositionLocalProvider(
                 LocalContentColor provides foreground,
@@ -156,7 +160,7 @@ fun OutlinedIconButton(
     content: @Composable () -> Unit,
 ) {
     if (isMiuix()) {
-        MiuixIconButton(onClick, if (border != null) modifier.border(border, ContinuousRoundedRectangle(12.dp)) else modifier,
+        MiuixIconButton(onClick, if (border != null) modifier.border(border, RoundedCornerShape(12.dp)) else modifier,
             minWidth = 48.dp, minHeight = 48.dp, content = content)
     } else {
         androidx.compose.material3.OutlinedIconButton(onClick, modifier, border = border, content = content)
@@ -204,8 +208,8 @@ fun Switch(
 fun RadioButton(selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     if (isMiuix()) {
         CompositionLocalProvider(LocalHapticFeedback provides NoNativeHaptics) {
-            top.yukonga.miuix.kmp.basic.Checkbox(
-                checked = selected, onCheckedChange = onClick?.let { action -> { action() } }, modifier = modifier,
+            top.yukonga.miuix.kmp.basic.RadioButton(
+                selected = selected, onClick = onClick, modifier = modifier,
             )
         }
     } else {

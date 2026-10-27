@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -38,21 +37,22 @@ import com.example.c001apk.compose.util.Utils.richToString
 import com.example.c001apk.compose.util.copyText
 import com.example.c001apk.compose.util.getShareText
 import com.example.c001apk.compose.util.makeToast
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import androidx.compose.foundation.shape.RoundedCornerShape
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Blocklist
-import top.yukonga.miuix.kmp.icon.icons.useful.Copy
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
-import top.yukonga.miuix.kmp.icon.icons.useful.Like
-import top.yukonga.miuix.kmp.icon.icons.useful.Unlike
-import top.yukonga.miuix.kmp.icon.icons.useful.More
+import top.yukonga.miuix.kmp.icon.extended.Blocklist
+import top.yukonga.miuix.kmp.icon.extended.Copy
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Report
+import top.yukonga.miuix.kmp.icon.extended.Reply
+import top.yukonga.miuix.kmp.icon.extended.Favorites
+import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -135,22 +135,22 @@ fun MiuixFeedHeader(
                 maxLines = 1, overflow = TextOverflow.Ellipsis, style = MiuixTheme.textStyles.footnote1)
         }
         if (data.isStickTop == 1 && !isFeedContent) {
-            Surface(shape = ContinuousRoundedRectangle(7.dp), color = MiuixTheme.colorScheme.tertiaryContainer) {
+            Surface(shape = RoundedCornerShape(7.dp), color = MiuixTheme.colorScheme.tertiaryContainer) {
                 Text("置顶", Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                     color = MiuixTheme.colorScheme.primary, fontSize = 11.sp)
             }
         }
         if (!isFeedContent) Box {
             IconButton(onClick = { expanded = true }, modifier = Modifier.testTag("feed-menu-${data.id}")) {
-                Icon(MiuixIcons.Useful.More, "动态操作", Modifier.size(22.dp),
+                Icon(MiuixIcons.More, "动态操作", Modifier.size(22.dp),
                     tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
             }
             ContentMenu(expanded, { expanded = false }, buildList {
-                add(ContentAction("复制链接", MiuixIcons.Useful.Copy) { context.copyText(getShareText(ShareType.FEED, data.id.orEmpty())) })
-                onBlockUser?.let { add(ContentAction("拉黑", MiuixIcons.Useful.Blocklist) { it(data.uid.orEmpty()) }) }
-                if (CookieUtil.isLogin) onReport?.let { add(ContentAction("举报", MiuixIcons.Useful.Info) { it(data.id.orEmpty(), ReportType.FEED) }) }
+                add(ContentAction("复制链接", MiuixIcons.Copy) { context.copyText(getShareText(ShareType.FEED, data.id.orEmpty())) })
+                onBlockUser?.let { add(ContentAction("拉黑", MiuixIcons.Blocklist) { it(data.uid.orEmpty()) }) }
+                if (CookieUtil.isLogin) onReport?.let { add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.FEED) }) }
                 if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
-                    add(ContentAction("删除", MiuixIcons.Useful.Delete) { it(data.id.orEmpty(), LikeType.FEED, null) })
+                    add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.FEED, null) })
                 }
             })
         }
@@ -174,8 +174,8 @@ fun MiuixFeedBottomInfo(
         Text(if (isFeedContent) ip.takeIf { it.isNotBlank() }?.let { "发布于 $it" }.orEmpty() else fromToday(dateline),
             modifier = Modifier.weight(1f), color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        ContentActionButton(MiuixIcons.Useful.Edit, "回复", replyNum, "feed-replies-$tag", onClick = onViewFeed)
-        ContentActionButton(if (like == 1) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
+        ContentActionButton(MiuixIcons.Reply, "回复", replyNum, "feed-replies-$tag", onClick = onViewFeed)
+        ContentActionButton(if (like == 1) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
             "点赞", likeNum, "feed-like-$tag", like == 1, onLike)
     }
 }
@@ -196,10 +196,10 @@ fun MiuixFeedRows(
         items(rows.size) { index ->
             val row = rows[index]
             Surface(onClick = { onOpenLink(row.url.orEmpty(), row.title) },
-                shape = ContinuousRoundedRectangle(12.dp), color = MiuixTheme.colorScheme.surface) {
+                shape = RoundedCornerShape(12.dp), color = MiuixTheme.colorScheme.surface) {
                 Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (!row.logo.isNullOrEmpty()) CoilLoader(url = row.logo, modifier = Modifier.size(20.dp).clip(ContinuousRoundedRectangle(5.dp)))
+                    if (!row.logo.isNullOrEmpty()) CoilLoader(url = row.logo, modifier = Modifier.size(20.dp).squircleClip(5.dp))
                     Text(row.title.orEmpty().richToString(), fontSize = 13.sp, maxLines = 1,
                         color = MiuixTheme.colorScheme.onBackground)
                 }
@@ -218,7 +218,7 @@ private fun MiuixFeedMessage(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (!data.messageTitle.isNullOrBlank()) ContentRichText(data.messageTitle, onOpenLink, size = 18f, bold = true)
         if (!data.message.isNullOrBlank()) ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth())
-        if (!data.picArr.isNullOrEmpty()) NineImageView(Modifier.fillMaxWidth().clip(ContinuousRoundedRectangle(12.dp)),
+        if (!data.picArr.isNullOrEmpty()) NineImageView(Modifier.fillMaxWidth().squircleClip(12.dp),
             data.pic, data.picArr, data.feedType)
         if (!data.forwardSourceType.isNullOrEmpty()) {
             val source = data.forwardSourceFeed
@@ -233,14 +233,14 @@ private fun MiuixFeedMessage(
                     if (!source.messageTitle.isNullOrEmpty() && !source.message.isNullOrEmpty())
                         ContentRichText(source.message, onOpenLink, Modifier.padding(top = 6.dp), size = 14f)
                     if (!source.picArr.isNullOrEmpty()) NineImageView(
-                        Modifier.fillMaxWidth().padding(top = 8.dp).clip(ContinuousRoundedRectangle(10.dp)),
+                        Modifier.fillMaxWidth().padding(top = 8.dp).squircleClip(10.dp),
                         source.pic, source.picArr, source.feedType)
                 }
             }
         }
         data.replyRows?.firstOrNull()?.let { reply ->
             Surface(onClick = { onViewFeed(data.id.orEmpty(), true) },
-                shape = ContinuousRoundedRectangle(14.dp), color = MiuixTheme.colorScheme.surface) {
+                shape = RoundedCornerShape(14.dp), color = MiuixTheme.colorScheme.surface) {
                 val imageLink = reply.pic?.takeIf { it.isNotBlank() }?.let {
                     " <a class=\"feed-forward-pic\" href=\"$it\">查看图片(${reply.picArr?.size ?: 1})</a>"
                 }.orEmpty()
@@ -250,11 +250,11 @@ private fun MiuixFeedMessage(
         }
         if (!data.extraUrl.isNullOrEmpty()) {
             Surface(onClick = { onOpenLink(data.extraUrl, data.extraTitle) },
-                shape = ContinuousRoundedRectangle(14.dp), color = MiuixTheme.colorScheme.surface) {
+                shape = RoundedCornerShape(14.dp), color = MiuixTheme.colorScheme.surface) {
                 Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     if (!data.extraPic.isNullOrEmpty()) CoilLoader(url = data.extraPic,
-                        modifier = Modifier.size(44.dp).clip(ContinuousRoundedRectangle(10.dp)))
+                        modifier = Modifier.size(44.dp).squircleClip(10.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         if (!data.extraTitle.isNullOrBlank()) Text(data.extraTitle, fontSize = 14.sp,
                             fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)

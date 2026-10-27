@@ -11,6 +11,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,8 +26,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import com.example.c001apk.compose.ui.theme.isMiuix
-import top.yukonga.miuix.kmp.basic.ListPopup
-import top.yukonga.miuix.kmp.extra.SuperDialog
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
+import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
@@ -39,9 +42,9 @@ fun AlertDialog(
     properties: DialogProperties = DialogProperties(),
 ) {
     if (isMiuix()) {
-        val shown = remember { androidx.compose.runtime.mutableStateOf(true) }
-        SuperDialog(show = shown, modifier = modifier.semantics { dialog() },
-            onDismissRequest = onDismissRequest) {
+        var visible by remember { mutableStateOf(true) }
+        WindowDialog(show = visible, modifier = modifier.semantics { dialog() },
+            onDismissRequest = { visible = false }, onDismissFinished = onDismissRequest) {
             CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onSurface) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     icon?.invoke()
@@ -75,9 +78,7 @@ fun DropdownMenu(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        val visible = remember { androidx.compose.runtime.mutableStateOf(expanded) }
-        visible.value = expanded
-        ListPopup(show = visible, popupModifier = modifier, onDismissRequest = onDismissRequest) {
+        OverlayListPopup(show = expanded, popupModifier = modifier, onDismissRequest = onDismissRequest) {
             CompositionLocalProvider(
                 LocalContentColor provides MiuixTheme.colorScheme.onSurface,
                 LocalTextStyle provides MiuixTheme.textStyles.main,

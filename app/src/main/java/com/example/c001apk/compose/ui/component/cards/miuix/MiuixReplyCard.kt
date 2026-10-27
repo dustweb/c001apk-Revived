@@ -39,7 +39,8 @@ import com.example.c001apk.compose.util.DateUtils.fromToday
 import com.example.c001apk.compose.util.ReportType
 import com.example.c001apk.compose.util.Utils.richToString
 import com.example.c001apk.compose.util.makeToast
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import androidx.compose.foundation.shape.RoundedCornerShape
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
@@ -47,15 +48,15 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.basic.ArrowRight
-import top.yukonga.miuix.kmp.icon.icons.useful.Blocklist
-import top.yukonga.miuix.kmp.icon.icons.useful.Copy
-import top.yukonga.miuix.kmp.icon.icons.useful.Delete
-import top.yukonga.miuix.kmp.icon.icons.useful.Edit
-import top.yukonga.miuix.kmp.icon.icons.useful.Info
-import top.yukonga.miuix.kmp.icon.icons.useful.Like
-import top.yukonga.miuix.kmp.icon.icons.useful.Unlike
-import top.yukonga.miuix.kmp.icon.icons.useful.More
+import top.yukonga.miuix.kmp.icon.basic.ArrowRight
+import top.yukonga.miuix.kmp.icon.extended.Blocklist
+import top.yukonga.miuix.kmp.icon.extended.Copy
+import top.yukonga.miuix.kmp.icon.extended.Delete
+import top.yukonga.miuix.kmp.icon.extended.Report
+import top.yukonga.miuix.kmp.icon.extended.Reply
+import top.yukonga.miuix.kmp.icon.extended.Favorites
+import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
+import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -117,27 +118,27 @@ fun MiuixReplyCard(
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
             }
             if (data.isFeedAuthor == 1 || isTopReply) {
-                Surface(shape = ContinuousRoundedRectangle(7.dp), color = MiuixTheme.colorScheme.tertiaryContainer) {
+                Surface(shape = RoundedCornerShape(7.dp), color = MiuixTheme.colorScheme.tertiaryContainer) {
                     Text(if (isTopReply) "原评论" else "楼主", Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                         fontSize = 11.sp, color = MiuixTheme.colorScheme.primary)
                 }
             }
             if (!likeNotice) Box {
                 IconButton(onClick = { expanded = true }, modifier = Modifier.testTag("comment-menu-${data.id}")) {
-                    Icon(MiuixIcons.Useful.More, "评论操作", Modifier.size(22.dp),
+                    Icon(MiuixIcons.More, "评论操作", Modifier.size(22.dp),
                         tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                 }
                 ContentMenu(expanded, { expanded = false }, buildList {
-                    add(ContentAction("复制", MiuixIcons.Useful.Copy) { onCopyText(data.message) })
-                    add(ContentAction("拉黑", MiuixIcons.Useful.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
+                    add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(data.message) })
+                    add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
                     onShowTotalReply?.let {
-                        add(ContentAction("显示回复", MiuixIcons.Useful.Edit) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
+                        add(ContentAction("显示回复", MiuixIcons.Reply) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
                     }
                     if (CookieUtil.isLogin) onReport?.let {
-                        add(ContentAction("举报", MiuixIcons.Useful.Info) { it(data.id.orEmpty(), ReportType.REPLY) })
+                        add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.REPLY) })
                     }
                     if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
-                        add(ContentAction("删除", MiuixIcons.Useful.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
+                        add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
                     }
                 })
             }
@@ -155,12 +156,12 @@ fun MiuixReplyCard(
             ReplySource(data.username, data.message, data.pic, null, onOpenLink)
         } else {
             if (!data.picArr.isNullOrEmpty()) NineImageView(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).clip(ContinuousRoundedRectangle(12.dp)),
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).squircleClip(12.dp),
                 pic = data.pic, picArr = data.picArr, feedType = data.feedType)
             data.feed?.let { ReplySource(it.username, it.message, it.pic, it.url, onOpenLink) }
             Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
-                ContentActionButton(MiuixIcons.Useful.Edit, "回复", data.replynum.orEmpty(), "comment-reply-${data.id}", onClick = reply)
-                ContentActionButton(if (data.userAction?.like == 1) MiuixIcons.Useful.Like else MiuixIcons.Useful.Unlike,
+                ContentActionButton(MiuixIcons.Reply, "回复", data.replynum.orEmpty(), "comment-reply-${data.id}", onClick = reply)
+                ContentActionButton(if (data.userAction?.like == 1) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
                     "点赞", data.likenum.orEmpty(), "comment-like-${data.id}",
                     active = data.userAction?.like == 1) {
                     if (CookieUtil.isLogin) onLike?.invoke(data.id.orEmpty(), data.userAction?.like ?: 0, LikeType.REPLY)
@@ -201,9 +202,9 @@ private fun ReplyIdentity(author: String, target: String, avatar: String?, onOpe
 private fun ReplySource(author: String?, message: String?, picture: String?, url: String?, onOpenLink: (String, String?) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
         .then(if (!url.isNullOrEmpty()) Modifier.clickable { onOpenLink(url, null) } else Modifier),
-        shape = ContinuousRoundedRectangle(14.dp), color = MiuixTheme.colorScheme.surface) {
+        shape = RoundedCornerShape(14.dp), color = MiuixTheme.colorScheme.surface) {
         Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (!picture.isNullOrBlank()) CoilLoader(url = picture, modifier = Modifier.size(48.dp).clip(ContinuousRoundedRectangle(10.dp)))
+            if (!picture.isNullOrBlank()) CoilLoader(url = picture, modifier = Modifier.size(48.dp).squircleClip(10.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("@${author.orEmpty().richToString()}", fontSize = 13.sp, fontWeight = FontWeight.Medium,
                     color = MiuixTheme.colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -256,14 +257,14 @@ fun MiuixReplyRows(
                     }
                 }
                 ContentMenu(menuIndex == index, { menuIndex = -1 }, buildList {
-                    add(ContentAction("复制", MiuixIcons.Useful.Copy) { onCopyText(reply.message) })
-                    add(ContentAction("拉黑", MiuixIcons.Useful.Blocklist) { onBlockUser(reply.uid.orEmpty()) })
-                    add(ContentAction("显示回复", MiuixIcons.Useful.Edit) { onShowTotalReply(reply.id.orEmpty()) })
+                    add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(reply.message) })
+                    add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(reply.uid.orEmpty()) })
+                    add(ContentAction("显示回复", MiuixIcons.Reply) { onShowTotalReply(reply.id.orEmpty()) })
                     if (CookieUtil.isLogin) onReport?.let {
-                        add(ContentAction("举报", MiuixIcons.Useful.Info) { it(reply.id.orEmpty(), ReportType.REPLY) })
+                        add(ContentAction("举报", MiuixIcons.Report) { it(reply.id.orEmpty(), ReportType.REPLY) })
                     }
                     if (!reply.uid.isNullOrEmpty() && reply.uid == CookieUtil.uid) onDelete?.let {
-                        add(ContentAction("删除", MiuixIcons.Useful.Delete) { it(reply.id.orEmpty(), LikeType.REPLY) })
+                        add(ContentAction("删除", MiuixIcons.Delete) { it(reply.id.orEmpty(), LikeType.REPLY) })
                     }
                 })
             }
@@ -273,7 +274,7 @@ fun MiuixReplyRows(
                 else "查看全部评论${replyNum.takeIf { it.isNotBlank() }?.let { "($it)" }.orEmpty()}"
             Surface(onClick = rememberHapticClick { onShowTotalReply(null) },
                 modifier = Modifier.fillMaxWidth().testTag("view-all-replies"), color = MiuixTheme.colorScheme.surface,
-                shape = ContinuousRoundedRectangle(10.dp)) {
+                shape = RoundedCornerShape(10.dp)) {
                 Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(label, Modifier.weight(1f), fontSize = 14.sp, color = MiuixTheme.colorScheme.primary)
                     Icon(MiuixIcons.Basic.ArrowRight, null, Modifier.size(16.dp), tint = MiuixTheme.colorScheme.primary)

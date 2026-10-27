@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
@@ -27,15 +25,15 @@ import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.CoilLoader
 import com.example.c001apk.compose.ui.component.rememberHapticClick
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
+import androidx.compose.foundation.shape.RoundedCornerShape
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.ListPopup
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.useful.Personal
+import top.yukonga.miuix.kmp.icon.extended.Contacts
 
 internal data class ContentAction(val title: String, val icon: ImageVector, val onClick: () -> Unit)
 
@@ -44,21 +42,19 @@ internal fun ContentAvatar(url: String?, size: Dp, tag: String, onClick: () -> U
     Surface(modifier = Modifier.size(size).clip(CircleShape).testTag(tag).clickable(onClick = onClick),
         shape = CircleShape, color = MiuixTheme.colorScheme.secondaryContainer) {
         if (!url.isNullOrBlank()) CoilLoader(url = url, modifier = Modifier.fillMaxSize())
-        else Icon(MiuixIcons.Useful.Personal, null, Modifier.padding(7.dp),
+        else Icon(MiuixIcons.Contacts, null, Modifier.padding(7.dp),
             tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
     }
 }
 
 @Composable
 internal fun ContentMenu(expanded: Boolean, onDismiss: () -> Unit, actions: List<ContentAction>) {
-    val visible = remember { mutableStateOf(expanded) }
-    visible.value = expanded
-    ListPopup(show = visible, onDismissRequest = onDismiss) {
+    OverlayListPopup(show = expanded, onDismissRequest = onDismiss) {
         androidx.compose.foundation.layout.Column {
             actions.forEach { action ->
                 BasicComponent(
                     title = action.title,
-                    leftAction = { Icon(action.icon, null, Modifier.padding(end = 12.dp).size(22.dp)) },
+                    startAction = { Icon(action.icon, null, Modifier.padding(end = 12.dp).size(22.dp)) },
                     onClick = rememberHapticClick { onDismiss(); action.onClick() },
                 )
             }
@@ -82,7 +78,7 @@ internal fun ContentActionButton(
             contentDescription = "$label ${count.ifBlank { "0" }}"
             selected = active
         },
-        shape = ContinuousRoundedRectangle(12.dp),
+        shape = RoundedCornerShape(12.dp),
         color = if (active) MiuixTheme.colorScheme.tertiaryContainer else Color.Transparent,
     ) {
         Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp),

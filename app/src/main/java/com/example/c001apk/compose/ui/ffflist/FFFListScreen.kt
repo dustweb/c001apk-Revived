@@ -130,7 +130,15 @@ fun FFFListScreen(
         ) {
             when (type) {
                 FFFListType.FOLLOW.name, FFFListType.REPLY.name -> {
+                    val onTabSelected: (Int) -> Unit = { index ->
+                        if (pagerState.currentPage == index) {
+                            refreshState = true
+                        }
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    }
                     SecondaryScrollableTabRow(
+                        labels = tabList,
+                        onTabSelected = onTabSelected,
                         modifier = Modifier.padding(
                             start = paddingValues.calculateLeftPadding(layoutDirection),
                             end = paddingValues.calculateRightPadding(layoutDirection),
@@ -151,12 +159,7 @@ fun FFFListScreen(
                         tabList.forEachIndexed { index, tab ->
                             Tab(
                                 selected = pagerState.currentPage == index,
-                                onClick = rememberHapticClick {
-                                    if (pagerState.currentPage == index) {
-                                        refreshState = true
-                                    }
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                },
+                                onClick = rememberHapticClick { onTabSelected(index) },
                                 text = { Text(text = tab) }
                             )
                         }
