@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.ui.theme.isMiuix
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import com.mocharealm.gaze.capsule.ContinuousRoundedRectangle
 
 @Composable
 fun BasicListItem(
@@ -39,13 +37,12 @@ fun BasicListItem(
                 color = MiuixTheme.colorScheme.onBackgroundVariant,
                 style = MaterialTheme.typography.titleSmall)
         } else {
-            top.yukonga.miuix.kmp.basic.Surface(
-                modifier = modifier.padding(horizontal = 16.dp, vertical = 2.dp).fillMaxWidth(),
-                shape = ContinuousRoundedRectangle(16.dp), color = MiuixTheme.colorScheme.background,
-            ) {
+            val grouped = LocalPreferenceGroup.current
+            PreferenceFrame {
                 BasicComponent(
-                    title = headlineText, summary = supportingText, enabled = enabled,
-                    leftAction = if (leadingImageVector != null || leadingPainter != null) ({
+                    title = headlineText, summary = supportingText,
+                    modifier = modifier, enabled = enabled,
+                    leftAction = if (!grouped && (leadingImageVector != null || leadingPainter != null)) ({
                         Box(Modifier.padding(end = 12.dp)) {
                             if (leadingImageVector != null) Icon(leadingImageVector, null,
                                 tint = if (enabled) MiuixTheme.colorScheme.onBackground

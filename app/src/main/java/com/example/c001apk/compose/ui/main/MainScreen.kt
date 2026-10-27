@@ -8,16 +8,21 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.animation.SizeTransform
 import androidx.compose.ui.res.stringResource
 import com.example.c001apk.compose.logic.model.UpdateCheckItem
 import com.example.c001apk.compose.ui.component.design.AppNavigationScaffold
 import com.example.c001apk.compose.ui.component.design.NavigationDestination
 import com.example.c001apk.compose.ui.component.SlideTransition
 import com.example.c001apk.compose.ui.component.rememberHapticClick
+import com.example.c001apk.compose.ui.component.MiuixPageMotion
+import com.example.c001apk.compose.ui.theme.isMiuix
 import com.example.c001apk.compose.ui.home.HomeScreen
 import com.example.c001apk.compose.ui.message.MessageScreen
 import com.example.c001apk.compose.ui.settings.SettingsScreen
@@ -34,6 +39,7 @@ fun MainScreen(
     resetBadge: () -> Unit,
     onParamsClick: () -> Unit,
     onAboutClick: () -> Unit,
+    onThemeSettingsClick: () -> Unit,
     onViewUser: (String) -> Unit,
     onViewFeed: (String, Boolean) -> Unit,
     onSearch: () -> Unit,
@@ -60,6 +66,8 @@ fun MainScreen(
     val savableStateHolder = rememberSaveableStateHolder()
     val performHapticClick = rememberHapticClick {}
     var refreshState by remember { mutableStateOf(false) }
+    var tabDirection by remember { mutableIntStateOf(1) }
+    val miuix = isMiuix()
 
     AppNavigationScaffold(
         selected = selectIndex,
@@ -70,18 +78,25 @@ fun MainScreen(
         badge = badge,
         onSelect = { index ->
             performHapticClick()
+            if (index != selectIndex) tabDirection = if (index > selectIndex) 1 else -1
             if (selectIndex == 0 && index == 0) refreshState = true
             else if (index == 1 && badge != 0) resetBadge()
             setSelectIndex(index)
         },
     ) {
         AnimatedContent(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().clipToBounds(),
             label = "home-content",
             targetState = selectIndex,
             transitionSpec = {
-                SlideTransition.slideLeft.enterTransition()
-                    .togetherWith(SlideTransition.slideLeft.exitTransition())
+                if (miuix) {
+                    MiuixPageMotion.tabEnter(tabDirection)
+                        .togetherWith(MiuixPageMotion.tabExit(tabDirection))
+                        .using(SizeTransform(clip = true))
+                } else {
+                    SlideTransition.slideLeft.enterTransition()
+                        .togetherWith(SlideTransition.slideLeft.exitTransition())
+                }
             },
         ) { page ->
             savableStateHolder.SaveableStateProvider(
@@ -121,6 +136,7 @@ fun MainScreen(
                         2 -> SettingsScreen(
                             onParamsClick = onParamsClick,
                             onAboutClick = onAboutClick,
+                            onThemeSettingsClick = onThemeSettingsClick,
                             onViewBlackList = onViewBlackList,
                         )
                     }
@@ -130,6 +146,7 @@ fun MainScreen(
     }
 
     BackHandler(enabled = isActive && selectIndex != 0) {
+        tabDirection = -1
         setSelectIndex(0)
     }
 

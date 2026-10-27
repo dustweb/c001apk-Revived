@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 /**
  * Used for selections
@@ -28,6 +29,12 @@ fun <T> StateDropdownListItem(
     selections: List<SelectionItem<T>>,
     onValueChanged: (index: Int, value: T) -> Unit,
 ) {
+    if (isMiuix()) {
+        PreferenceDropdown(title = headlineText, items = selections.map { it.label }, enabled = isEnable,
+            selectedIndex = selections.indexOfFirst { it.value == value }.coerceAtLeast(0),
+            onSelectedIndexChange = { index -> onValueChanged(index, selections[index].value) })
+        return
+    }
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
     StateBasicListItem(
         isEnable = isEnable,

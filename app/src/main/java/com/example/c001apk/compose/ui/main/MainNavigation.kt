@@ -50,6 +50,9 @@ import com.example.c001apk.compose.ui.carousel.CarouselScreen
 import com.example.c001apk.compose.ui.chat.ChatScreen
 import com.example.c001apk.compose.ui.collection.CollectionScreen
 import com.example.c001apk.compose.ui.component.SlideTransition
+import com.example.c001apk.compose.ui.component.MiuixPageMotion
+import com.example.c001apk.compose.ui.theme.isMiuix
+import com.example.c001apk.compose.ui.settings.ThemeSettingsScreen
 import com.example.c001apk.compose.ui.coolpic.CoolPicScreen
 import com.example.c001apk.compose.ui.dyh.DyhScreen
 import com.example.c001apk.compose.ui.event.EventScreen
@@ -92,6 +95,7 @@ fun MainNavigation(
 ) {
 
     val context = LocalContext.current
+    val miuix = isMiuix()
     var initialPage = 0
     var selectIndex by rememberSaveable { mutableIntStateOf(0) }
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
@@ -145,6 +149,7 @@ fun MainNavigation(
                     onAboutClick = {
                         navController.navigate(Router.ABOUT.name)
                     },
+                    onThemeSettingsClick = { navController.navigate(Router.THEME_SETTINGS.name) },
                     onViewUser = navController::navigateToUser,
                     onViewFeed = ::onViewFeed,
                     onSearch = {
@@ -194,16 +199,16 @@ fun MainNavigation(
             navController = navController,
             startDestination = Router.MAIN.name,
             enterTransition = {
-                SlideTransition.slideLeft.enterTransition()
+                if (miuix) MiuixPageMotion.enter() else SlideTransition.slideLeft.enterTransition()
             },
             exitTransition = {
-                SlideTransition.slideLeft.exitTransition()
+                if (miuix) MiuixPageMotion.exit() else SlideTransition.slideLeft.exitTransition()
             },
             popEnterTransition = {
-                SlideTransition.slideRight.enterTransition()
+                if (miuix) MiuixPageMotion.popEnter() else SlideTransition.slideRight.enterTransition()
             },
             popExitTransition = {
-                SlideTransition.slideRight.exitTransition()
+                if (miuix) MiuixPageMotion.popExit() else SlideTransition.slideRight.exitTransition()
             }
         ) {
 
@@ -214,6 +219,10 @@ fun MainNavigation(
                 ParamsScreen(
                     onBackClick = navController::popBackStack
                 )
+            }
+
+            composable(route = Router.THEME_SETTINGS.name) {
+                ThemeSettingsScreen(onBack = { navController.popBackStack() })
             }
 
             composable(route = Router.ABOUT.name) {

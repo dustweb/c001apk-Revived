@@ -49,6 +49,7 @@ sealed class Router(
     data object PARAMS : Router(name = "PARAMS")
 
     data object ABOUT : Router(name = "ABOUT")
+    data object THEME_SETTINGS : Router(name = "THEME_SETTINGS")
 
     data object LICENSE : Router(name = "LICENSE")
 

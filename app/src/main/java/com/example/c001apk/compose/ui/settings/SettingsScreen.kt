@@ -52,7 +52,6 @@ import androidx.compose.material3.Scaffold
 import com.example.c001apk.compose.ui.component.design.Slider
 import androidx.compose.material3.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
-import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -94,6 +93,10 @@ import com.example.c001apk.compose.ui.component.settings.DropdownListItem
 import com.example.c001apk.compose.ui.component.settings.SelectionItem
 import com.example.c001apk.compose.ui.component.settings.StateDropdownListItem
 import com.example.c001apk.compose.ui.component.settings.SwitchListItem
+import com.example.c001apk.compose.ui.component.settings.PreferenceTopBar
+import com.example.c001apk.compose.ui.theme.isMiuix
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import com.example.c001apk.compose.util.CacheDataManager.clearAllCache
 import com.example.c001apk.compose.util.CacheDataManager.getTotalCacheSize
 import com.example.c001apk.compose.util.TokenDeviceUtils.encode
@@ -112,10 +115,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onParamsClick: () -> Unit,
     onAboutClick: () -> Unit,
+    onThemeSettingsClick: () -> Unit,
     onViewBlackList: (String) -> Unit,
 ) {
 
     val prefs = LocalUserPreferences.current
+    val miuix = isMiuix()
+    val headerBehavior = MiuixScrollBehavior()
     val rememberScrollState = rememberScrollState()
     val layoutDirection = LocalLayoutDirection.current
     val context = LocalContext.current
@@ -141,10 +147,12 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .then(if (miuix) Modifier.nestedScroll(headerBehavior.nestedScrollConnection) else Modifier),
         topBar = {
-            TopAppBar(
-                title = { Text(text = "设置") },
+            PreferenceTopBar(
+                title = "设置",
+                scrollBehavior = headerBehavior,
                 actions = {
                     Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
                         MoreMenuButton { dropdownMenuExpanded = true }
@@ -185,249 +193,259 @@ fun SettingsScreen(
                 )
                 .verticalScroll(rememberScrollState)
         ) {
-
-            BasicListItem(leadingText = stringResource(id = R.string.app_name))
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.Smartphone,
-                headlineText = "数字联盟ID",
-                supportingText = prefs.szlmId.ifEmpty { null }
-            ) {
-                showSZLMIDDialog = true
-            }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.DeveloperMode,
-                headlineText = "机型参数",
-            ) {
-                onParamsClick()
-            }
-
-            BasicListItem(leadingText = "主题")
-            BasicListItem(headlineText = "界面风格", supportingText = "切换后立即生效")
-            UiStyleSelector(prefs.uiStyle, viewModel::setUiStyle)
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.Image,
-                headlineText = stringResource(R.string.app_icon),
-                supportingText = stringResource(viewModel.launcherIcon.labelRes),
-                trailingContent = {
-                    LauncherIconImage(Modifier.size(40.dp), viewModel.launcherIcon)
-                },
-            ) {
-                showLauncherIconDialog = true
-            }
-            SwitchListItem(
-                value = prefs.materialYou,
-                leadingImageVector = Icons.Outlined.Palette,
-                headlineText = "系统主题色",
-            ) {
-                viewModel.setMaterialYou(it)
-            }
-            StateDropdownListItem(
-                isEnable = !prefs.materialYou,
-                leadingImageVector = Icons.Outlined.FormatColorFill,
-                headlineText = "主题颜色",
-                value = prefs.themeType,
-                selections = ThemeType.entries.toMutableList()
-                    .also { it.remove(ThemeType.UNRECOGNIZED) }.map {
-                        SelectionItem(stringResource(id = themeTypeLabelRes(it)), it)
-                    },
-                onValueChanged = { _, value ->
-                    if (value == ThemeType.Custom)
-                        showThemeTypeDialog = true
-                    viewModel.setThemeType(value)
-                }
-            )
-            StateDropdownListItem(
-                isEnable = !prefs.materialYou,
-                leadingImageVector = Icons.Rounded.Swatch,
-                headlineText = "调色版风格",
-                value = prefs.paletteStyle,
-                selections = PaletteStyle.entries.mapIndexed { index, label ->
-                    SelectionItem(stringResource(id = paletteStyleLabelRes(label)), index)
-                },
-                onValueChanged = { index, _ ->
-                    viewModel.setPaletteStyle(index)
-                }
-            )
-            DropdownListItem(
-                leadingImageVector = Icons.Outlined.DarkMode,
-                headlineText = "深色主题",
-                value = prefs.themeMode.name,
-                selections = (0..2).map {
-                    SelectionItem(
-                        themeList[it],
-                        ThemeMode.entries[it].name
-                    )
-                }/*ThemeMode.entries.map {
-                    SelectionItem(it.name, it.name)
-                }*/,
-                onValueChanged = { index, _ ->
-                    viewModel.setDarkTheme(ThemeMode.forNumber(index))
-                }
-            )
-            SwitchListItem(
-                value = prefs.pureBlack,
-                leadingImageVector = Icons.Outlined.InvertColors,
-                headlineText = "纯黑主题",
-            ) {
-                viewModel.setPureBlack(it)
-            }
-
-            BasicListItem(leadingText = "显示")
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.Block,
-                headlineText = "用户黑名单",
-            ) {
-                onViewBlackList(BlackListType.USER.name)
-            }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.Block,
-                headlineText = "话题黑名单",
-            ) {
-                onViewBlackList(BlackListType.TOPIC.name)
-            }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.TextFields,
-                headlineText = "字体大小",
-                supportingText = "${Formatter().format("%.2f", prefs.fontScale)}x"
-            ) {
-                showFontScaleDialog = true
-            }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.ImageAspectRatio,
-                headlineText = "内容大小",
-                supportingText = "${Formatter().format("%.2f", prefs.contentScale)}x"
-            ) {
-                showContentScaleDialog = true
-            }
-            DropdownListItem(
-                leadingImageVector = Icons.Outlined.AddCircleOutline,
-                headlineText = "关注分组",
-                value = prefs.followType.name,
-                selections = followList.mapIndexed { index, label ->
-                    SelectionItem(label, FollowType.entries[index].name)
-                },
-                onValueChanged = { index, _ ->
-                    viewModel.setFollowType(FollowType.forNumber(index))
-                }
-            )
-            DropdownListItem(
-                leadingImageVector = Icons.Outlined.Image,
-                headlineText = "图片画质",
-                value = prefs.imageQuality,
-                selections = imageQualityList.mapIndexed { index, label ->
-                    SelectionItem(label, index)
-                },
-                onValueChanged = { index, _ ->
-                    viewModel.setImageQuality(index)
-                }
-            )
-            /*BasicListItem(
-                leadingImageVector = Icons.Outlined.Image,
-                headlineText = "Image Quality",
-                supportingText = imageQualityList[userPreferences.imageQuality]
-            ) {
-                showImageQualityDialog = true
-            }*/
-            SwitchListItem(
-                value = prefs.imageFilter,
-                leadingImageVector = Icons.Outlined.PhotoLibrary,
-                headlineText = "压暗图片",
-            ) {
-                viewModel.setImageFilter(it)
-            }
-            SwitchListItem(
-                value = prefs.openInBrowser,
-                leadingImageVector = Icons.Outlined.TravelExplore,
-                headlineText = "使用外部浏览器打开链接",
-            ) {
-                viewModel.setOpenInBrowser(it)
-            }
-            SwitchListItem(
-                value = prefs.showSquare,
-                leadingImageVector = Icons.AutoMirrored.Outlined.Feed,
-                headlineText = "头条显示广场",
-            ) {
-                viewModel.setShowSquare(it)
-            }
-            SwitchListItem(
-                value = prefs.recordHistory,
-                leadingImageVector = Icons.Outlined.History,
-                headlineText = "记录浏览历史",
-            ) {
-                viewModel.setRecordHistory(it)
-            }
-            SwitchListItem(
-                value = prefs.showEmoji,
-                leadingImageVector = Icons.Outlined.EmojiEmotions,
-                headlineText = "显示表情",
-            ) {
-                viewModel.setShowEmoji(it)
-            }
-            SwitchListItem(
-                value = prefs.checkUpdate,
-                leadingImageVector = Icons.Outlined.SystemUpdate,
-                headlineText = "检查更新",
-            ) {
-                viewModel.setCheckUpdate(it)
-            }
-            /*SwitchListItem(
-                value = prefs.checkCount,
-                leadingImageVector = Icons.Outlined.Notifications,
-                headlineText = "检查通知",
-            ) {
-                viewModel.setCheckCount(it)
-            }*/
-
-            BasicListItem(leadingText = "其他")
-            SwitchListItem(
-                value = prefs.hapticFeedback,
-                leadingImageVector = Icons.Outlined.TouchApp,
-                headlineText = "触感反馈",
-            ) {
-                viewModel.setHapticFeedback(it)
-            }
-            SwitchListItem(
-                value = prefs.customHaptics,
-                leadingImageVector = Icons.Outlined.TouchApp,
-                headlineText = "自定义触感",
-                supportingText = "关闭时跟随系统触感设置",
-            ) {
-                viewModel.setCustomHaptics(it)
-            }
-            if (prefs.customHaptics) {
-                BasicListItem(
-                    leadingImageVector = Icons.Outlined.TouchApp,
-                    headlineText = "触感强度",
-                    supportingText = prefs.hapticStrength.label,
-                    onClick = showHapticStrengthDialogClick
+            if (miuix) {
+                MiuixSettingsContent(
+                    viewModel = viewModel, cacheSize = cacheSize,
+                    onThemeSettings = onThemeSettingsClick,
+                    onIcon = { showLauncherIconDialog = true },
+                    onDeviceId = { showSZLMIDDialog = true },
+                    onParams = onParamsClick, onAbout = onAboutClick, onBlacklist = onViewBlackList,
+                    onHapticStrength = showHapticStrengthDialogClick,
+                    onClearCache = { cacheSize = getTotalCacheSize(context); showCleanCacheDialog = true },
                 )
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    SwitchListItem(
-                        value = prefs.reverseHapticEffects,
+            } else {
+                BasicListItem(leadingText = stringResource(id = R.string.app_name))
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.Smartphone,
+                    headlineText = "数字联盟ID",
+                    supportingText = prefs.szlmId.ifEmpty { null }
+                ) {
+                    showSZLMIDDialog = true
+                }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.DeveloperMode,
+                    headlineText = "机型参数",
+                ) {
+                    onParamsClick()
+                }
+
+                BasicListItem(leadingText = "主题")
+                BasicListItem(headlineText = "界面风格", supportingText = "切换后立即生效")
+                UiStyleSelector(prefs.uiStyle, viewModel::setUiStyle)
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.Image,
+                    headlineText = stringResource(R.string.app_icon),
+                    supportingText = stringResource(viewModel.launcherIcon.labelRes),
+                    trailingContent = {
+                        LauncherIconImage(Modifier.size(40.dp), viewModel.launcherIcon)
+                    },
+                ) {
+                    showLauncherIconDialog = true
+                }
+                SwitchListItem(
+                    value = prefs.materialYou,
+                    leadingImageVector = Icons.Outlined.Palette,
+                    headlineText = "系统主题色",
+                ) {
+                    viewModel.setMaterialYou(it)
+                }
+                StateDropdownListItem(
+                    isEnable = !prefs.materialYou,
+                    leadingImageVector = Icons.Outlined.FormatColorFill,
+                    headlineText = "主题颜色",
+                    value = prefs.themeType,
+                    selections = ThemeType.entries.toMutableList()
+                        .also { it.remove(ThemeType.UNRECOGNIZED) }.map {
+                            SelectionItem(stringResource(id = themeTypeLabelRes(it)), it)
+                        },
+                    onValueChanged = { _, value ->
+                        if (value == ThemeType.Custom)
+                            showThemeTypeDialog = true
+                        viewModel.setThemeType(value)
+                    }
+                )
+                StateDropdownListItem(
+                    isEnable = !prefs.materialYou,
+                    leadingImageVector = Icons.Rounded.Swatch,
+                    headlineText = "调色版风格",
+                    value = prefs.paletteStyle,
+                    selections = PaletteStyle.entries.mapIndexed { index, label ->
+                        SelectionItem(stringResource(id = paletteStyleLabelRes(label)), index)
+                    },
+                    onValueChanged = { index, _ ->
+                        viewModel.setPaletteStyle(index)
+                    }
+                )
+                DropdownListItem(
+                    leadingImageVector = Icons.Outlined.DarkMode,
+                    headlineText = "深色主题",
+                    value = prefs.themeMode.name,
+                    selections = (0..2).map {
+                        SelectionItem(
+                            themeList[it],
+                            ThemeMode.entries[it].name
+                        )
+                    }/*ThemeMode.entries.map {
+                        SelectionItem(it.name, it.name)
+                    }*/,
+                    onValueChanged = { index, _ ->
+                        viewModel.setDarkTheme(ThemeMode.forNumber(index))
+                    }
+                )
+                SwitchListItem(
+                    value = prefs.pureBlack,
+                    leadingImageVector = Icons.Outlined.InvertColors,
+                    headlineText = "纯黑主题",
+                ) {
+                    viewModel.setPureBlack(it)
+                }
+
+                BasicListItem(leadingText = "显示")
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.Block,
+                    headlineText = "用户黑名单",
+                ) {
+                    onViewBlackList(BlackListType.USER.name)
+                }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.Block,
+                    headlineText = "话题黑名单",
+                ) {
+                    onViewBlackList(BlackListType.TOPIC.name)
+                }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.TextFields,
+                    headlineText = "字体大小",
+                    supportingText = "${Formatter().format("%.2f", prefs.fontScale)}x"
+                ) {
+                    showFontScaleDialog = true
+                }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.ImageAspectRatio,
+                    headlineText = "内容大小",
+                    supportingText = "${Formatter().format("%.2f", prefs.contentScale)}x"
+                ) {
+                    showContentScaleDialog = true
+                }
+                DropdownListItem(
+                    leadingImageVector = Icons.Outlined.AddCircleOutline,
+                    headlineText = "关注分组",
+                    value = prefs.followType.name,
+                    selections = followList.mapIndexed { index, label ->
+                        SelectionItem(label, FollowType.entries[index].name)
+                    },
+                    onValueChanged = { index, _ ->
+                        viewModel.setFollowType(FollowType.forNumber(index))
+                    }
+                )
+                DropdownListItem(
+                    leadingImageVector = Icons.Outlined.Image,
+                    headlineText = "图片画质",
+                    value = prefs.imageQuality,
+                    selections = imageQualityList.mapIndexed { index, label ->
+                        SelectionItem(label, index)
+                    },
+                    onValueChanged = { index, _ ->
+                        viewModel.setImageQuality(index)
+                    }
+                )
+                /*BasicListItem(
+                    leadingImageVector = Icons.Outlined.Image,
+                    headlineText = "Image Quality",
+                    supportingText = imageQualityList[userPreferences.imageQuality]
+                ) {
+                    showImageQualityDialog = true
+                }*/
+                SwitchListItem(
+                    value = prefs.imageFilter,
+                    leadingImageVector = Icons.Outlined.PhotoLibrary,
+                    headlineText = "压暗图片",
+                ) {
+                    viewModel.setImageFilter(it)
+                }
+                SwitchListItem(
+                    value = prefs.openInBrowser,
+                    leadingImageVector = Icons.Outlined.TravelExplore,
+                    headlineText = "使用外部浏览器打开链接",
+                ) {
+                    viewModel.setOpenInBrowser(it)
+                }
+                SwitchListItem(
+                    value = prefs.showSquare,
+                    leadingImageVector = Icons.AutoMirrored.Outlined.Feed,
+                    headlineText = "头条显示广场",
+                ) {
+                    viewModel.setShowSquare(it)
+                }
+                SwitchListItem(
+                    value = prefs.recordHistory,
+                    leadingImageVector = Icons.Outlined.History,
+                    headlineText = "记录浏览历史",
+                ) {
+                    viewModel.setRecordHistory(it)
+                }
+                SwitchListItem(
+                    value = prefs.showEmoji,
+                    leadingImageVector = Icons.Outlined.EmojiEmotions,
+                    headlineText = "显示表情",
+                ) {
+                    viewModel.setShowEmoji(it)
+                }
+                SwitchListItem(
+                    value = prefs.checkUpdate,
+                    leadingImageVector = Icons.Outlined.SystemUpdate,
+                    headlineText = "检查更新",
+                ) {
+                    viewModel.setCheckUpdate(it)
+                }
+                /*SwitchListItem(
+                    value = prefs.checkCount,
+                    leadingImageVector = Icons.Outlined.Notifications,
+                    headlineText = "检查通知",
+                ) {
+                    viewModel.setCheckCount(it)
+                }*/
+
+                BasicListItem(leadingText = "其他")
+                SwitchListItem(
+                    value = prefs.hapticFeedback,
+                    leadingImageVector = Icons.Outlined.TouchApp,
+                    headlineText = "触感反馈",
+                ) {
+                    viewModel.setHapticFeedback(it)
+                }
+                SwitchListItem(
+                    value = prefs.customHaptics,
+                    leadingImageVector = Icons.Outlined.TouchApp,
+                    headlineText = "自定义触感",
+                    supportingText = "关闭时跟随系统触感设置",
+                ) {
+                    viewModel.setCustomHaptics(it)
+                }
+                if (prefs.customHaptics) {
+                    BasicListItem(
                         leadingImageVector = Icons.Outlined.TouchApp,
-                        headlineText = "触感兼容模式",
-                        supportingText = "轻重反馈与预期相反时开启",
-                    ) {
-                        viewModel.setReverseHapticEffects(it)
+                        headlineText = "触感强度",
+                        supportingText = prefs.hapticStrength.label,
+                        onClick = showHapticStrengthDialogClick
+                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        SwitchListItem(
+                            value = prefs.reverseHapticEffects,
+                            leadingImageVector = Icons.Outlined.TouchApp,
+                            headlineText = "触感兼容模式",
+                            supportingText = "轻重反馈与预期相反时开启",
+                        ) {
+                            viewModel.setReverseHapticEffects(it)
+                        }
                     }
                 }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.AllInclusive,
+                    headlineText = "关于",
+                    supportingText = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
+                ) {
+                    onAboutClick()
+                }
+                BasicListItem(
+                    leadingImageVector = Icons.Outlined.CleaningServices,
+                    headlineText = "清理缓存",
+                    supportingText = cacheSize
+                ) {
+                    cacheSize = getTotalCacheSize(context)
+                    showCleanCacheDialog = true
+                }
             }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.AllInclusive,
-                headlineText = "关于",
-                supportingText = "${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})"
-            ) {
-                onAboutClick()
-            }
-            BasicListItem(
-                leadingImageVector = Icons.Outlined.CleaningServices,
-                headlineText = "清理缓存",
-                supportingText = cacheSize
-            ) {
-                cacheSize = getTotalCacheSize(context)
-                showCleanCacheDialog = true
-            }
-
         }
 
         when {
@@ -846,7 +864,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
     }
 }
 
-private fun themeTypeLabelRes(themeType: ThemeType): Int = when (themeType) {
+internal fun themeTypeLabelRes(themeType: ThemeType): Int = when (themeType) {
     ThemeType.Default -> R.string.theme_type_default
     ThemeType.Red -> R.string.theme_type_red
     ThemeType.Pink -> R.string.theme_type_pink
@@ -870,7 +888,7 @@ private fun themeTypeLabelRes(themeType: ThemeType): Int = when (themeType) {
     ThemeType.UNRECOGNIZED -> R.string.theme_type_default
 }
 
-private fun paletteStyleLabelRes(style: PaletteStyle): Int = when (style) {
+internal fun paletteStyleLabelRes(style: PaletteStyle): Int = when (style) {
     PaletteStyle.TonalSpot -> R.string.palette_style_tonal_spot
     PaletteStyle.Neutral -> R.string.palette_style_neutral
     PaletteStyle.Vibrant -> R.string.palette_style_vibrant

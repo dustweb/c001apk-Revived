@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -45,17 +46,17 @@ class LauncherIconSettingsTest {
 
                 compose.onNodeWithText("应用图标").performClick()
                 option("原版").performClick()
-                compose.onNodeWithText("应用").performClick()
+                compose.onNode(hasText("应用") and hasClickAction()).performClick()
                 compose.waitUntil(5_000) {
                     manager.current == LauncherIcon.CLASSIC &&
-                        compose.onAllNodesWithText("应用").fetchSemanticsNodes().isEmpty()
+                        compose.onAllNodes(hasText("应用") and hasClickAction()).fetchSemanticsNodes().isEmpty()
                 }
                 compose.waitForIdle()
 
                 compose.onNodeWithText("应用图标").performClick()
                 option("原版").assertIsSelected()
                 option("Revived").performClick()
-                compose.onNodeWithText("应用").performClick()
+                compose.onNode(hasText("应用") and hasClickAction()).performClick()
                 compose.waitUntil(5_000) { manager.current == LauncherIcon.REVIVED }
             }
         } finally {

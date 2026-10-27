@@ -23,6 +23,8 @@ fun isMiuix() = LocalUiStyle.current == UiStyle.MIUIX
 
 fun ColorScheme.miuixColors(dark: Boolean, pureBlack: Boolean): Colors {
     val base = if (dark) miuixDarkColors() else miuixLightColors()
+    val pageColor = if (dark && pureBlack) Color.Black else if (dark) background else surfaceContainerLow
+    val cardColor = if (dark && pureBlack) Color.Black else if (dark) surfaceContainerLow else surfaceContainerLowest
     return base.copy(
         primary = primary,
         onPrimary = onPrimary,
@@ -37,7 +39,32 @@ fun ColorScheme.miuixColors(dark: Boolean, pureBlack: Boolean): Colors {
         disabledPrimarySlider = primary.copy(alpha = 0.35f),
         tertiaryContainer = primaryContainer,
         onTertiaryContainer = onPrimaryContainer,
-        background = if (dark && pureBlack) Color.Black else base.background,
+        secondaryVariant = surfaceContainerHigh,
+        onSecondaryVariant = onSurface,
+        secondaryContainer = surfaceContainerHigh,
+        onSecondaryContainer = onSurfaceVariant,
+        secondaryContainerVariant = surfaceContainerHighest,
+        onSecondaryContainerVariant = onSurfaceVariant,
+        // Miuix pages use surface; cards and popups use surfaceContainer.
+        surface = pageColor,
+        background = cardColor,
+        onSurface = onSurface,
+        onBackground = onSurface,
+        onBackgroundVariant = primary,
+        surfaceVariant = surfaceContainerHigh,
+        onSurfaceSecondary = onSurfaceVariant,
+        onSurfaceVariantSummary = onSurfaceVariant,
+        onSurfaceVariantActions = onSurfaceVariant,
+        disabledOnSurface = onSurface.copy(alpha = 0.38f),
+        surfaceContainer = cardColor,
+        onSurfaceContainer = onSurface,
+        onSurfaceContainerVariant = onSurfaceVariant,
+        surfaceContainerHigh = surfaceContainerHigh,
+        onSurfaceContainerHigh = onSurface,
+        surfaceContainerHighest = surfaceContainerHighest,
+        onSurfaceContainerHighest = onSurface,
+        outline = outline,
+        dividerLine = outlineVariant,
     )
 }
 

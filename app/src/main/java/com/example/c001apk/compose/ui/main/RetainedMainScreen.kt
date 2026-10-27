@@ -19,6 +19,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.LocalOwnersProvider
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.c001apk.compose.ui.component.TransitionDurations
+import com.example.c001apk.compose.ui.component.MiuixPageMotion
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 @Composable
 internal fun RetainedMainScreen(
@@ -30,9 +32,10 @@ internal fun RetainedMainScreen(
         runCatching { navController.getBackStackEntry(Router.MAIN.name) }.getOrNull()
     } ?: return
     val isActive = currentEntry?.destination?.route == Router.MAIN.name
+    val miuix = isMiuix()
     val visibility = animateFloatAsState(
         targetValue = if (isActive) 1f else 0f,
-        animationSpec = TransitionDurations.Normal.asTween(),
+        animationSpec = if (miuix) MiuixPageMotion.progressSpec() else TransitionDurations.Normal.asTween(),
         label = "main-screen-visibility",
     )
     val stateHolder = rememberSaveableStateHolder()
@@ -56,8 +59,8 @@ internal fun RetainedMainScreen(
                     }
                 }
                 .graphicsLayer {
-                    alpha = visibility.value
-                    translationX = -(1f - visibility.value) * size.width * 0.15f
+                    alpha = if (miuix) 0.88f + visibility.value * 0.12f else visibility.value
+                    translationX = -(1f - visibility.value) * size.width * (if (miuix) 0.25f else 0.15f)
                 }
                 .then(if (isActive) Modifier else Modifier.clearAndSetSemantics {}),
         ) {
