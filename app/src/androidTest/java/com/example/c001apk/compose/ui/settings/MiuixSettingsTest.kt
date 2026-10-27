@@ -64,6 +64,48 @@ class MiuixSettingsTest {
         scenario.onActivity { assertSame(activity, it) }
     }
 
+    @Test
+    fun aboutMenuUsesAnAnchoredPopupAndNativeDialog() = withSettings { _, _, _ ->
+        val trigger = compose.onNodeWithTag("settings-more")
+        val anchor = trigger.fetchSemanticsNode().boundsInRoot
+        trigger.performClick()
+        val feedback = compose.onNodeWithText("反馈").fetchSemanticsNode().boundsInRoot
+        assertTrue("The settings menu must align with its button", feedback.right >= anchor.left)
+        capture("settings-menu")
+        pressBack()
+        compose.onNodeWithText("反馈").assertDoesNotExist()
+        trigger.assertExists().performClick()
+        compose.onAllNodesWithText("关于").filter(SemanticsMatcher("visible") {
+            it.layoutInfo.isPlaced && it.boundsInRoot.height > 0
+        }).onLast().performClick()
+        compose.onNodeWithTag("miuix-about-dialog").assertExists()
+        compose.onNodeWithText("本项目地址").assertExists()
+        compose.onNodeWithTag("miuix-about-dialog").captureToImage().asAndroidBitmap().let { bitmap ->
+            File(context.cacheDir, "lsposed-about-dialog.png").outputStream().use {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            }
+        }
+        pressBack()
+        compose.onNodeWithTag("miuix-about-dialog").assertDoesNotExist()
+        compose.onNodeWithTag("settings-more").assertExists()
+    }
+
+    @Test
+    fun aboutPageGroupsLinksAndKeepsNavigationDuringStyleSwitch() = withSettings { repository, scenario, activity ->
+        compose.onNodeWithText("关于").performScrollTo().performClick()
+        compose.onNodeWithTag("miuix-about-page").assertExists()
+        compose.onNodeWithTag("about-links")
+            .assert(hasAnyDescendant(hasText("本项目地址")))
+            .assert(hasAnyDescendant(hasText("原项目地址")))
+            .assert(hasAnyDescendant(hasText("开源许可证")))
+        capture("about-page")
+        runBlocking { repository.setUiStyle(UiStyle.MD3) }
+        compose.onNodeWithText("开源许可证").assertExists()
+        scenario.onActivity { assertSame(activity, it) }
+        pressBack()
+        compose.onNodeWithTag("ui-style-MD3").performScrollTo().assertIsSelected()
+    }
+
     private fun withSettings(block: (UserPreferencesRepository, ActivityScenario<MainActivity>, MainActivity) -> Unit) {
         val intent = Intent(context, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)

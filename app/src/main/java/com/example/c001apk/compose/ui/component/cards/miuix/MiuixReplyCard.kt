@@ -13,9 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.ui.component.design.MiuixActionMenuButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,7 +44,6 @@ import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -56,7 +55,6 @@ import top.yukonga.miuix.kmp.icon.extended.Report
 import top.yukonga.miuix.kmp.icon.extended.Reply
 import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
-import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -78,7 +76,6 @@ fun MiuixReplyCard(
     onReply: ((String, String, String, String?, String?) -> Unit)?,
     replyUserAvatars: Map<String, String>,
 ) {
-    var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val likeNotice = data.likeUserInfo != null
     val feedReply = data.fetchType == "feed_reply"
@@ -123,23 +120,21 @@ fun MiuixReplyCard(
                         fontSize = 11.sp, color = MiuixTheme.colorScheme.primary)
                 }
             }
-            if (!likeNotice) Box {
-                IconButton(onClick = { expanded = true }, modifier = Modifier.testTag("comment-menu-${data.id}")) {
-                    Icon(MiuixIcons.More, "评论操作", Modifier.size(22.dp),
-                        tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-                }
-                ContentMenu(expanded, { expanded = false }, buildList {
-                    add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(data.message) })
-                    add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
-                    onShowTotalReply?.let {
-                        add(ContentAction("显示回复", MiuixIcons.Reply) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
-                    }
-                    if (CookieUtil.isLogin) onReport?.let {
-                        add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.REPLY) })
-                    }
-                    if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
-                        add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
-                    }
+            if (!likeNotice) {
+                MiuixActionMenuButton(
+                    modifier = Modifier.testTag("comment-menu-${data.id}"),
+                    contentDescription = "评论操作", actions = buildList {
+                        add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(data.message) })
+                        add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
+                        onShowTotalReply?.let {
+                            add(ContentAction("显示回复", MiuixIcons.Reply) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
+                        }
+                        if (CookieUtil.isLogin) onReport?.let {
+                            add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.REPLY) })
+                        }
+                        if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
+                            add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
+                        }
                 })
             }
         }

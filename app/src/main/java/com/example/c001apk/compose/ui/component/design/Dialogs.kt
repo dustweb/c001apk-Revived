@@ -2,10 +2,12 @@ package com.example.c001apk.compose.ui.component.design
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.LocalContentColor
@@ -18,7 +20,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.dialog
 import androidx.compose.ui.semantics.semantics
@@ -29,6 +30,8 @@ import com.example.c001apk.compose.ui.theme.isMiuix
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.window.WindowDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 
 @Composable
 fun AlertDialog(
@@ -78,12 +81,13 @@ fun DropdownMenu(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        OverlayListPopup(show = expanded, popupModifier = modifier, onDismissRequest = onDismissRequest) {
+        OverlayListPopup(show = expanded, popupModifier = modifier, onDismissRequest = onDismissRequest,
+            alignment = PopupPositionProvider.Align.End) {
             CompositionLocalProvider(
                 LocalContentColor provides MiuixTheme.colorScheme.onSurface,
                 LocalTextStyle provides MiuixTheme.textStyles.main,
             ) {
-                Column(content = content)
+                ListPopupColumn { Column(content = content) }
             }
         }
     } else {
@@ -102,13 +106,19 @@ fun DropdownMenuItem(
     enabled: Boolean = true,
 ) {
     if (isMiuix()) {
-        top.yukonga.miuix.kmp.basic.Surface(onClick = onClick, enabled = enabled, modifier = modifier,
-            color = Color.Transparent) {
-            Row(modifier = Modifier.alpha(if (enabled) 1f else 0.38f).padding(horizontal = 20.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                leadingIcon?.invoke()
-                text()
-                trailingIcon?.invoke()
+        val foreground = if (enabled) MiuixTheme.colorScheme.onSurface else MiuixTheme.colorScheme.disabledOnSurface
+        CompositionLocalProvider(LocalContentColor provides foreground,
+            top.yukonga.miuix.kmp.theme.LocalContentColor provides foreground) {
+            // Slot-based rows must support ListPopupColumn's intrinsic measurement.
+            top.yukonga.miuix.kmp.basic.Surface(onClick = onClick, enabled = enabled,
+                modifier = modifier, color = Color.Transparent, contentColor = foreground) {
+                Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 20.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    leadingIcon?.invoke()
+                    Box(Modifier.weight(1f)) { text() }
+                    trailingIcon?.invoke()
+                }
             }
         }
     } else {

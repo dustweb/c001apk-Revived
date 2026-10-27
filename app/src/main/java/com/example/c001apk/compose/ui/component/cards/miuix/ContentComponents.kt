@@ -26,16 +26,14 @@ import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.CoilLoader
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import androidx.compose.foundation.shape.RoundedCornerShape
-import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 
-internal data class ContentAction(val title: String, val icon: ImageVector, val onClick: () -> Unit)
+internal typealias ContentAction = com.example.c001apk.compose.ui.component.design.MenuAction
 
 @Composable
 internal fun ContentAvatar(url: String?, size: Dp, tag: String, onClick: () -> Unit) {
@@ -49,17 +47,7 @@ internal fun ContentAvatar(url: String?, size: Dp, tag: String, onClick: () -> U
 
 @Composable
 internal fun ContentMenu(expanded: Boolean, onDismiss: () -> Unit, actions: List<ContentAction>) {
-    OverlayListPopup(show = expanded, onDismissRequest = onDismiss) {
-        androidx.compose.foundation.layout.Column {
-            actions.forEach { action ->
-                BasicComponent(
-                    title = action.title,
-                    startAction = { Icon(action.icon, null, Modifier.padding(end = 12.dp).size(22.dp)) },
-                    onClick = rememberHapticClick { onDismiss(); action.onClick() },
-                )
-            }
-        }
-    }
+    com.example.c001apk.compose.ui.component.design.MiuixActionMenu(expanded, onDismiss, actions)
 }
 
 @Composable

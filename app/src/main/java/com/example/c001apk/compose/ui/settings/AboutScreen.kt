@@ -46,6 +46,11 @@ fun AboutScreen(
 
     val context = LocalContext.current
     val rememberScrollState = rememberScrollState()
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        MiuixAboutScreen(onBackClick, onLicenseClick, rememberScrollState)
+        return
+    }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

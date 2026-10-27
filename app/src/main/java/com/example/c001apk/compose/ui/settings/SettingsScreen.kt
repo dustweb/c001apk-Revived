@@ -61,6 +61,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
@@ -154,7 +155,19 @@ fun SettingsScreen(
                 title = "设置",
                 scrollBehavior = headerBehavior,
                 actions = {
-                    Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
+                    if (miuix) {
+                        com.example.c001apk.compose.ui.component.design.MiuixActionMenuButton(
+                            modifier = Modifier.testTag("settings-more"),
+                            actions = listOf(
+                                com.example.c001apk.compose.ui.component.design.MenuAction(stringResource(R.string.menu_feedback)) {
+                                    context.openInBrowser("$URL_SOURCE_CODE_FORK/issues")
+                                },
+                                com.example.c001apk.compose.ui.component.design.MenuAction(stringResource(R.string.menu_about)) {
+                                    showAboutDialog = true
+                                },
+                            ),
+                        )
+                    } else Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
                         MoreMenuButton { dropdownMenuExpanded = true }
 
                         DropdownMenu(
@@ -815,6 +828,10 @@ fun SliderDialog(
 
 @Composable
 fun AboutDialog(onDismiss: () -> Unit) {
+    if (isMiuix()) {
+        MiuixAboutDialog(onDismiss)
+        return
+    }
     val context = LocalContext.current
     Dialog(onDismissRequest = { onDismiss() }) {
         ElevatedCard(

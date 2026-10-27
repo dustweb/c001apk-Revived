@@ -13,9 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.ui.component.design.MiuixActionMenuButton
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +39,6 @@ import com.example.c001apk.compose.util.makeToast
 import androidx.compose.foundation.shape.RoundedCornerShape
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.icon.MiuixIcons
@@ -52,7 +49,6 @@ import top.yukonga.miuix.kmp.icon.extended.Report
 import top.yukonga.miuix.kmp.icon.extended.Reply
 import top.yukonga.miuix.kmp.icon.extended.Favorites
 import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
-import top.yukonga.miuix.kmp.icon.extended.More
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -114,7 +110,6 @@ fun MiuixFeedHeader(
     onDelete: ((String, LikeType, String?) -> Unit)? = null,
     onBlockUser: ((String) -> Unit)? = null,
 ) {
-    var expanded by remember { mutableStateOf(false) }
     val context = LocalContext.current
     Row(modifier.fillMaxWidth().padding(vertical = if (isFeedContent && !isFeedTop) 12.dp else 0.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -140,12 +135,10 @@ fun MiuixFeedHeader(
                     color = MiuixTheme.colorScheme.primary, fontSize = 11.sp)
             }
         }
-        if (!isFeedContent) Box {
-            IconButton(onClick = { expanded = true }, modifier = Modifier.testTag("feed-menu-${data.id}")) {
-                Icon(MiuixIcons.More, "动态操作", Modifier.size(22.dp),
-                    tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-            }
-            ContentMenu(expanded, { expanded = false }, buildList {
+        if (!isFeedContent) {
+            MiuixActionMenuButton(
+                modifier = Modifier.testTag("feed-menu-${data.id}"),
+                contentDescription = "动态操作", actions = buildList {
                 add(ContentAction("复制链接", MiuixIcons.Copy) { context.copyText(getShareText(ShareType.FEED, data.id.orEmpty())) })
                 onBlockUser?.let { add(ContentAction("拉黑", MiuixIcons.Blocklist) { it(data.uid.orEmpty()) }) }
                 if (CookieUtil.isLogin) onReport?.let { add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.FEED) }) }
