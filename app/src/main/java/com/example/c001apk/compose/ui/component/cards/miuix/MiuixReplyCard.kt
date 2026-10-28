@@ -123,16 +123,16 @@ fun MiuixReplyCard(
                 MiuixActionMenuButton(
                     modifier = Modifier.testTag("comment-menu-${data.id}"),
                     contentDescription = "评论操作", actions = buildList {
-                        add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(data.message) })
-                        add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
+                        add(ContentAction("复制", MiuixIcons.Medium.Copy) { onCopyText(data.message) })
+                        add(ContentAction("拉黑", MiuixIcons.Medium.Blocklist) { onBlockUser(data.uid.orEmpty(), null) })
                         onShowTotalReply?.let {
-                            add(ContentAction("显示回复", MiuixIcons.Reply) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
+                            add(ContentAction("显示回复", MiuixIcons.Medium.Reply) { it(data.id.orEmpty(), data.uid.orEmpty(), null) })
                         }
                         if (CookieUtil.isLogin) onReport?.let {
-                            add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.REPLY) })
+                            add(ContentAction("举报", MiuixIcons.Medium.Report) { it(data.id.orEmpty(), ReportType.REPLY) })
                         }
                         if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
-                            add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
+                            add(ContentAction("删除", MiuixIcons.Medium.Delete) { it(data.id.orEmpty(), LikeType.REPLY, null) })
                         }
                 })
             }
@@ -154,7 +154,7 @@ fun MiuixReplyCard(
                 pic = data.pic, picArr = data.picArr, feedType = data.feedType)
             data.feed?.let { ReplySource(it.username, it.message, it.pic, it.url, onOpenLink) }
             Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
-                ContentActionButton(MiuixIcons.Reply, "回复", data.replynum.orEmpty(), "comment-reply-${data.id}", onClick = reply)
+                ContentActionButton(MiuixIcons.Medium.Reply, "回复", data.replynum.orEmpty(), "comment-reply-${data.id}", onClick = reply)
                 ContentActionButton(if (data.userAction?.like == 1) AppGlyphs.LikeFilled else AppGlyphs.Like,
                     "点赞", data.likenum.orEmpty(), "comment-like-${data.id}",
                     active = data.userAction?.like == 1) {
@@ -251,14 +251,14 @@ fun MiuixReplyRows(
                     }
                 }
                 ContentMenu(menuIndex == index, { menuIndex = -1 }, buildList {
-                    add(ContentAction("复制", MiuixIcons.Copy) { onCopyText(reply.message) })
-                    add(ContentAction("拉黑", MiuixIcons.Blocklist) { onBlockUser(reply.uid.orEmpty()) })
-                    add(ContentAction("显示回复", MiuixIcons.Reply) { onShowTotalReply(reply.id.orEmpty()) })
+                    add(ContentAction("复制", MiuixIcons.Medium.Copy) { onCopyText(reply.message) })
+                    add(ContentAction("拉黑", MiuixIcons.Medium.Blocklist) { onBlockUser(reply.uid.orEmpty()) })
+                    add(ContentAction("显示回复", MiuixIcons.Medium.Reply) { onShowTotalReply(reply.id.orEmpty()) })
                     if (CookieUtil.isLogin) onReport?.let {
-                        add(ContentAction("举报", MiuixIcons.Report) { it(reply.id.orEmpty(), ReportType.REPLY) })
+                        add(ContentAction("举报", MiuixIcons.Medium.Report) { it(reply.id.orEmpty(), ReportType.REPLY) })
                     }
                     if (!reply.uid.isNullOrEmpty() && reply.uid == CookieUtil.uid) onDelete?.let {
-                        add(ContentAction("删除", MiuixIcons.Delete) { it(reply.id.orEmpty(), LikeType.REPLY) })
+                        add(ContentAction("删除", MiuixIcons.Medium.Delete) { it(reply.id.orEmpty(), LikeType.REPLY) })
                     }
                 })
             }

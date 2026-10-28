@@ -40,7 +40,7 @@ internal fun ContentAvatar(url: String?, size: Dp, tag: String, onClick: () -> U
     Surface(modifier = Modifier.size(size).clip(CircleShape).testTag(tag).clickable(onClick = onClick),
         shape = CircleShape, color = MiuixTheme.colorScheme.secondaryContainer) {
         if (!url.isNullOrBlank()) CoilLoader(url = url, modifier = Modifier.fillMaxSize())
-        else Icon(MiuixIcons.Contacts, null, Modifier.padding(7.dp),
+        else Icon(MiuixIcons.Medium.Contacts, null, Modifier.padding(7.dp),
             tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
     }
 }

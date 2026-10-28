@@ -536,7 +536,7 @@ fun ChatBottom(
                                 onPickOtherImage()
                             }) {
                         if (com.example.c001apk.compose.ui.theme.isMiuix()) Icon(
-                            top.yukonga.miuix.kmp.icon.MiuixIcons.File,
+                            top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.File,
                             contentDescription = "选择文件中的图片",
                         ) else Image(
                             painter = androidx.compose.ui.res.painterResource(
@@ -655,7 +655,7 @@ fun ChatBottom(
             HorizontalDivider()
             if (com.example.c001apk.compose.ui.theme.isMiuix()) {
                 val scope = rememberCoroutineScope()
-                top.yukonga.miuix.kmp.basic.TabRow(
+                com.example.c001apk.compose.ui.component.design.FilledTabs(
                     tabs = listOf("最近", "默认", "酷币"), selectedTabIndex = pagerState.currentPage,
                     onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.fillMaxWidth().padding(8.dp),

@@ -46,7 +46,7 @@ fun FeedReplySortCard(
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
             }
             val haptic = rememberHapticClick {}
-            top.yukonga.miuix.kmp.basic.TabRow(
+            com.example.c001apk.compose.ui.component.design.FilledTabs(
                 tabs = listOf("默认", "最新", "热门", "楼主"),
                 selectedTabIndex = selected.coerceIn(0, 3), modifier = Modifier.fillMaxWidth(),
                 onTabSelected = { haptic(); updateSortReply(it) },

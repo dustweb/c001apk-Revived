@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -21,6 +20,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.dialog
 import androidx.compose.ui.semantics.semantics
@@ -51,18 +52,17 @@ fun AlertDialog(
             onDismissRequest = { visible = false }, onDismissFinished = onDismissRequest) {
             CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onSurface) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    icon?.invoke()
+                    icon?.let { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { it() } }
                     title?.let {
-                        CompositionLocalProvider(LocalTextStyle provides MiuixTheme.textStyles.title4) { it() }
+                        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            CompositionLocalProvider(LocalTextStyle provides MiuixTheme.textStyles.title4.copy(textAlign = TextAlign.Center, fontWeight = FontWeight.Medium)) { it() }
+                        }
                     }
                     if (text != null) Box(Modifier.weight(1f, fill = false)) { text() }
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
-                    ) {
-                        dismissButton?.invoke()
-                        CompositionLocalProvider(LocalPrimaryDialogAction provides true) { confirmButton() }
-                    }
+                    val actions = mutableListOf<@Composable () -> Unit>()
+                    dismissButton?.let { actions.add(it) }
+                    actions.add { CompositionLocalProvider(LocalPrimaryDialogAction provides true) { confirmButton() } }
+                    DialogActions(actions)
                 }
             }
         }

@@ -13,49 +13,49 @@ import top.yukonga.miuix.kmp.icon.extended.*
 /** Resolves shared action semantics to the active design system's actual glyphs. */
 internal fun miuixIcon(vector: ImageVector): ImageVector {
     val name = vector.name
-    if (name == "Swatch") return MiuixIcons.Theme
+    if (name == "Swatch") return MiuixIcons.Medium.Theme
     if (!name.startsWith("Filled.") && !name.startsWith("Outlined.") &&
         !name.startsWith("Rounded.") && !name.startsWith("AutoMirrored.")) return vector
     return when (name.substringAfterLast('.')) {
-        "ArrowBack" -> MiuixIcons.Back
-        "ArrowForwardIos", "ArrowRight", "KeyboardArrowRight", "ChevronRight" -> MiuixIcons.ChevronForward
-        "Search" -> MiuixIcons.Search
-        "Close", "Clear", "Cancel" -> MiuixIcons.Close
-        "Check" -> MiuixIcons.Ok
-        "Add" -> MiuixIcons.Add
-        "AddCircleOutline" -> MiuixIcons.AddCircle
-        "MoreVert" -> MiuixIcons.More
-        "ExpandMore" -> MiuixIcons.ExpandMore
-        "DragHandle" -> MiuixIcons.Sort
-        "Home" -> if (name.startsWith("Filled.")) MiuixIcons.Demibold.Home else MiuixIcons.Home
-        "Settings" -> if (name.startsWith("Filled.")) MiuixIcons.Demibold.Settings else MiuixIcons.Settings
-        "Message", "ChatBubbleOutline" -> MiuixIcons.Messages
-        "Reply" -> MiuixIcons.Reply
-        "Send" -> MiuixIcons.Send
-        "Backspace" -> MiuixIcons.Clear
-        "Feed" -> MiuixIcons.Notes
-        "Download" -> MiuixIcons.Download
-        "Upload" -> MiuixIcons.UploadCloud
-        "Image", "AddPhotoAlternate", "ImageAspectRatio" -> MiuixIcons.Image
-        "PhotoLibrary" -> MiuixIcons.Photos
-        "Mail" -> MiuixIcons.Email
-        "SupervisorAccount", "PersonAdd" -> MiuixIcons.Contacts
-        "History", "Schedule" -> MiuixIcons.Recent
-        "Update", "SystemUpdate" -> MiuixIcons.Update
-        "Link" -> MiuixIcons.Link
-        "Share" -> MiuixIcons.Share
-        "Block" -> MiuixIcons.Blocklist
-        "Info", "ErrorOutline" -> MiuixIcons.Info
-        "HelpOutline" -> MiuixIcons.Help
-        "Source" -> MiuixIcons.Folder
-        "Archive" -> MiuixIcons.Backup
-        "ClearAll", "CleaningServices" -> MiuixIcons.Clear
-        "Palette", "Swatch", "FormatColorFill", "InvertColors" -> MiuixIcons.Theme
-        "Tune" -> MiuixIcons.Tune
-        "Visibility" -> MiuixIcons.Show
-        "VisibilityOff" -> MiuixIcons.Hide
-        "MyLocation" -> MiuixIcons.Location
-        "FavoriteBorder" -> MiuixIcons.Favorites
+        "ArrowBack" -> MiuixIcons.Medium.Back
+        "ArrowForwardIos", "ArrowRight", "KeyboardArrowRight", "ChevronRight" -> MiuixIcons.Medium.ChevronForward
+        "Search" -> MiuixIcons.Medium.Search
+        "Close", "Clear", "Cancel" -> MiuixIcons.Medium.Close
+        "Check" -> MiuixIcons.Medium.Ok
+        "Add" -> MiuixIcons.Medium.Add
+        "AddCircleOutline" -> MiuixIcons.Medium.AddCircle
+        "MoreVert" -> MiuixIcons.Medium.More
+        "ExpandMore" -> MiuixIcons.Medium.ExpandMore
+        "DragHandle" -> MiuixIcons.Medium.Sort
+        "Home" -> if (name.startsWith("Filled.")) MiuixIcons.Demibold.Home else MiuixIcons.Medium.Home
+        "Settings" -> if (name.startsWith("Filled.")) MiuixIcons.Demibold.Settings else MiuixIcons.Medium.Settings
+        "Message", "ChatBubbleOutline" -> if (name.contains("Outlined")) MiuixIcons.Medium.Reply else MiuixIcons.Medium.Messages
+        "Reply" -> MiuixIcons.Medium.Reply
+        "Send" -> MiuixIcons.Medium.Send
+        "Backspace" -> MiuixIcons.Medium.Clear
+        "Feed" -> MiuixIcons.Medium.Notes
+        "Download" -> MiuixIcons.Medium.Download
+        "Upload" -> MiuixIcons.Medium.UploadCloud
+        "Image", "AddPhotoAlternate", "ImageAspectRatio" -> MiuixIcons.Medium.Image
+        "PhotoLibrary" -> MiuixIcons.Medium.Photos
+        "Mail" -> MiuixIcons.Medium.Email
+        "SupervisorAccount", "PersonAdd" -> MiuixIcons.Medium.Contacts
+        "History", "Schedule" -> MiuixIcons.Medium.Recent
+        "Update", "SystemUpdate" -> MiuixIcons.Medium.Update
+        "Link" -> MiuixIcons.Medium.Link
+        "Share" -> MiuixIcons.Medium.Share
+        "Block" -> MiuixIcons.Medium.Blocklist
+        "Info", "ErrorOutline" -> MiuixIcons.Medium.Info
+        "HelpOutline" -> MiuixIcons.Medium.Help
+        "Source" -> MiuixIcons.Medium.Folder
+        "Archive" -> MiuixIcons.Medium.Backup
+        "ClearAll", "CleaningServices" -> MiuixIcons.Medium.Clear
+        "Palette", "Swatch", "FormatColorFill", "InvertColors" -> MiuixIcons.Medium.Theme
+        "Tune" -> MiuixIcons.Medium.Tune
+        "Visibility" -> MiuixIcons.Medium.Show
+        "VisibilityOff" -> MiuixIcons.Medium.Hide
+        "MyLocation" -> MiuixIcons.Medium.Location
+        "FavoriteBorder" -> MiuixIcons.Medium.Favorites
         "ThumbUp", "ThumbUpOffAlt" -> AppGlyphs.Like
         "ThumbUpAlt" -> AppGlyphs.LikeFilled
         "EmojiEmotions" -> AppGlyphs.Emoji
@@ -83,7 +83,7 @@ object AppGlyphs {
         ImageVector.Builder("App.$name", 24.dp, 24.dp, 24f, 24f).addPath(
             pathData = PathParser().parsePathString(path).toNodes(),
             fill = if (filled) SolidColor(Color.Black) else null,
-            stroke = SolidColor(Color.Black), strokeLineWidth = 1.6f,
+            stroke = SolidColor(Color.Black), strokeLineWidth = 2f,
             strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round,
         ).build()
 

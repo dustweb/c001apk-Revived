@@ -53,6 +53,9 @@ import com.example.c001apk.compose.ui.component.design.Slider
 import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -684,8 +687,12 @@ fun ListItemDialogItem(
         androidx.compose.runtime.CompositionLocalProvider(
             androidx.compose.ui.platform.LocalHapticFeedback provides com.example.c001apk.compose.ui.component.design.NoNativeHaptics
         ) {
-            top.yukonga.miuix.kmp.preference.RadioButtonPreference(title = title, selected = selected,
-                onClick = hapticClick)
+            top.yukonga.miuix.kmp.basic.BasicComponent(
+                title = title,
+                modifier = Modifier.semantics { this.selected = selected; role = androidx.compose.ui.semantics.Role.RadioButton },
+                onClick = hapticClick,
+                endActions = { com.example.c001apk.compose.ui.component.design.ChoiceIndicator(selected) },
+            )
         }
         return
     }

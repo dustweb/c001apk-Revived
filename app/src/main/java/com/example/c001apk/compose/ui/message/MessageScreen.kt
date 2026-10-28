@@ -99,12 +99,13 @@ fun MessageScreen(
                 onViewUser = onViewUser
             )
 
-            HorizontalDivider()
+            if (!miuix) HorizontalDivider()
 
             RefreshContainer(
                 modifier = Modifier.padding(
                     start = paddingValues.calculateLeftPadding(layoutDirection),
                 ),
+                indicatorTopInset = if (miuix) 12.dp else 0.dp,
                 isRefreshing = viewModel.isRefreshing,
                 onRefresh = viewModel::refresh,
 
@@ -116,7 +117,7 @@ fun MessageScreen(
                 ) {
                     item(key = "fff") {
                         MessageFFFCard(
-                            modifier = Modifier.padding(horizontal = 10.dp),
+                            modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
                             fffList = viewModel.fffList,
                             onViewFFFList = onViewFFFList,
                         )
@@ -124,7 +125,7 @@ fun MessageScreen(
 
                     item(key = "widget") {
                         MessageWidgetCard(
-                            modifier = Modifier.padding(horizontal = 10.dp),
+                            modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
                             onViewFFFList = onViewFFFList,
                             onViewHistory = onViewHistory,
                         )
@@ -151,7 +152,7 @@ fun MessageScreen(
                     } else {
                         items(5) { index ->
                             MessageListCard(
-                                modifier = Modifier.padding(horizontal = 10.dp),
+                                modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
                                 background = backgroundList[index],
                                 imageVector = iconList[index],
                                 title = titleList[index],
@@ -183,7 +184,7 @@ fun MessageScreen(
                     )
 
                     FooterCard(
-                        modifier = Modifier.padding(horizontal = 10.dp),
+                        modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
                         footerState = viewModel.footerState,
                         loadMore = viewModel::loadMore,
                         isFeed = false

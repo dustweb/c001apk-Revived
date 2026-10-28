@@ -1,8 +1,16 @@
 package com.example.c001apk.compose.ui.component.design
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.ButtonDefaults
@@ -101,7 +109,7 @@ fun StyleButton(
         val foreground = if (enabled) nativeColors.contentColor else nativeColors.disabledContentColor
         MiuixButton(
             onClick = onClick,
-            modifier = modifier,
+            modifier = if (LocalDialogAction.current) modifier.fillMaxWidth().heightIn(min = 48.dp) else modifier,
             enabled = enabled,
             colors = nativeColors,
         ) {
@@ -221,11 +229,9 @@ fun Switch(
 @Composable
 fun RadioButton(selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     if (isMiuix()) {
-        CompositionLocalProvider(LocalHapticFeedback provides NoNativeHaptics) {
-            top.yukonga.miuix.kmp.basic.RadioButton(
-                selected = selected, onClick = onClick, modifier = modifier,
-            )
-        }
+        val selection = if (onClick != null) Modifier.selectable(selected, role = Role.RadioButton, onClick = onClick)
+            else Modifier.semantics { this.selected = selected; role = Role.RadioButton }
+        Box(modifier.then(selection)) { ChoiceIndicator(selected) }
     } else {
         androidx.compose.material3.RadioButton(selected, onClick, modifier)
     }

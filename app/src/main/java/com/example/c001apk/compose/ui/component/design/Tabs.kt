@@ -1,6 +1,9 @@
 package com.example.c001apk.compose.ui.component.design
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -56,11 +59,28 @@ fun SecondaryScrollableTabRow(
 @Composable
 private fun NativeTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier) {
     val haptic = rememberHapticClick {}
-    if (labels.isNotEmpty()) top.yukonga.miuix.kmp.basic.TabRow(
-        tabs = labels, selectedTabIndex = selected.coerceIn(labels.indices),
-        onTabSelected = { haptic(); onSelect(it) },
-        modifier = modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-    )
+    FilledTabs(labels, selected, { haptic(); onSelect(it) }, modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+}
+
+@Composable
+fun FilledTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit, modifier: Modifier = Modifier) {
+    if (tabs.isEmpty()) return
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        top.yukonga.miuix.kmp.basic.TabRowWithContour(
+            tabs = tabs,
+            selectedTabIndex = selectedTabIndex.coerceIn(tabs.indices),
+            onTabSelected = onTabSelected,
+            maxWidth = maxWidth.coerceAtLeast(top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowWithContourMinWidth),
+            height = 52.dp,
+            cornerRadius = top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowCornerRadius,
+            colors = top.yukonga.miuix.kmp.basic.TabRowDefaults.tabRowColors(
+                backgroundColor = Color.Transparent,
+                selectedBackgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+                contentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                selectedContentColor = MiuixTheme.colorScheme.onSurface,
+            ),
+        )
+    }
 }
 
 @Composable

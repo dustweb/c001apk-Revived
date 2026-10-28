@@ -68,8 +68,8 @@ fun MiuixAccountStats(modifier: Modifier, values: List<String>, onOpen: (String,
 @Composable
 fun MiuixAccountShortcuts(modifier: Modifier, onOpen: (String?, String) -> Unit, onHistory: (String) -> Unit) {
     val labels = listOf("本地收藏", "浏览历史", "我的常去", "我的收藏", "我的赞", "我的回复")
-    val icons = listOf(MiuixIcons.Folder, MiuixIcons.Recent, MiuixIcons.Pin,
-        MiuixIcons.Favorites, AppGlyphs.Like, MiuixIcons.Reply)
+    val icons = listOf(MiuixIcons.Medium.Folder, MiuixIcons.Medium.Recent, MiuixIcons.Medium.Pin,
+        MiuixIcons.Medium.Favorites, AppGlyphs.Like, MiuixIcons.Medium.Reply)
     Card(modifier.fillMaxWidth()) {
         repeat(2) { row ->
             Row(Modifier.fillMaxWidth()) {

@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.runtime.*
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.c001apk.compose.ui.theme.isMiuix
@@ -40,17 +42,22 @@ fun RefreshContainer(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    indicatorTopInset: Dp = 0.dp,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val currentContent by rememberUpdatedState(content)
     val body = remember { movableContentOf { Box(Modifier.fillMaxSize()) { currentContent() } } }
-    if (isMiuix()) top.yukonga.miuix.kmp.basic.PullToRefresh(
-        isRefreshing = isRefreshing, onRefresh = onRefresh, modifier = modifier,
-        color = MiuixTheme.colorScheme.primary,
-        refreshTexts = listOf("下拉刷新", "松开刷新", "正在刷新", "刷新完成"),
-        refreshTextStyle = MiuixTheme.textStyles.footnote1.copy(color = MiuixTheme.colorScheme.onSurfaceVariantSummary),
-    ) { body() }
-    else androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+    if (isMiuix()) {
+        val state = top.yukonga.miuix.kmp.basic.rememberPullToRefreshState()
+        val headerInset = indicatorTopInset * state.visualProgress.coerceIn(0f, 1f)
+        top.yukonga.miuix.kmp.basic.PullToRefresh(
+            isRefreshing = isRefreshing, onRefresh = onRefresh, modifier = modifier,
+            pullToRefreshState = state, contentPadding = PaddingValues(top = headerInset),
+            color = MiuixTheme.colorScheme.primary,
+            refreshTexts = listOf("下拉刷新", "松开刷新", "正在刷新", "刷新完成"),
+            refreshTextStyle = MiuixTheme.textStyles.footnote1.copy(color = MiuixTheme.colorScheme.onSurfaceVariantSummary),
+        ) { Box(Modifier.padding(top = headerInset)) { body() } }
+    } else androidx.compose.material3.pulltorefresh.PullToRefreshBox(
         isRefreshing = isRefreshing, onRefresh = onRefresh, modifier = modifier,
     ) { body() }
 }

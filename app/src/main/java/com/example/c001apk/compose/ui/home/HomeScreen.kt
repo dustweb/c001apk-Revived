@@ -436,7 +436,7 @@ fun HomeScreen(
                     onClick = rememberHapticClick { showTabEditor = true },
                 ) {
                     if (com.example.c001apk.compose.ui.theme.isMiuix()) Icon(
-                        imageVector = top.yukonga.miuix.kmp.icon.MiuixIcons.ListView,
+                        imageVector = top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.ListView,
                         contentDescription = "编辑首页板块",
                     ) else Icon(
                         modifier = Modifier.size(21.dp),

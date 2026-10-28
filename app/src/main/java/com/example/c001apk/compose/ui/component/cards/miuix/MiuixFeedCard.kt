@@ -137,11 +137,11 @@ fun MiuixFeedHeader(
             MiuixActionMenuButton(
                 modifier = Modifier.testTag("feed-menu-${data.id}"),
                 contentDescription = "动态操作", actions = buildList {
-                add(ContentAction("复制链接", MiuixIcons.Copy) { context.copyText(getShareText(ShareType.FEED, data.id.orEmpty())) })
-                onBlockUser?.let { add(ContentAction("拉黑", MiuixIcons.Blocklist) { it(data.uid.orEmpty()) }) }
-                if (CookieUtil.isLogin) onReport?.let { add(ContentAction("举报", MiuixIcons.Report) { it(data.id.orEmpty(), ReportType.FEED) }) }
+                add(ContentAction("复制链接", MiuixIcons.Medium.Copy) { context.copyText(getShareText(ShareType.FEED, data.id.orEmpty())) })
+                onBlockUser?.let { add(ContentAction("拉黑", MiuixIcons.Medium.Blocklist) { it(data.uid.orEmpty()) }) }
+                if (CookieUtil.isLogin) onReport?.let { add(ContentAction("举报", MiuixIcons.Medium.Report) { it(data.id.orEmpty(), ReportType.FEED) }) }
                 if (!data.uid.isNullOrEmpty() && data.uid == CookieUtil.uid) onDelete?.let {
-                    add(ContentAction("删除", MiuixIcons.Delete) { it(data.id.orEmpty(), LikeType.FEED, null) })
+                    add(ContentAction("删除", MiuixIcons.Medium.Delete) { it(data.id.orEmpty(), LikeType.FEED, null) })
                 }
             })
         }
@@ -165,7 +165,7 @@ fun MiuixFeedBottomInfo(
         Text(if (isFeedContent) ip.takeIf { it.isNotBlank() }?.let { "发布于 $it" }.orEmpty() else fromToday(dateline),
             modifier = Modifier.weight(1f), color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        ContentActionButton(MiuixIcons.Reply, "回复", replyNum, "feed-replies-$tag", onClick = onViewFeed)
+        ContentActionButton(MiuixIcons.Medium.Reply, "回复", replyNum, "feed-replies-$tag", onClick = onViewFeed)
         ContentActionButton(if (like == 1) AppGlyphs.LikeFilled else AppGlyphs.Like,
             "点赞", likeNum, "feed-like-$tag", like == 1, onLike)
     }

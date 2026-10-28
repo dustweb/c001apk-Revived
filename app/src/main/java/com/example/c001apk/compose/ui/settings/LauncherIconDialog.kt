@@ -2,6 +2,10 @@ package com.example.c001apk.compose.ui.settings
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,7 +51,23 @@ fun LauncherIconDialog(
         title = { Text(stringResource(R.string.app_icon)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Row(
+                if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                    Column(Modifier.fillMaxWidth().selectableGroup()) {
+                        LauncherIcon.entries.forEach { icon ->
+                            val isSelected = selected == icon
+                            top.yukonga.miuix.kmp.basic.BasicComponent(
+                                title = stringResource(icon.labelRes),
+                                modifier = Modifier.semantics { this.selected = isSelected; role = Role.RadioButton },
+                                enabled = !isApplying,
+                                onClick = rememberHapticClick { selected = icon },
+                                startAction = {
+                                    Box(Modifier.padding(end = 12.dp)) { LauncherIconImage(Modifier.size(48.dp), icon) }
+                                },
+                                endActions = { com.example.c001apk.compose.ui.component.design.ChoiceIndicator(isSelected) },
+                            )
+                        }
+                    }
+                } else Row(
                     modifier = Modifier.fillMaxWidth().selectableGroup(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {

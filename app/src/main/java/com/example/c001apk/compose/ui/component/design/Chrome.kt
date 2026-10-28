@@ -189,7 +189,7 @@ fun ModalBottomSheet(
             insideMargin = DpSize(0.dp, 8.dp),
             endAction = {
                 top.yukonga.miuix.kmp.basic.IconButton(onClick = { visible = false }) {
-                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Close, "关闭")
+                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Medium.Close, "关闭")
                 }
             },
         ) {

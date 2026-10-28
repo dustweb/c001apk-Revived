@@ -214,8 +214,8 @@ class ReplyActivity : AppCompatActivity(),
         originalIcons = originalIconTints.keys.associateWith { it.drawable }
         nativeIcons = listOfNotNull(
             binding.emojiBtn to AppGlyphs.Emoji,
-            binding.imageBtn to MiuixIcons.Image,
-            binding.otherImageBtn?.let { it to MiuixIcons.File },
+            binding.imageBtn to MiuixIcons.Medium.Image,
+            binding.otherImageBtn?.let { it to MiuixIcons.Medium.File },
             binding.atBtn to AppGlyphs.Mention,
             binding.tagBtn to AppGlyphs.Topic,
         ).mapNotNull { (view, vector) -> view?.let { it to VectorGlyphDrawable(vector) } }.toMap()

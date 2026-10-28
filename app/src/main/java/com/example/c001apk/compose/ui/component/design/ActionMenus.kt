@@ -32,7 +32,7 @@ fun MiuixActionMenuButton(
     ConfiguredMenuHaptics {
         OverlayIconDropdownMenu(entry = actionEntry(actions), modifier = modifier,
             minWidth = 48.dp, minHeight = 48.dp) {
-            Icon(MiuixIcons.More, contentDescription,
+            Icon(MiuixIcons.Medium.More, contentDescription,
                 tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
         }
     }

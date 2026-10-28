@@ -100,7 +100,7 @@ private fun ScalePreference(title: String, value: Float, onCommit: (Float) -> Un
             modifier = Modifier.testTag("scale-$title"),
             endActions = {
                 top.yukonga.miuix.kmp.basic.IconButton(onClick = { preview = 1f; onCommit(1f) }) {
-                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Reset, "重置$title")
+                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Medium.Reset, "重置$title")
                 }
             },
             hapticEffect = top.yukonga.miuix.kmp.basic.SliderDefaults.SliderHapticEffect.None,

@@ -96,13 +96,18 @@ fun showAppDialog(
                                     }
                                 }
                             }
-                            FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                actions.forEach { action ->
+                            val buttons = actions.map { action ->
+                                val button: @Composable () -> Unit = {
                                     StyleButton(primary = action.primary, onClick = {
                                         nextAction = action.onClick
                                         handle.dismiss()
                                     }) { Text(action.label) }
                                 }
+                                button
+                            }
+                            if (isMiuix()) DialogActions(buttons)
+                            else FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                buttons.forEach { it() }
                             }
                         }
                     }
