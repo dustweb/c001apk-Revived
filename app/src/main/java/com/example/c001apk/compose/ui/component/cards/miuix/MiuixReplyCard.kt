@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.basic.CardColors
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import com.example.c001apk.compose.ui.component.design.AppGlyphs
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
 import top.yukonga.miuix.kmp.icon.extended.Blocklist
@@ -53,8 +54,6 @@ import top.yukonga.miuix.kmp.icon.extended.Copy
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Report
 import top.yukonga.miuix.kmp.icon.extended.Reply
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -156,7 +155,7 @@ fun MiuixReplyCard(
             data.feed?.let { ReplySource(it.username, it.message, it.pic, it.url, onOpenLink) }
             Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {
                 ContentActionButton(MiuixIcons.Reply, "回复", data.replynum.orEmpty(), "comment-reply-${data.id}", onClick = reply)
-                ContentActionButton(if (data.userAction?.like == 1) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+                ContentActionButton(if (data.userAction?.like == 1) AppGlyphs.LikeFilled else AppGlyphs.Like,
                     "点赞", data.likenum.orEmpty(), "comment-like-${data.id}",
                     active = data.userAction?.like == 1) {
                     if (CookieUtil.isLogin) onLike?.invoke(data.id.orEmpty(), data.userAction?.like ?: 0, LikeType.REPLY)

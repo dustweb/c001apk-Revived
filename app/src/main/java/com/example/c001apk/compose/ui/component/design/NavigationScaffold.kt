@@ -37,7 +37,7 @@ fun AppNavigationScaffold(
                         destinations.forEachIndexed { index, destination ->
                             MiuixNavigationBarItem(
                                 selected = selected == index, onClick = { onSelect(index) },
-                                icon = if (selected == index) destination.selectedIcon else destination.icon,
+                                icon = miuixIcon(if (selected == index) destination.selectedIcon else destination.icon),
                                 label = destination.label,
                                 badge = if (index == 1 && badge > 0) ({ NativeBadge(badge) }) else null,
                             )
@@ -67,7 +67,7 @@ fun AppNavigationScaffold(
                         destinations.forEachIndexed { index, destination ->
                             top.yukonga.miuix.kmp.basic.NavigationRailItem(
                                 selected = selected == index, onClick = { onSelect(index) },
-                                icon = if (selected == index) destination.selectedIcon else destination.icon,
+                                icon = miuixIcon(if (selected == index) destination.selectedIcon else destination.icon),
                                 label = destination.label,
                                 badge = if (index == 1 && badge > 0) ({ NativeBadge(badge) }) else null,
                             )

@@ -46,6 +46,7 @@ import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.HorizontalDivider
 import com.example.c001apk.compose.ui.component.design.Icon
+import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -54,6 +55,8 @@ import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.component.design.VerticalDivider
 import androidx.compose.runtime.Composable
 import com.example.c001apk.compose.ui.component.design.MenuAction
+import top.yukonga.miuix.kmp.squircle.squircleSurface
+import top.yukonga.miuix.kmp.icon.extended.File
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -488,28 +491,23 @@ fun ChatBottom(
 
     Column(modifier = modifier) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable {
+            IconButton(modifier = Modifier.size(48.dp), onClick = {
                         onClearFocus()
                         showEmojiPanel = !showEmojiPanel
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    imageVector = Icons.Outlined.EmojiEmotions,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
-                )
+                    }) {
+                Icon(imageVector = Icons.Outlined.EmojiEmotions, contentDescription = "表情",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             ChatEditText(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 6.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 6.dp),
+                    .then(if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                        Modifier.squircleSurface(
+                            top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.secondaryContainer,
+                            top.yukonga.miuix.kmp.basic.TextFieldDefaults.CornerRadius)
+                    } else Modifier.clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface))
+                    .padding(horizontal = if (com.example.c001apk.compose.ui.theme.isMiuix()) 12.dp else 6.dp),
                 showSendBtn = { shouldShowSendBtn = it },
                 updateInputText = {
                     textInput = it
@@ -528,29 +526,19 @@ fun ChatBottom(
             )
             if (!shouldShowSendBtn) {
                 Row {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable {
+                    IconButton(modifier = Modifier.size(48.dp), onClick = {
                                 onPickImage()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            imageVector = Icons.Outlined.AddPhotoAlternate,
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
-                        )
+                            }) {
+                        Icon(imageVector = Icons.Outlined.AddPhotoAlternate, contentDescription = "选择图片",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clickable {
+                    IconButton(modifier = Modifier.size(48.dp), onClick = {
                                 onPickOtherImage()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
+                            }) {
+                        if (com.example.c001apk.compose.ui.theme.isMiuix()) Icon(
+                            top.yukonga.miuix.kmp.icon.MiuixIcons.File,
+                            contentDescription = "选择文件中的图片",
+                        ) else Image(
                             painter = androidx.compose.ui.res.painterResource(
                                 id = R.drawable.outline_note_alt_24
                             ),
@@ -560,19 +548,11 @@ fun ChatBottom(
                     }
                 }
             } else {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable {
+                IconButton(modifier = Modifier.size(48.dp), onClick = {
                             onSendMessage(textInput)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        imageVector = Icons.AutoMirrored.Default.Send,
-                        contentDescription = null,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
+                        }) {
+                    Icon(imageVector = Icons.AutoMirrored.Default.Send, contentDescription = "发送消息",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

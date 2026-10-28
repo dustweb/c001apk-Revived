@@ -2,7 +2,6 @@ package com.example.c001apk.compose.ui.component.cards.miuix
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,14 +40,13 @@ import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import com.example.c001apk.compose.ui.component.design.AppGlyphs
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Blocklist
 import top.yukonga.miuix.kmp.icon.extended.Copy
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Report
 import top.yukonga.miuix.kmp.icon.extended.Reply
-import top.yukonga.miuix.kmp.icon.extended.Favorites
-import top.yukonga.miuix.kmp.icon.extended.FavoritesFill
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
@@ -168,7 +166,7 @@ fun MiuixFeedBottomInfo(
             modifier = Modifier.weight(1f), color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         ContentActionButton(MiuixIcons.Reply, "回复", replyNum, "feed-replies-$tag", onClick = onViewFeed)
-        ContentActionButton(if (like == 1) MiuixIcons.FavoritesFill else MiuixIcons.Favorites,
+        ContentActionButton(if (like == 1) AppGlyphs.LikeFilled else AppGlyphs.Like,
             "点赞", likeNum, "feed-like-$tag", like == 1, onLike)
     }
 }

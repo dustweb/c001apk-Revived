@@ -84,6 +84,13 @@ import com.example.c001apk.compose.ui.component.design.DialogAction
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
+import com.example.c001apk.compose.ui.component.design.AppGlyphs
+import com.example.c001apk.compose.view.VectorGlyphDrawable
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Image
+import top.yukonga.miuix.kmp.icon.extended.File
+import androidx.activity.BackEventCompat
+import androidx.activity.OnBackPressedCallback
 import com.example.c001apk.compose.ui.theme.observeViewTheme
 import com.google.android.material.elevation.SurfaceColors
 import dagger.hilt.android.AndroidEntryPoint
@@ -122,11 +129,14 @@ class ReplyActivity : AppCompatActivity(),
     View.OnClickListener, OnTouchListener, SmoothInputLayout.OnVisibilityChangeListener {
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
+    private var predictiveReplyBack: OnBackPressedCallback? = null
     private var currentUiStyle = com.example.c001apk.compose.util.CookieUtil.uiStyle
     private var viewPalette: androidx.compose.material3.ColorScheme? = null
     private var originalPublishColors: android.content.res.ColorStateList? = null
     private var originalHintColors: android.content.res.ColorStateList? = null
     private var originalCheckTint: android.content.res.ColorStateList? = null
+    private var originalIcons = emptyMap<android.widget.ImageView, android.graphics.drawable.Drawable?>()
+    private var nativeIcons = emptyMap<android.widget.ImageView, VectorGlyphDrawable>()
     private var originalIconTints = emptyMap<android.widget.ImageView, android.content.res.ColorStateList?>()
     private var originalTextSizes = emptyMap<android.widget.TextView, Float>()
     private var styleDarkMode = com.example.c001apk.compose.util.CookieUtil.isDarkMode
@@ -201,12 +211,21 @@ class ReplyActivity : AppCompatActivity(),
         originalCheckTint = binding.checkBox.buttonTintList
         originalIconTints = listOfNotNull(binding.emojiBtn, binding.imageBtn, binding.otherImageBtn, binding.atBtn, binding.tagBtn)
             .associateWith { it.imageTintList }
+        originalIcons = originalIconTints.keys.associateWith { it.drawable }
+        nativeIcons = listOfNotNull(
+            binding.emojiBtn to AppGlyphs.Emoji,
+            binding.imageBtn to MiuixIcons.Image,
+            binding.otherImageBtn?.let { it to MiuixIcons.File },
+            binding.atBtn to AppGlyphs.Mention,
+            binding.tagBtn to AppGlyphs.Topic,
+        ).mapNotNull { (view, vector) -> view?.let { it to VectorGlyphDrawable(vector) } }.toMap()
         binding.emojiBtn?.contentDescription = "表情"
         binding.imageBtn?.contentDescription = "选择图片"
         binding.otherImageBtn?.contentDescription = "选择文件"
         binding.atBtn?.contentDescription = "提及用户"
         binding.tagBtn?.contentDescription = "添加话题"
         setContentView(binding.root)
+        installPredictiveReplyBack()
         binding.main.post {
             binding.main.translationY = binding.main.height.toFloat()
             binding.main.animate()
@@ -568,6 +587,10 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     private fun applyUiStyle() {
+        nativeIcons.forEach { (view, icon) ->
+            val target = if (currentUiStyle == UiStyle.MIUIX) icon else originalIcons[view]
+            if (view.drawable !== target) view.setImageDrawable(target)
+        }
         val miuix = currentUiStyle == UiStyle.MIUIX
         val topRadius = if (miuix) 28.dp.toFloat() else 16.dp.toFloat()
         val radius = listOf(topRadius, topRadius, 0f, 0f)
@@ -619,6 +642,7 @@ class ReplyActivity : AppCompatActivity(),
     private fun initObserve() {
         observeViewTheme(userPreferencesRepository) { prefs, dark, palette, typography ->
             currentUiStyle = prefs.uiStyle
+            predictiveReplyBack?.isEnabled = currentUiStyle == UiStyle.MIUIX
             styleDarkMode = dark
             viewPalette = palette
             applyUiStyle()
@@ -1404,6 +1428,42 @@ class ReplyActivity : AppCompatActivity(),
         ViewCompat.requestApplyInsets(binding.main)
     }
 
+
+    private fun installPredictiveReplyBack() {
+        val initialDim = window.attributes.dimAmount
+        val callback = object : OnBackPressedCallback(currentUiStyle == UiStyle.MIUIX) {
+            private var progress = 0f
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                progress = 0f
+                binding.main.animate().cancel()
+            }
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                if (isExiting || currentUiStyle != UiStyle.MIUIX) return
+                progress = backEvent.progress.coerceIn(0f, 1f)
+                binding.main.translationY = binding.main.height * progress
+                window.setDimAmount(initialDim * (1f - progress))
+            }
+            override fun handleOnBackCancelled() {
+                progress = 0f
+                binding.main.animate().translationY(0f).setDuration(180L).start()
+                window.setDimAmount(initialDim)
+            }
+            override fun handleOnBackPressed() {
+                if (progress == 0f || currentUiStyle != UiStyle.MIUIX) {
+                    finish()
+                } else if (!isExiting) {
+                    isExiting = true
+                    imeHideSuppressed = true
+                    exitHandler.postDelayed(finishFallback, 800L)
+                    binding.main.animate().translationY(binding.main.height.toFloat())
+                        .setDuration((200L * (1f - progress)).toLong().coerceAtLeast(60L))
+                        .withEndAction { finishAfterExitAnimation() }.start()
+                }
+            }
+        }
+        predictiveReplyBack = callback
+        onBackPressedDispatcher.addCallback(this, callback)
+    }
 
     override fun finish() {
         if (isExiting) return

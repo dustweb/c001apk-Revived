@@ -1,6 +1,6 @@
 package com.example.c001apk.compose.ui.main
 
-import androidx.activity.compose.BackHandler
+import com.example.c001apk.compose.ui.component.design.PageBackAction
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
@@ -145,7 +145,7 @@ fun MainScreen(
         }
     }
 
-    BackHandler(enabled = isActive && selectIndex != 0) {
+    PageBackAction(enabled = isActive && selectIndex != 0) {
         tabDirection = -1
         setSelectIndex(0)
     }

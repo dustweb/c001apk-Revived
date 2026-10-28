@@ -59,8 +59,9 @@ fun MessageListCard(
         top.yukonga.miuix.kmp.preference.ArrowPreference(title = title, enabled = CookieUtil.isLogin,
             modifier = modifier, onClick = onViewNotice,
             startAction = {
-                top.yukonga.miuix.kmp.basic.Icon(imageVector, null, Modifier.padding(end = 12.dp),
-                    tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary)
+                com.example.c001apk.compose.ui.component.design.Icon(imageVector, null, Modifier.padding(end = 12.dp),
+                    tint = if (CookieUtil.isLogin) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary
+                        else top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.disabledOnSecondaryVariant)
             }, endActions = {
                 count?.takeIf { it > 0 }?.let { value ->
                     top.yukonga.miuix.kmp.basic.Badge { top.yukonga.miuix.kmp.basic.Text(value.toString()) }

@@ -45,8 +45,9 @@ internal fun HomeFeedActions(
     val scrollingUp = listState.isScrollingUp()
     val canScrollToTop = listState.canScrollBackward
     var returningToTop by remember { mutableStateOf(false) }
-    val buttonColor = MaterialTheme.colorScheme.primaryContainer
-    val iconColor = MaterialTheme.colorScheme.onPrimaryContainer
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
+    val buttonColor = if (miuix) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+    val iconColor = if (miuix) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
 
     AnimatedVisibility(
         visible = isActive && scrollingUp && (canPublish || canScrollToTop),

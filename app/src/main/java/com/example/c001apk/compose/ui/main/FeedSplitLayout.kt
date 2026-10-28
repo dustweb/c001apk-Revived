@@ -1,8 +1,12 @@
 package com.example.c001apk.compose.ui.main
 
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.updateTransition
+import top.yukonga.miuix.kmp.nav.gesture.PredictiveBackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -16,14 +20,17 @@ internal fun FeedSplitLayout(
     showDetail: Boolean,
     detailContent: @Composable () -> Unit,
     mainBackground: @Composable () -> Unit = {},
+    canHandleBack: Boolean = false,
+    onClose: () -> Unit = {},
     mainContent: @Composable () -> Unit,
 ) {
-    val transition = updateTransition(showDetail, label = "feed-split")
-    val progress = transition.animateFloat(
-        transitionSpec = { spring(dampingRatio = 1f, stiffness = 350f) },
-        label = "pane-progress",
-    ) { visible -> if (visible) 1f else 0f }
-    val keepDetail = transition.currentState || transition.targetState
+    val scope = rememberCoroutineScope()
+    val progress = remember { Animatable(if (showDetail) 1f else 0f) }
+    LaunchedEffect(showDetail) {
+        progress.animateTo(if (showDetail) 1f else 0f,
+            spring(dampingRatio = 1f, stiffness = 350f))
+    }
+    val keepDetail = showDetail || progress.value > 0f
 
     Layout(
         modifier = Modifier.fillMaxSize().clipToBounds(),
@@ -52,4 +59,10 @@ internal fun FeedSplitLayout(
             detail?.placeRelative(mainWidth, 0)
         }
     }
+    PredictiveBackHandler(
+        enabled = showDetail && canHandleBack,
+        onProgress = { events -> events.collect { progress.snapTo(1f - it.progress) } },
+        onCommit = { scope.launch { progress.animateTo(0f); onClose() } },
+        onCancel = { scope.launch { progress.animateTo(1f) } },
+    )
 }

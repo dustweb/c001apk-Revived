@@ -1,6 +1,6 @@
 package com.example.c001apk.compose.ui.webview
 
-import androidx.activity.compose.BackHandler
+import com.example.c001apk.compose.ui.component.design.PageBackAction
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
@@ -80,6 +80,7 @@ fun WebViewScreen(
 
     var actionType by remember { mutableStateOf(ActionType.NONE) }
     var onBack by remember { mutableStateOf(false) }
+    var hasWebHistory by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -176,6 +177,7 @@ fun WebViewScreen(
                 },
                 onFinish = onBackClick,
                 onBack = onBack,
+                onHistoryChanged = { hasWebHistory = it },
                 onBackReset = {
                     onBack = false
                 },
@@ -207,7 +209,7 @@ fun WebViewScreen(
         onBackClick()
     }
 
-    BackHandler {
+    PageBackAction(enabled = hasWebHistory) {
         onBack = true
     }
 

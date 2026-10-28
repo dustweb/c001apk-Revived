@@ -49,6 +49,7 @@ fun WebView(
     onUpdateProgress: (Float) -> Unit,
     onUpdateTitle: (String) -> Unit,
     onShowSnackbar: (String) -> Unit,
+    onHistoryChanged: (Boolean) -> Unit = {},
 ) {
 
     val prefs = LocalUserPreferences.current
@@ -134,6 +135,11 @@ fun WebView(
                 }
 
                 webViewClient = object : WebViewClient() {
+                    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                        super.doUpdateVisitedHistory(view, url, isReload)
+                        onHistoryChanged(view?.canGoBack() == true)
+                    }
+
                     override fun shouldOverrideUrlLoading(
                         webView: WebView?, request: WebResourceRequest?
                     ): Boolean {

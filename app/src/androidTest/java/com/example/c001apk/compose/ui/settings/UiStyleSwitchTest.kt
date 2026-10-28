@@ -20,6 +20,7 @@ import com.example.c001apk.compose.ui.main.MainActivity
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -176,9 +177,61 @@ class UiStyleSwitchTest {
                     }
                     scenario.onActivity {
                         assertSame(originalActivity, it)
+                        val icon = it.findViewById<android.widget.ImageView>(R.id.imageBtn).drawable
+                        assertEquals(style == UiStyle.MIUIX,
+                            icon is com.example.c001apk.compose.view.VectorGlyphDrawable)
+                        assertEquals(style == UiStyle.MIUIX, it.onBackPressedDispatcher.hasEnabledCallbacks())
                         assertEquals("切换界面时保留这份草稿", it.findViewById<TextInputEditText>(R.id.editText).text.toString())
                     }
                 }
+            } finally {
+                runBlocking { repository.setUiStyle(original) }
+            }
+        }
+    }
+
+    @Test
+    fun replyPredictiveBackCancelsWithoutLosingDraftAndCommitsOnce() {
+        val intent = Intent(context, ReplyActivity::class.java).putExtra("type", "feed")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        ActivityScenario.launch<ReplyActivity>(intent).use { scenario ->
+            lateinit var repository: UserPreferencesRepository
+            scenario.onActivity { repository = it.userPreferencesRepository }
+            val original = runBlocking { repository.data.first().uiStyle }
+            try {
+                runBlocking { repository.setUiStyle(UiStyle.MIUIX) }
+                compose.waitUntil(5_000) {
+                    var ready = false
+                    scenario.onActivity {
+                        ready = it.findViewById<android.widget.ImageView>(R.id.imageBtn).drawable is
+                            com.example.c001apk.compose.view.VectorGlyphDrawable
+                    }
+                    ready
+                }
+                scenario.onActivity {
+                    it.findViewById<TextInputEditText>(R.id.editText).setText("手势取消后保留")
+                    it.onBackPressedDispatcher.dispatchOnBackStarted(
+                        androidx.activity.BackEventCompat(0f, 500f, 0f, androidx.activity.BackEventCompat.EDGE_LEFT))
+                    it.onBackPressedDispatcher.dispatchOnBackProgressed(
+                        androidx.activity.BackEventCompat(200f, 500f, .5f, androidx.activity.BackEventCompat.EDGE_LEFT))
+                    assertTrue(it.findViewById<android.view.View>(R.id.main).translationY > 0f)
+                    it.onBackPressedDispatcher.dispatchOnBackCancelled()
+                }
+                compose.waitUntil(5_000) {
+                    var restored = false
+                    scenario.onActivity { restored = it.findViewById<android.view.View>(R.id.main).translationY == 0f }
+                    restored
+                }
+                scenario.onActivity {
+                    assertFalse(it.isFinishing)
+                    assertEquals("手势取消后保留", it.findViewById<TextInputEditText>(R.id.editText).text.toString())
+                    it.onBackPressedDispatcher.dispatchOnBackStarted(
+                        androidx.activity.BackEventCompat(0f, 500f, 0f, androidx.activity.BackEventCompat.EDGE_LEFT))
+                    it.onBackPressedDispatcher.dispatchOnBackProgressed(
+                        androidx.activity.BackEventCompat(200f, 500f, .6f, androidx.activity.BackEventCompat.EDGE_LEFT))
+                    it.onBackPressedDispatcher.onBackPressed()
+                }
+                compose.waitUntil(5_000) { scenario.state == androidx.lifecycle.Lifecycle.State.DESTROYED }
             } finally {
                 runBlocking { repository.setUiStyle(original) }
             }

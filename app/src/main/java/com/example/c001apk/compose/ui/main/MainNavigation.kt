@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -20,8 +19,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.Navigator
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.c001apk.compose.constant.Constants.CHANNEL
@@ -49,9 +46,6 @@ import com.example.c001apk.compose.ui.blacklist.BlackListScreen
 import com.example.c001apk.compose.ui.carousel.CarouselScreen
 import com.example.c001apk.compose.ui.chat.ChatScreen
 import com.example.c001apk.compose.ui.collection.CollectionScreen
-import com.example.c001apk.compose.ui.component.SlideTransition
-import com.example.c001apk.compose.ui.component.MiuixPageMotion
-import com.example.c001apk.compose.ui.theme.isMiuix
 import com.example.c001apk.compose.ui.settings.ThemeSettingsScreen
 import com.example.c001apk.compose.ui.coolpic.CoolPicScreen
 import com.example.c001apk.compose.ui.dyh.DyhScreen
@@ -95,7 +89,6 @@ fun MainNavigation(
 ) {
 
     val context = LocalContext.current
-    val miuix = isMiuix()
     var initialPage = 0
     var selectIndex by rememberSaveable { mutableIntStateOf(0) }
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
@@ -103,6 +96,7 @@ fun MainNavigation(
     var selectedFeedReply by rememberSaveable { mutableStateOf(false) }
     var isFeedPaneOpen by rememberSaveable { mutableStateOf(false) }
     var feedPaneOwnerId by rememberSaveable { mutableStateOf<String?>(null) }
+    val activeEntry by navController.currentBackStackEntryAsState()
     val showFeedPane = selectIndex != 2 && !isCompact && isFeedPaneOpen
 
     fun onReport(id: String, type: ReportType) {
@@ -130,53 +124,54 @@ fun MainNavigation(
         }
     }
 
+    val mainPage: @Composable (Boolean) -> Unit = { isActive ->
+        MainScreen(
+            isActive = isActive,
+            selectIndex = selectIndex,
+            setSelectIndex = {
+                selectIndex = it
+            },
+            badge = badge,
+            resetBadge = resetBadge,
+            widthSizeClass = widthSizeClass,
+            onParamsClick = {
+                navController.navigate(Router.PARAMS.name)
+            },
+            onAboutClick = {
+                navController.navigate(Router.ABOUT.name)
+            },
+            onThemeSettingsClick = { navController.navigate(Router.THEME_SETTINGS.name) },
+            onViewUser = navController::navigateToUser,
+            onViewFeed = ::onViewFeed,
+            onSearch = {
+                initialPage = 0
+                navController.navigateToSearch(null, null, null)
+            },
+            onOpenLink = ::onOpenLink,
+            onCopyText = navController::navigateToCopyText,
+            onViewApp = navController::navigateToApp,
+            onLogin = {
+                navController.navigate(Router.LOGIN.name)
+            },
+            onCheckUpdate = { data ->
+                val bundle = Bundle()
+                bundle.putParcelableArrayList("list", ArrayList(data))
+                navController.navigate(route = Router.UPDATE.name, args = bundle)
+            },
+            onViewFFFList = { viewUid, viewType ->
+                navController.navigateToFFFList(viewUid, viewType, null, null)
+            },
+            onReport = ::onReport,
+            onViewNotice = navController::navigateToNotice,
+            onViewBlackList = navController::navigateToBlackList,
+            onViewHistory = navController::navigateToHistory,
+        )
+    }
+
     FeedSplitLayout(
         showDetail = showFeedPane,
-        mainBackground = {
-            RetainedMainScreen(navController) { isActive ->
-                MainScreen(
-                    isActive = isActive,
-                    selectIndex = selectIndex,
-                    setSelectIndex = {
-                        selectIndex = it
-                    },
-                    badge = badge,
-                    resetBadge = resetBadge,
-                    widthSizeClass = widthSizeClass,
-                    onParamsClick = {
-                        navController.navigate(Router.PARAMS.name)
-                    },
-                    onAboutClick = {
-                        navController.navigate(Router.ABOUT.name)
-                    },
-                    onThemeSettingsClick = { navController.navigate(Router.THEME_SETTINGS.name) },
-                    onViewUser = navController::navigateToUser,
-                    onViewFeed = ::onViewFeed,
-                    onSearch = {
-                        initialPage = 0
-                        navController.navigateToSearch(null, null, null)
-                    },
-                    onOpenLink = ::onOpenLink,
-                    onCopyText = navController::navigateToCopyText,
-                    onViewApp = navController::navigateToApp,
-                    onLogin = {
-                        navController.navigate(Router.LOGIN.name)
-                    },
-                    onCheckUpdate = { data ->
-                        val bundle = Bundle()
-                        bundle.putParcelableArrayList("list", ArrayList(data))
-                        navController.navigate(route = Router.UPDATE.name, args = bundle)
-                    },
-                    onViewFFFList = { viewUid, viewType ->
-                        navController.navigateToFFFList(viewUid, viewType, null, null)
-                    },
-                    onReport = ::onReport,
-                    onViewNotice = navController::navigateToNotice,
-                    onViewBlackList = navController::navigateToBlackList,
-                    onViewHistory = navController::navigateToHistory,
-                )
-            }
-        },
+        canHandleBack = activeEntry?.id == feedPaneOwnerId,
+        onClose = { isFeedPaneOpen = false },
         detailContent = {
             FeedScreen(
                 isCompat = false,
@@ -194,38 +189,29 @@ fun MainNavigation(
             )
         },
     ) {
-        NavHost(
+        AppNavHost(
             modifier = Modifier.fillMaxSize(),
             navController = navController,
             startDestination = Router.MAIN.name,
-            enterTransition = {
-                if (miuix) MiuixPageMotion.enter() else SlideTransition.slideLeft.enterTransition()
-            },
-            exitTransition = {
-                if (miuix) MiuixPageMotion.exit() else SlideTransition.slideLeft.exitTransition()
-            },
-            popEnterTransition = {
-                if (miuix) MiuixPageMotion.popEnter() else SlideTransition.slideRight.enterTransition()
-            },
-            popExitTransition = {
-                if (miuix) MiuixPageMotion.popExit() else SlideTransition.slideRight.exitTransition()
-            }
+            isPane = showFeedPane,
+            backEnabled = !(showFeedPane && activeEntry?.id == feedPaneOwnerId),
         ) {
+            appComposable(route = Router.MAIN.name) { entry ->
+                val activeEntry by navController.currentBackStackEntryAsState()
+                mainPage(activeEntry?.id == entry.id)
+            }
 
-            // 主界面保留在 mainBackground 中，此处仅保留导航栈入口。
-            composable(route = Router.MAIN.name) {}
-
-            composable(route = Router.PARAMS.name) {
+            appComposable(route = Router.PARAMS.name) {
                 ParamsScreen(
                     onBackClick = navController::popBackStack
                 )
             }
 
-            composable(route = Router.THEME_SETTINGS.name) {
+            appComposable(route = Router.THEME_SETTINGS.name) {
                 ThemeSettingsScreen(onBack = { navController.popBackStack() })
             }
 
-            composable(route = Router.ABOUT.name) {
+            appComposable(route = Router.ABOUT.name) {
                 AboutScreen(
                     onBackClick = navController::popBackStack,
                     onLicenseClick = {
@@ -234,13 +220,13 @@ fun MainNavigation(
                 )
             }
 
-            composable(route = Router.LICENSE.name) {
+            appComposable(route = Router.LICENSE.name) {
                 LicenseScreen(
                     onBackClick = navController::popBackStack
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.FEED.name}/{id}/{isViewReply}",
                 arguments = listOf(
                     navArgument("id") {
@@ -265,7 +251,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.USER.name}/{uid}",
                 arguments = listOf(
                     navArgument("uid") {
@@ -309,7 +295,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.SEARCH.name}/{title}/{pageType}/{pageParam}",
                 arguments = listOf(
                     navArgument("title") {
@@ -338,7 +324,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.SEARCHRESULT.name}/{keyword}/{title}/{pageType}/{pageParam}",
                 arguments = listOf(
                     navArgument("keyword") {
@@ -380,7 +366,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.COPY.name}/{text}",
                 arguments = listOf(
                     navArgument("text") {
@@ -393,7 +379,7 @@ fun MainNavigation(
                 CopyTextScreen(text = text)
             }
 
-            composable(
+            appComposable(
                 route = "${Router.TOPIC}/{tag}/{id}",
                 arguments = listOf(
                     navArgument("tag") {
@@ -424,7 +410,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.WEBVIEW.name}/{url}/{isLogin}",
                 arguments = listOf(
                     navArgument("url") {
@@ -448,7 +434,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.APP.name}/{packageName}",
                 arguments = listOf(
                     navArgument("packageName") {
@@ -471,7 +457,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(route = Router.LOGIN.name) {
+            appComposable(route = Router.LOGIN.name) {
                 LoginScreen(
                     onBackClick = {
                         if (navController.currentDestination?.route == Router.LOGIN.name) {
@@ -484,7 +470,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.CAROUSEL.name}/{url}/{title}",
                 arguments = listOf(
                     navArgument("url") {
@@ -509,7 +495,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.EVENT.name}/{id}",
                 arguments = listOf(
                     navArgument("id") { type = NavType.StringType },
@@ -525,7 +511,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = Router.UPDATE.name,
             ) {
                 val bundle = it.arguments
@@ -537,7 +523,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.FFFLIST.name}/{uid}/{type}/{id}/{title}",
                 arguments = listOf(
                     navArgument("uid") {
@@ -576,7 +562,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.DYH.name}/{id}/{title}",
                 arguments = listOf(
                     navArgument("id") {
@@ -601,7 +587,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.COOLPIC.name}/{title}",
                 arguments = listOf(
                     navArgument("title") {
@@ -621,7 +607,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.NOTICE.name}/{type}",
                 arguments = listOf(
                     navArgument("type") {
@@ -642,7 +628,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.BLACKLIST.name}/{type}",
                 arguments = listOf(
                     navArgument("type") {
@@ -661,7 +647,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.HISTORY.name}/{type}",
                 arguments = listOf(
                     navArgument("type") {
@@ -681,7 +667,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.CHAT.name}/{ukey}/{uid}/{username}",
                 arguments = listOf(
                     navArgument("ukey") {
@@ -709,7 +695,7 @@ fun MainNavigation(
                 )
             }
 
-            composable(
+            appComposable(
                 route = "${Router.COLLECTION.name}/{id}",
                 arguments = listOf(
                     navArgument("id") {
@@ -732,22 +718,6 @@ fun MainNavigation(
         }
     }
 
-    FeedPaneBackHandler(navController, showFeedPane, feedPaneOwnerId) {
-        isFeedPaneOpen = false
-    }
-
-}
-
-@Composable
-private fun FeedPaneBackHandler(
-    navController: NavHostController,
-    showFeedPane: Boolean,
-    ownerId: String?,
-    onClose: () -> Unit,
-) {
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val activeEntry = currentEntry ?: navController.currentBackStackEntry
-    BackHandler(enabled = showFeedPane && activeEntry?.id == ownerId, onBack = onClose)
 }
 
 fun NavHostController.onOpenLink(

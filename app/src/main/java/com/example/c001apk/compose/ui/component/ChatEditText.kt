@@ -37,6 +37,9 @@ fun ChatEditText(
     onCloseEmojiPanel: () -> Unit,
 ) {
 
+    val prefs = com.example.c001apk.compose.logic.providable.LocalUserPreferences.current
+    val textSizeSp = (if (com.example.c001apk.compose.ui.theme.isMiuix())
+        top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.main.fontSize.value else 16f) * prefs.fontScale * prefs.contentScale
     val primary = MaterialTheme.colorScheme.primary.toArgb()
     val onSurface = MaterialTheme.colorScheme.onSurface.toArgb()
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
@@ -50,7 +53,7 @@ fun ChatEditText(
                 setHintTextColor(onSurfaceVariant)
                 maxLines = 4
                 hint = "写私信..."
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp)
                 setLineSpacing(0.0f, 1.2f)
                 setBackgroundColor(Color.TRANSPARENT)
                 filters = arrayOf(InputFilter.LengthFilter(500))
@@ -91,6 +94,7 @@ fun ChatEditText(
             }
         },
         update = { editText ->
+            editText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp)
             editText.highlightColor = setAlphaComponent(primary, 128)
             editText.setTextColor(onSurface)
             editText.setHintTextColor(onSurfaceVariant)

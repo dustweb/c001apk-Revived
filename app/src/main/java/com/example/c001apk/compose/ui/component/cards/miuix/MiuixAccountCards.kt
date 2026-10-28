@@ -14,6 +14,7 @@ import com.example.c001apk.compose.ui.history.HistoryType
 import com.example.c001apk.compose.util.CookieUtil
 import com.example.c001apk.compose.util.decode
 import top.yukonga.miuix.kmp.basic.*
+import com.example.c001apk.compose.ui.component.design.AppGlyphs
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.*
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -40,7 +41,7 @@ fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, na
                 LinearProgressIndicator(progress = ((experience.toFloatOrNull() ?: 0f) / total).coerceIn(0f, 1f))
             }
             IconButton(onClick = rememberHapticClick(onClick = onLogout)) {
-                Icon(MiuixIcons.Close, "退出登录", tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
+                Icon(AppGlyphs.Logout, "退出登录", tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
             }
         }
     }
@@ -68,7 +69,7 @@ fun MiuixAccountStats(modifier: Modifier, values: List<String>, onOpen: (String,
 fun MiuixAccountShortcuts(modifier: Modifier, onOpen: (String?, String) -> Unit, onHistory: (String) -> Unit) {
     val labels = listOf("本地收藏", "浏览历史", "我的常去", "我的收藏", "我的赞", "我的回复")
     val icons = listOf(MiuixIcons.Folder, MiuixIcons.Recent, MiuixIcons.Pin,
-        MiuixIcons.Favorites, MiuixIcons.FavoritesFill, MiuixIcons.Reply)
+        MiuixIcons.Favorites, AppGlyphs.Like, MiuixIcons.Reply)
     Card(modifier.fillMaxWidth()) {
         repeat(2) { row ->
             Row(Modifier.fillMaxWidth()) {

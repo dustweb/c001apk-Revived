@@ -1,14 +1,12 @@
 package net.mikaelzero.mojito.ui
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.Window
-import android.window.OnBackInvokedCallback
-import android.window.OnBackInvokedDispatcher
+import androidx.activity.BackEventCompat
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -45,7 +43,6 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
     lateinit var activityConfig: ActivityConfig
     private lateinit var imageViewPagerAdapter: FragmentPagerAdapter
     val fragmentMap = hashMapOf<Int, ImageMojitoFragment?>()
-    private var backInvokedCallback: OnBackInvokedCallback? = null
     private var backHandled = false
     private var viewPagerScrollState = ViewPager.SCROLL_STATE_IDLE
     private var isStatusBarHidden = false
@@ -149,27 +146,28 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         binding.viewPager.setCurrentItem(currentPosition, false)
         binding.viewPager.post(updateStatusBarRunnable)
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackStarted(backEvent: BackEventCompat) {
+                binding.root.animate().cancel()
+            }
+            override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                val progress = backEvent.progress.coerceIn(0f, 1f)
+                val direction = if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) 1f else -1f
+                binding.root.scaleX = 1f - progress * 0.12f
+                binding.root.scaleY = 1f - progress * 0.12f
+                binding.root.translationX = direction * binding.root.width * progress * 0.12f
+            }
+            override fun handleOnBackCancelled() = restorePreview()
             override fun handleOnBackPressed() {
-                if (backHandled) {
-                    return
-                }
+                if (backHandled) return
+                restorePreview()
                 backHandled = true
                 backToMin()
+            }
+            private fun restorePreview() {
+                binding.root.animate().scaleX(1f).scaleY(1f).translationX(0f)
+                    .setDuration(180L).start()
             }
         })
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backInvokedCallback = OnBackInvokedCallback {
-                if (backHandled) {
-                    return@OnBackInvokedCallback
-                }
-                backHandled = true
-                backToMin()
-            }
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                backInvokedCallback!!
-            )
-        }
 
         binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
@@ -302,10 +300,6 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         }
         super.onDestroy()
         binding.viewPager.removeCallbacks(updateStatusBarRunnable)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backInvokedCallback?.let { onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it) }
-            backInvokedCallback = null
-        }
         if (isStatusBarHidden) {
             restoreSystemBars()
         }

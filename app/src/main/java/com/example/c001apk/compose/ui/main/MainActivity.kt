@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -107,7 +106,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val navController = rememberNavController()
+            val navController = rememberAppNavController()
 
             // 窗口重新获得焦点时，Compose 会把焦点补到第一个可聚焦节点上，
             // 导致左上角按钮/Tab 长时间显示 Focus 高亮（看起来像被按住）。

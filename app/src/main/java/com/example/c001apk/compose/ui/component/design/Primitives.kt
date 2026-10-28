@@ -76,7 +76,7 @@ fun Text(
 
 @Composable
 fun Icon(imageVector: ImageVector, contentDescription: String?, modifier: Modifier = Modifier, tint: Color = LocalContentColor.current) {
-    if (isMiuix()) top.yukonga.miuix.kmp.basic.Icon(imageVector, contentDescription, modifier, tint)
+    if (isMiuix()) top.yukonga.miuix.kmp.basic.Icon(miuixIcon(imageVector), contentDescription, modifier, tint)
     else androidx.compose.material3.Icon(imageVector, contentDescription, modifier, tint)
 }
 

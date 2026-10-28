@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import top.yukonga.miuix.kmp.icon.extended.ListView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.ui.component.design.FullScreenDialog as Dialog
@@ -434,7 +435,10 @@ fun HomeScreen(
                     modifier = Modifier.size(40.dp),
                     onClick = rememberHapticClick { showTabEditor = true },
                 ) {
-                    Icon(
+                    if (com.example.c001apk.compose.ui.theme.isMiuix()) Icon(
+                        imageVector = top.yukonga.miuix.kmp.icon.MiuixIcons.ListView,
+                        contentDescription = "编辑首页板块",
+                    ) else Icon(
                         modifier = Modifier.size(21.dp),
                         painter = painterResource(R.drawable.ic_menu),
                         contentDescription = "编辑首页板块",

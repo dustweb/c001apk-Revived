@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import top.yukonga.miuix.kmp.squircle.squircleBorder
@@ -73,8 +74,13 @@ fun OutlinedButton(
     content: @Composable RowScope.() -> Unit,
 ) {
     if (isMiuix()) {
-        Button(onClick, modifier.squircleBorder(1.dp, MiuixTheme.colorScheme.outline, MiuixButtonDefaults.CornerRadius),
-            enabled, colors = ButtonDefaults.outlinedButtonColors(), contentPadding = contentPadding, content = content)
+        val colors = MiuixButtonDefaults.buttonColors()
+        MiuixButton(onClick, modifier, enabled, colors = colors,
+            insideMargin = contentPadding ?: MiuixButtonDefaults.InsideMargin) {
+            CompositionLocalProvider(LocalContentColor provides
+                if (enabled) colors.contentColor else colors.disabledContentColor,
+                LocalTextStyle provides MiuixTheme.textStyles.button, content = { content() })
+        }
     } else {
         androidx.compose.material3.OutlinedButton(onClick, modifier, enabled,
             contentPadding = contentPadding ?: ButtonDefaults.ContentPadding, content = content)
@@ -178,20 +184,21 @@ fun OutlinedIconButton(
 fun FloatingActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    containerColor: Color = Color.Unspecified,
+    contentColor: Color = Color.Unspecified,
     content: @Composable () -> Unit,
 ) {
     if (isMiuix()) {
         top.yukonga.miuix.kmp.basic.FloatingActionButton(
-            onClick = onClick, modifier = modifier, containerColor = containerColor,
-            minWidth = 56.dp, minHeight = 56.dp,
+            onClick = onClick, modifier = modifier,
+            containerColor = containerColor.takeOrElse { MiuixTheme.colorScheme.primary },
         ) {
-            CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
+            CompositionLocalProvider(LocalContentColor provides contentColor.takeOrElse { MiuixTheme.colorScheme.onPrimary }, content = content)
         }
     } else {
         androidx.compose.material3.FloatingActionButton(onClick, modifier,
-            containerColor = containerColor, contentColor = contentColor, content = content)
+            containerColor = containerColor.takeOrElse { MaterialTheme.colorScheme.primaryContainer },
+            contentColor = contentColor.takeOrElse { MaterialTheme.colorScheme.onPrimaryContainer }, content = content)
     }
 }
 
