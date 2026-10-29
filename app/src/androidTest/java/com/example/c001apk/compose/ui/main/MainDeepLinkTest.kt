@@ -19,6 +19,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.example.c001apk.compose.UiStyle
+import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 
 @RunWith(AndroidJUnit4::class)
 class MainDeepLinkTest {
@@ -29,6 +33,25 @@ class MainDeepLinkTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val firstUrl = "https://www.coolapk1s.com/feed/73700591"
     private val secondUrl = "https://www.coolapk.com/feed/72251715"
+
+    @Test
+    fun materialDetailKeepsItsToolbarAtTheTopOfTheWindow() {
+        ActivityScenario.launch<MainActivity>(intent()).use { scenario ->
+            lateinit var repository: UserPreferencesRepository
+            scenario.onActivity { repository = it.userPreferencesRepository }
+            val original = runBlocking { repository.data.first().uiStyle }
+            try {
+                runBlocking { repository.setUiStyle(UiStyle.MD3) }
+                compose.waitForIdle()
+                scenario.onActivity { deliverLinks(it, firstUrl) }
+                assertDetail()
+                pressBack()
+                assertHome()
+            } finally {
+                runBlocking { repository.setUiStyle(original) }
+            }
+        }
+    }
 
     @Test
     fun coldLinkOpensOnceAndReturnsToHome() {
@@ -114,7 +137,13 @@ class MainDeepLinkTest {
     }
 
     private fun assertDetail() {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithContentDescription("返回").fetchSemanticsNodes().size == 1
+        }
         compose.waitForIdle()
+        val back = compose.onNodeWithContentDescription("返回").fetchSemanticsNode().boundsInRoot
+        assertTrue("The detail toolbar must stay at the top: $back",
+            back.top < application.resources.displayMetrics.heightPixels / 3f)
         compose.onNodeWithContentDescription("编辑首页板块").assertDoesNotExist()
     }
 
