@@ -95,8 +95,6 @@ import androidx.activity.OnBackPressedCallback
 import com.example.c001apk.compose.ui.theme.observeViewTheme
 import com.google.android.material.elevation.SurfaceColors
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -176,6 +174,9 @@ class ReplyActivity : AppCompatActivity(),
     private lateinit var atTopicResultLauncher: ActivityResultLauncher<Intent>
     private var isFromAt = false
     private var pendingShowKeyboard = true
+    private var isReplyThemeReady = false
+    private var hasStartedEntrance = false
+    private var imeAnimating = false
     private val imeRetryHandler = Handler(Looper.getMainLooper())
     private var imeRetryCount = 0
     private val maxImeRetry = 8
@@ -229,16 +230,9 @@ class ReplyActivity : AppCompatActivity(),
         binding.otherImageBtn?.contentDescription = "选择文件"
         binding.atBtn?.contentDescription = "提及用户"
         binding.tagBtn?.contentDescription = "添加话题"
+        binding.main.alpha = 0f
         setContentView(binding.root)
         installPredictiveReplyBack()
-        binding.main.post {
-            binding.main.translationY = binding.main.height.toFloat()
-            binding.main.animate()
-                .translationY(0f)
-                .setDuration(350L)
-                .setInterpolator(android.view.animation.PathInterpolator(0.2f, 0f, 0f, 1f))
-                .start()
-        }
         window.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
         window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         window.setSoftInputMode(
@@ -248,11 +242,11 @@ class ReplyActivity : AppCompatActivity(),
         binding.main.isFocusableInTouchMode = false
         baseRootPaddingBottom = binding.main.paddingBottom
 
-        var imeAnimating = false
         ViewCompat.setWindowInsetsAnimationCallback(binding.main, object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
             override fun onPrepare(animation: WindowInsetsAnimationCompat) {
                 if ((animation.typeMask and WindowInsetsCompat.Type.ime()) != 0) {
                     imeAnimating = true
+                    imeRetryHandler.removeCallbacks(imeRetryRunnable)
                 }
                 if ((animation.typeMask and WindowInsetsCompat.Type.ime()) != 0 &&
                     isEmojiPanelRequested && isEmojiPanelVisible
@@ -269,7 +263,7 @@ class ReplyActivity : AppCompatActivity(),
                 val imeAnimation = runningAnimations.lastOrNull {
                     (it.typeMask and WindowInsetsCompat.Type.ime()) != 0
                 }
-                if (!isExternalInputDescentAnimating && !imeHideSuppressed) {
+                if (!isExternalInputDescentAnimating && !isEmojiPanelEntranceAnimating && !imeHideSuppressed) {
                     val translation = if (animateEmojiInputDescent && imeAnimation != null) {
                         val fraction = imeAnimation.fraction.coerceIn(0f, 1f)
                         emojiInputDescentStart * (1f - smoothStep(fraction))
@@ -453,23 +447,9 @@ class ReplyActivity : AppCompatActivity(),
             }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (pendingShowKeyboard) {
-            lifecycleScope.launch(Dispatchers.Main) {
-                delay(120)
-                showInput()
-            }
-        }
-    }
-
     override fun onPostResume() {
         super.onPostResume()
-        if (pendingShowKeyboard) {
-            pendingShowKeyboard = false
-            binding.editText.postDelayed({ showInput() }, 200)
-            startImeRetry()
-        }
+        requestInitialKeyboard()
     }
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
@@ -483,11 +463,7 @@ class ReplyActivity : AppCompatActivity(),
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus && pendingShowKeyboard) {
-            pendingShowKeyboard = false
-            binding.editText.postDelayed({ showInput() }, 200)
-            startImeRetry()
-        }
+        if (hasFocus) requestInitialKeyboard()
         if (hasFocus && imeHideSuppressed) {
             // 窗口失焦期间 IME 动画回调可能丢失，恢复时重置状态避免输入框位置冻结
             imeHideSuppressed = false
@@ -687,6 +663,22 @@ class ReplyActivity : AppCompatActivity(),
                 binding.replyTargetName?.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.body2.fontSize.value * scale)
                 binding.checkBox.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, typography.body2.fontSize.value * scale)
             } else originalTextSizes.forEach { (view, size) -> view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, size) }
+            if (!isReplyThemeReady) {
+                isReplyThemeReady = true
+                binding.main.doOnPreDraw {
+                    if (!isFinishing && !isDestroyed) {
+                        hasStartedEntrance = true
+                        binding.main.translationY = (binding.bottomLayout ?: binding.inputLayout).height.toFloat()
+                        binding.main.alpha = 1f
+                        binding.main.animate()
+                            .translationY(0f)
+                            .setDuration(300L)
+                            .setInterpolator(android.view.animation.PathInterpolator(0.2f, 0f, 0f, 1f))
+                            .start()
+                        requestInitialKeyboard()
+                    }
+                }
+            }
         }
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -1013,6 +1005,9 @@ class ReplyActivity : AppCompatActivity(),
         exitHandler.removeCallbacks(finishFallback)
         super.onDestroy()
         cancelEmojiPanelEntranceAnimation()
+        binding.main.animate().cancel()
+        binding.inputLayout.animate().cancel()
+        binding.emojiLayout.animate().cancel()
         closeDialog()
         countDownTimer.cancel()
         imeRetryHandler.removeCallbacks(imeRetryRunnable)
@@ -1037,7 +1032,16 @@ class ReplyActivity : AppCompatActivity(),
         window.navigationBarColor = SurfaceColors.SURFACE_1.getColor(this)
     }
 
+    private fun requestInitialKeyboard() {
+        if (!pendingShowKeyboard || !hasStartedEntrance || !hasWindowFocus() ||
+            isExiting || isFinishing || isDestroyed) return
+        pendingShowKeyboard = false
+        showInput()
+        startImeRetry()
+    }
+
     private fun showInput() {
+        if (isExiting || isFinishing || isDestroyed) return
         cancelEmojiPanelEntranceAnimation()
         isEmojiPanelRequested = false
         animateEmojiInputDescent = false
@@ -1063,7 +1067,8 @@ class ReplyActivity : AppCompatActivity(),
     private fun retryShowIme() {
         val isImeVisible = ViewCompat.getRootWindowInsets(binding.editText)
             ?.isVisible(WindowInsetsCompat.Type.ime()) == true
-        if (isImeVisible) {
+        if (isImeVisible || imeAnimating || isEmojiPanelRequested ||
+            !hasWindowFocus() || isExiting || isFinishing || isDestroyed) {
             imeRetryHandler.removeCallbacks(imeRetryRunnable)
             return
         }
@@ -1079,6 +1084,7 @@ class ReplyActivity : AppCompatActivity(),
     private fun showEmoji() {
         // A pending startup IME retry must not reopen the keyboard over an explicit panel request.
         imeRetryHandler.removeCallbacks(imeRetryRunnable)
+        pendingShowKeyboard = false
         val insets = ViewCompat.getRootWindowInsets(binding.editText)
         val animatePanelEntrance = binding.main is SmoothInputLayout &&
             !isEmojiPanelVisible &&
@@ -1139,6 +1145,8 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     private fun cancelEmojiPanelEntranceAnimation() {
+        // Keyboard retries must not reset an in-flight IME translation.
+        if (!isEmojiPanelEntranceAnimating) return
         binding.inputLayout.animate().cancel()
         binding.emojiLayout.animate().cancel()
         isEmojiPanelEntranceAnimating = false
