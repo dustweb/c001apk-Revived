@@ -66,6 +66,12 @@ fun HistoryCard(
     onCopyText: (String?) -> Unit,
 ) {
 
+    if (isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixHistoryCard(
+            modifier, data, onViewUser, onReport, onDelete, onBlockUser, onOpenLink, onViewFeed, onCopyText)
+        return
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()

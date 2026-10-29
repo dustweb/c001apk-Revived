@@ -66,6 +66,7 @@ fun AppListScreen(
     }
 
     RefreshContainer(
+        indicatorTopInset = com.example.c001apk.compose.ui.component.design.LocalHomePadding.current.calculateTopPadding(),
         isRefreshing = viewModel.isRefreshing,
         onRefresh = viewModel::refresh,
 

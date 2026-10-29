@@ -36,7 +36,8 @@ fun FeedReplySortCard(
     updateSortReply: (Int) -> Unit,
 ) {
     if (isMiuix()) {
-        Column(modifier.fillMaxWidth().background(MiuixTheme.colorScheme.surface)
+        com.example.c001apk.compose.ui.component.design.TabBarSurface(modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().background(com.example.c001apk.compose.ui.component.design.barBackground(MiuixTheme.colorScheme.surface))
             .padding(horizontal = 12.dp, vertical = 8.dp).testTag("miuix-comment-sort"),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -51,6 +52,7 @@ fun FeedReplySortCard(
                 selectedTabIndex = selected.coerceIn(0, 3), modifier = Modifier.fillMaxWidth(),
                 onTabSelected = { haptic(); updateSortReply(it) },
             )
+        }
         }
         return
     }

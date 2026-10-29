@@ -651,7 +651,7 @@ class ReplyActivity : AppCompatActivity(),
     private fun initObserve() {
         observeViewTheme(userPreferencesRepository) { prefs, dark, palette, typography ->
             currentUiStyle = prefs.uiStyle
-            window.setMiuixBlurBehind(prefs.uiStyle == UiStyle.MIUIX && prefs.blurEnabled && SDK_INT >= 33)
+            window.setMiuixBlurBehind(prefs.uiStyle == UiStyle.MIUIX && prefs.blurEnabled && prefs.blurScope == com.example.c001apk.compose.BlurScope.GLOBAL && SDK_INT >= 33)
             predictiveReplyBack?.isEnabled = currentUiStyle == UiStyle.MIUIX
             styleDarkMode = dark
             viewPalette = palette

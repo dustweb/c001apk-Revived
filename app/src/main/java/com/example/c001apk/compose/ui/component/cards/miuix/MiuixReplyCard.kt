@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,12 +80,13 @@ fun MiuixReplyCard(
     val context = LocalContext.current
     val likeNotice = data.likeUserInfo != null
     val feedReply = data.fetchType == "feed_reply"
-    val authorName = data.likeUserInfo?.username ?: data.userInfo?.username ?: data.username.orEmpty().richToString()
+    val relation = if (isTotalReply && data.ruid != "0") parseGeneratedRelation(data.username) else null
+    val authorName = data.likeUserInfo?.username ?: data.userInfo?.username ?: (relation?.first ?: data.username.orEmpty()).richToString()
     val avatar = data.likeUserInfo?.userAvatar ?: data.userInfo?.userAvatar ?: data.userAvatar
-    val authorUid = data.likeUserInfo?.uid ?: data.uid.orEmpty()
+    val authorUid = data.likeUserInfo?.uid ?: data.userInfo?.uid ?: data.uid.orEmpty()
     val reply: () -> Unit = {
         if (CookieUtil.isLogin) onReply?.invoke(data.id.orEmpty(), data.uid.orEmpty(),
-            data.userInfo?.username ?: data.username.orEmpty().richToString(), null,
+            authorName, null,
             data.userInfo?.userAvatar ?: data.userAvatar)
         else context.makeToast("请先登录")
     }
@@ -97,22 +99,21 @@ fun MiuixReplyCard(
         onLongPress = { onCopyText(data.message) },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ContentAvatar(avatar, 36.dp, "comment-avatar-${data.id}") { onViewUser(authorUid) }
+            ContentAvatar(avatar, 40.dp, "comment-avatar-${data.id}") { onViewUser(authorUid) }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                val relation = if (isTotalReply && data.ruid != "0") parseGeneratedRelation(data.username) else null
-                if (relation == null) {
-                    Text(authorName, Modifier.clickable { onViewUser(authorUid) },
-                        fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis, color = MiuixTheme.colorScheme.onBackground)
-                } else {
-                    ReplyIdentity(relation.first, relation.second, replyUserAvatars[data.ruid], onOpenLink)
-                }
                 val metadata = listOfNotNull(
                     fromToday(if (likeNotice) data.likeTime ?: 0 else data.dateline ?: 0),
                     data.ipLocation?.takeIf { it.isNotBlank() },
                 ).joinToString(" · ")
-                Text(metadata, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                if (relation == null) {
+                    Text(authorName, Modifier.clickable { onViewUser(authorUid) },
+                        fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, color = MiuixTheme.colorScheme.onBackground)
+                    Text(metadata, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                } else {
+                    ReplyIdentity(relation.first, relation.second, replyUserAvatars[data.ruid], onOpenLink, metadata)
+                }
             }
             if (data.isFeedAuthor == 1 || isTopReply) {
                 Surface(shape = RoundedCornerShape(7.dp), color = MiuixTheme.colorScheme.tertiaryContainer) {
@@ -184,12 +185,16 @@ fun MiuixReplyCard(
 }
 
 @Composable
-private fun ReplyIdentity(author: String, target: String, avatar: String?, onOpenLink: (String, String?) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        ContentRichText(author, onOpenLink, Modifier.weight(1f), size = 14f, maxLines = 1)
-        Text("回复", fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-        if (!avatar.isNullOrBlank()) CoilLoader(url = avatar, modifier = Modifier.size(16.dp).clip(CircleShape))
-        ContentRichText(target, onOpenLink, Modifier.weight(1f), size = 14f, maxLines = 1)
+private fun ReplyIdentity(author: String, target: String, avatar: String?, onOpenLink: (String, String?) -> Unit, metadata: String? = null) {
+    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        ContentRichText(author, onOpenLink, Modifier.fillMaxWidth(), size = 15f, maxLines = 1)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (!metadata.isNullOrBlank()) Text(metadata, Modifier.widthIn(max = 96.dp), fontSize = 12.sp,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+            Text(if (metadata.isNullOrBlank()) "回复" else "· 回复", fontSize = 12.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+            if (!avatar.isNullOrBlank()) CoilLoader(url = avatar, modifier = Modifier.size(16.dp).clip(CircleShape))
+            ContentRichText(target, onOpenLink, Modifier.weight(1f), size = 12f, maxLines = 1)
+        }
     }
 }
 

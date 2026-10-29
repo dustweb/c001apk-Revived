@@ -65,21 +65,23 @@ private fun NativeTabs(labels: List<String>, selected: Int, onSelect: (Int) -> U
 @Composable
 fun FilledTabs(tabs: List<String>, selectedTabIndex: Int, onTabSelected: (Int) -> Unit, modifier: Modifier = Modifier) {
     if (tabs.isEmpty()) return
-    BoxWithConstraints(modifier.fillMaxWidth()) {
-        top.yukonga.miuix.kmp.basic.TabRowWithContour(
-            tabs = tabs,
-            selectedTabIndex = selectedTabIndex.coerceIn(tabs.indices),
-            onTabSelected = onTabSelected,
-            maxWidth = maxWidth.coerceAtLeast(top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowWithContourMinWidth),
-            height = 52.dp,
-            cornerRadius = top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowCornerRadius,
-            colors = top.yukonga.miuix.kmp.basic.TabRowDefaults.tabRowColors(
-                backgroundColor = Color.Transparent,
-                selectedBackgroundColor = MiuixTheme.colorScheme.surfaceContainer,
-                contentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                selectedContentColor = MiuixTheme.colorScheme.onSurface,
-            ),
-        )
+    TabBarSurface(modifier.fillMaxWidth()) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            top.yukonga.miuix.kmp.basic.TabRowWithContour(
+                tabs = tabs,
+                selectedTabIndex = selectedTabIndex.coerceIn(tabs.indices),
+                onTabSelected = onTabSelected,
+                maxWidth = maxWidth.coerceAtLeast(top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowWithContourMinWidth),
+                height = 52.dp,
+                cornerRadius = top.yukonga.miuix.kmp.basic.TabRowDefaults.TabRowCornerRadius,
+                colors = top.yukonga.miuix.kmp.basic.TabRowDefaults.tabRowColors(
+                    backgroundColor = Color.Transparent,
+                    selectedBackgroundColor = MiuixTheme.colorScheme.surfaceContainer,
+                    contentColor = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    selectedContentColor = MiuixTheme.colorScheme.onSurface,
+                ),
+            )
+        }
     }
 }
 

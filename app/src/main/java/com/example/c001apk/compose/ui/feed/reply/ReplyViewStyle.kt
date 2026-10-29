@@ -7,11 +7,11 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
-import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import com.example.c001apk.compose.R
 import com.example.c001apk.compose.databinding.ActivityReplyBinding
@@ -24,15 +24,21 @@ import top.yukonga.miuix.kmp.icon.extended.Ok
 internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
     private val density = binding.root.resources.displayMetrics.density
     private fun dp(value: Int) = (value * density).toInt()
-    private val barrierId = View.generateViewId()
-    private val headerId = View.generateViewId()
-    private val originalTitleParams = ConstraintLayout.LayoutParams(binding.title.layoutParams as ConstraintLayout.LayoutParams)
-    private val originalPublishParams = ConstraintLayout.LayoutParams(binding.publish.layoutParams as ConstraintLayout.LayoutParams)
+    private val headerId = R.id.reply_header
+    private val headerViews = listOf(binding.title, binding.replyAvatar, binding.replyTargetName, binding.publish)
+    private val originalHeaderParams = headerViews.associateWith {
+        ConstraintLayout.LayoutParams(it.layoutParams as ConstraintLayout.LayoutParams)
+    }
     private val header = LinearLayout(binding.root.context).apply {
         id = headerId
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        setPadding(dp(16), 0, dp(16), 0)
+        setPadding(dp(16), dp(8), dp(16), 0)
+    }
+    private val heading = LinearLayout(binding.root.context).apply { orientation = LinearLayout.VERTICAL }
+    private val target = LinearLayout(binding.root.context).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
     }
     private val originalConstraints = ConstraintSet().apply {
         clone(binding.inputLayout)
@@ -57,11 +63,11 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
     fun apply(native: Boolean, palette: ColorScheme?) {
         if (!native) {
             if (!nativeApplied) return
-            header.removeAllViews()
+            headerViews.forEach { (it.parent as? ViewGroup)?.removeView(it) }
             binding.inputLayout.removeView(header)
-            binding.inputLayout.findViewById<View>(barrierId)?.let(binding.inputLayout::removeView)
-            binding.inputLayout.addView(binding.title, 0, originalTitleParams)
-            binding.inputLayout.addView(binding.publish, 3, originalPublishParams)
+            headerViews.forEachIndexed { index, view ->
+                binding.inputLayout.addView(view, index, originalHeaderParams.getValue(view))
+            }
             originalConstraints.applyTo(binding.inputLayout)
             originalPadding.forEach { (view, p) -> view.setPadding(p[0], p[1], p[2], p[3]) }
             binding.title.minHeight = 0
@@ -83,35 +89,38 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
         }
         if (palette == null) return
         if (!nativeApplied) {
-            binding.inputLayout.removeView(binding.title)
-            binding.inputLayout.removeView(binding.publish)
-            header.addView(binding.title, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(12) })
+            headerViews.forEach { (it.parent as? ViewGroup)?.removeView(it) }
+            header.removeAllViews()
+            heading.removeAllViews()
+            target.removeAllViews()
+            heading.addView(binding.title, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+            target.addView(binding.replyAvatar, LinearLayout.LayoutParams(dp(28), dp(28)).apply { marginEnd = dp(8) })
+            target.addView(binding.replyTargetName, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            heading.addView(target, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+            header.addView(heading, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(12) })
             header.addView(binding.publish, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
-            binding.inputLayout.addView(header, ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT))
+            binding.inputLayout.addView(header, ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT).apply {
+                startToStart = ConstraintSet.PARENT_ID
+                endToEnd = ConstraintSet.PARENT_ID
+                topToTop = ConstraintSet.PARENT_ID
+            })
         }
         nativeApplied = true
-        val constraints = ConstraintSet().apply {
-            clone(binding.inputLayout)
-            constrainWidth(headerId, ConstraintLayout.LayoutParams.MATCH_PARENT)
-            constrainHeight(headerId, ConstraintSet.WRAP_CONTENT)
-            connect(headerId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
-            connect(headerId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
-            connect(headerId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, dp(12))
-            connect(R.id.replyAvatar, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, dp(16))
-            connect(R.id.replyAvatar, ConstraintSet.TOP, headerId, ConstraintSet.BOTTOM, dp(8))
-            connect(R.id.replyTargetName, ConstraintSet.START, R.id.replyAvatar, ConstraintSet.END, dp(8))
-            connect(R.id.replyTargetName, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, dp(16))
-            connect(R.id.replyTargetName, ConstraintSet.TOP, R.id.replyAvatar, ConstraintSet.TOP)
-            connect(R.id.replyTargetName, ConstraintSet.BOTTOM, R.id.replyAvatar, ConstraintSet.BOTTOM)
-            createBarrier(barrierId, Barrier.BOTTOM, 0, headerId, R.id.replyAvatar, R.id.replyTargetName)
-            constrainWidth(R.id.textInputLayout, 0)
-            connect(R.id.textInputLayout, ConstraintSet.TOP, barrierId, ConstraintSet.BOTTOM, dp(12))
-            connect(R.id.textInputLayout, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, dp(16))
-            connect(R.id.textInputLayout, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, dp(16))
+        val hasTarget = binding.replyTargetName.visibility == View.VISIBLE || binding.replyAvatar.visibility == View.VISIBLE
+        target.visibility = if (hasTarget) View.VISIBLE else View.GONE
+        binding.title.visibility = View.VISIBLE
+        binding.publish.visibility = View.VISIBLE
+        binding.textInputLayout.layoutParams = ConstraintLayout.LayoutParams(binding.textInputLayout.layoutParams as ConstraintLayout.LayoutParams).apply {
+            width = 0
+            startToStart = ConstraintSet.PARENT_ID
+            endToEnd = ConstraintSet.PARENT_ID
+            topToTop = ConstraintSet.UNSET
+            topToBottom = headerId
+            marginStart = dp(16)
+            marginEnd = dp(16)
+            topMargin = dp(8)
         }
-        constraints.applyTo(binding.inputLayout)
-        binding.inputLayout.findViewById<Barrier>(barrierId).setAllowsGoneWidget(false)
-        binding.title.apply { setPadding(0, 0, 0, 0); minHeight = dp(48); gravity = Gravity.START or Gravity.CENTER_VERTICAL; maxLines = 1 }
+        binding.title.apply { setPadding(0, 0, 0, 0); minHeight = if (hasTarget) 0 else dp(48); gravity = Gravity.START or Gravity.CENTER_VERTICAL; maxLines = 1 }
         binding.publish.apply { setPadding(dp(20), dp(10), dp(20), dp(10)); minWidth = dp(80); minHeight = dp(48); gravity = Gravity.CENTER; setSingleLine(true); foreground = null }
         binding.textInputLayout.boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_NONE
         binding.textInputLayout.isHintEnabled = false

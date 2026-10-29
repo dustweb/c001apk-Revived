@@ -91,6 +91,7 @@ fun CollectionScreen(
         val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
 
         RefreshContainer(
+            indicatorTopInset = if (blur) paddingValues.calculateTopPadding() else 0.dp,
             modifier = Modifier.padding(
                 top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                 start = paddingValues.calculateLeftPadding(layoutDirection),

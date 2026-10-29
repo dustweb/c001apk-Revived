@@ -58,8 +58,13 @@ fun ThemeSettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel = hiltV
     ) { padding ->
         Column(Modifier.fillMaxSize().pageScroll(scroll, padding)) {
             if (miuix) PreferenceGroup("界面效果") {
-                SwitchListItem(value = prefs.blurEnabled, leadingImageVector = Icons.Outlined.Palette, headlineText = "全局模糊",
-                    supportingText = "模糊顶栏、导航栏和弹窗背后的内容", onValueChanged = viewModel::setBlurEnabled)
+                SwitchListItem(value = prefs.blurEnabled, leadingImageVector = Icons.Outlined.Palette, headlineText = "背景模糊",
+                    supportingText = "使用毛玻璃背景", onValueChanged = viewModel::setBlurEnabled)
+                StateDropdownListItem(isEnable = prefs.blurEnabled, value = prefs.blurScope, headlineText = "模糊范围",
+                    selections = listOf(
+                        SelectionItem("全局（包含弹窗）", com.example.c001apk.compose.BlurScope.GLOBAL),
+                        SelectionItem("仅顶栏、底栏和标签栏", com.example.c001apk.compose.BlurScope.BARS_ONLY),
+                    ), onValueChanged = { _, value -> viewModel.setBlurScope(value) })
             }
             PreferenceGroup("配色") {
                 DropdownListItem(value = prefs.themeMode, headlineText = "深色主题",

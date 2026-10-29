@@ -51,6 +51,12 @@ message UserPreferences {
   bool reverseHapticEffects = 45;
   UiStyle uiStyle = 46;
   optional bool blurEnabled = 47;
+  BlurScope blurScope = 48;
+}
+
+enum BlurScope {
+  GLOBAL = 0;
+  BARS_ONLY = 1;
 }
 
 enum UiStyle {

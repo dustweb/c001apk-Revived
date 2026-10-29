@@ -79,6 +79,7 @@ fun CommonScreen(
             end = paddingValues.calculateRightPadding(layoutDirection),
             top = if (needTopPadding && !blur) paddingValues.calculateTopPadding() else 0.dp
         ),
+        indicatorTopInset = if (needTopPadding && blur) paddingValues.calculateTopPadding() else 0.dp,
         isRefreshing = viewModel.isRefreshing,
         onRefresh = viewModel::refresh,
 

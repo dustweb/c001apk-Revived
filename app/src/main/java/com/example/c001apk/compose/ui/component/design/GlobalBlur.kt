@@ -47,10 +47,15 @@ private val activityBlurStates = WeakHashMap<Activity, ModalBlurState>()
 internal val LocalModalBlur = staticCompositionLocalOf<ModalBlurState?> { null }
 internal val LocalBlurredBar = compositionLocalOf { false }
 internal val LocalNavigationPadding = compositionLocalOf { 0.dp }
+internal val LocalPageBackdrop = compositionLocalOf<PageBackdrop?> { null }
 internal val LocalHomePadding = compositionLocalOf { PaddingValues() }
 
 @Composable
 fun isMiuixBlurEnabled(): Boolean = isMiuix() && LocalUserPreferences.current.blurEnabled && isRuntimeShaderSupported()
+
+@Composable
+fun isMiuixWindowBlurEnabled(): Boolean = isMiuixBlurEnabled() &&
+    LocalUserPreferences.current.blurScope != com.example.c001apk.compose.BlurScope.BARS_ONLY
 
 @Composable
 internal fun rememberModalBlurState(): ModalBlurState {
@@ -64,7 +69,7 @@ internal fun rememberModalBlurState(): ModalBlurState {
 fun GlobalPopupBlur(visible: Boolean) {
     val state = LocalModalBlur.current ?: rememberModalBlurState()
     val token = remember { Any() }
-    val active = visible && isMiuixBlurEnabled()
+    val active = visible && isMiuixWindowBlurEnabled()
     DisposableEffect(state, active) {
         if (active) state.overlays[token] = Unit
         onDispose { state.overlays.remove(token) }
@@ -73,7 +78,7 @@ fun GlobalPopupBlur(visible: Boolean) {
 
 @Composable
 internal fun Modifier.modalBackgroundBlur(state: ModalBlurState): Modifier {
-    val enabled = isMiuixBlurEnabled()
+    val enabled = isMiuixWindowBlurEnabled()
     val radius by animateFloatAsState(if (enabled && state.overlays.isNotEmpty()) 18f else 0f,
         animationSpec = tween(200), label = "modal-background-blur")
     if (!enabled || radius <= .1f) return this
@@ -84,7 +89,9 @@ internal fun Modifier.modalBackgroundBlur(state: ModalBlurState): Modifier {
     }
 }
 
-internal class PageBackdrop(val layer: LayerBackdrop) {
+internal class BackdropCapture { var recording: Boolean = false }
+
+internal class PageBackdrop(val layer: LayerBackdrop, val capture: BackdropCapture) {
     var position by mutableStateOf(Offset.Zero)
 }
 
@@ -95,32 +102,39 @@ internal fun Modifier.pageBackdrop(backdrop: PageBackdrop?): Modifier = if (back
 internal fun rememberPageBackdrop(): PageBackdrop? {
     if (!isMiuixBlurEnabled()) return null
     val background = MiuixTheme.colorScheme.surface
-    val layer = rememberLayerBackdrop { drawRect(background); drawContent() }
-    return remember(layer) { PageBackdrop(layer) }
+    val capture = remember { BackdropCapture() }
+    val layer = rememberLayerBackdrop {
+        capture.recording = true
+        try { drawRect(background); drawContent() } finally { capture.recording = false }
+    }
+    return remember(layer) { PageBackdrop(layer, capture) }
 }
 
 @Composable
-internal fun BlurredBar(backdrop: PageBackdrop?, content: @Composable BoxScope.() -> Unit) {
-    Box {
+internal fun BlurredBar(backdrop: PageBackdrop?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+    Box(modifier.drawWithContent { if (backdrop?.capture?.recording != true) drawContent() }) {
         if (backdrop != null && Build.VERSION.SDK_INT >= 33) {
             val layer = rememberGraphicsLayer()
             val density = LocalDensity.current
-            val radius = with(density) { 20.dp.toPx() }
+            val radius = with(density) { 32.dp.toPx() }
             val effect = remember(radius) {
                 RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP).asComposeRenderEffect()
             }
-            val tint = MiuixTheme.colorScheme.surface.copy(alpha = .72f)
+            val surface = MiuixTheme.colorScheme.surface
+            val tint = surface.copy(alpha = .82f)
             var position by remember { mutableStateOf(Offset.Zero) }
             Box(Modifier.matchParentSize().onGloballyPositioned { position = it.positionInWindow() }
                 .drawWithContent {
-                    val margin = radius.toInt()
+                    val margin = (radius * 3).toInt()
                     val offset = backdrop.position - position
                     // Capture only the bar and its blur margin; foreground controls stay sharp.
                     layer.record(IntSize(size.width.toInt() + margin * 2, size.height.toInt() + margin * 2)) {
+                        drawRect(surface)
                         translate(margin + offset.x, margin + offset.y) { drawLayer(backdrop.layer.graphicsLayer) }
                     }
                     layer.renderEffect = effect
                     clipRect {
+                        drawRect(surface)
                         translate(-margin.toFloat(), -margin.toFloat()) { drawLayer(layer) }
                         drawRect(tint)
                     }
@@ -151,3 +165,10 @@ internal fun Window.setMiuixBlurBehind(enabled: Boolean) {
 internal fun Modifier.pageScroll(state: ScrollState, padding: PaddingValues): Modifier =
     if (isMiuixBlurEnabled()) verticalScroll(state).padding(padding)
     else padding(padding).verticalScroll(state)
+
+@Composable
+internal fun TabBarSurface(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+    val backdrop = if (LocalBlurredBar.current) null else LocalPageBackdrop.current
+    if (backdrop == null) Box(modifier, content = content)
+    else BlurredBar(backdrop, modifier, content)
+}

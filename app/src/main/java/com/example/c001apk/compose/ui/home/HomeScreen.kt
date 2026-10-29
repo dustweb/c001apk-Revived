@@ -1,5 +1,9 @@
 package com.example.c001apk.compose.ui.home
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import top.yukonga.miuix.kmp.icon.extended.Ok
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -123,6 +127,27 @@ internal fun HomeTabEditorDialog(
     val listState = rememberLazyListState()
     var draggedItemIndex by remember { mutableIntStateOf(-1) }
     var draggedItemOffset by remember { mutableFloatStateOf(0f) }
+    val dragScope = rememberCoroutineScope()
+    val returnOffset = remember { Animatable(0f) }
+    var returningTab by remember { mutableStateOf<TabType?>(null) }
+    var returnJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+    fun finishNativeDrag() {
+        val released = tabs.getOrNull(draggedItemIndex)
+        val offset = draggedItemOffset
+        if (released != null) {
+            returningTab = released
+            returnJob?.cancel()
+            returnJob = dragScope.launch {
+                returnOffset.snapTo(offset)
+                returnOffset.animateTo(0f, spring(dampingRatio = .85f, stiffness = 400f))
+                if (returningTab == released) returningTab = null
+            }
+        }
+        draggedItemIndex = -1
+        draggedItemOffset = 0f
+    }
+
 
     fun moveDraggedTab(change: androidx.compose.ui.input.pointer.PointerInputChange, amount: androidx.compose.ui.geometry.Offset) {
         val currentIndex = draggedItemIndex
@@ -151,7 +176,9 @@ internal fun HomeTabEditorDialog(
                     PreferenceTopBar(
                         title = "编辑首页板块", scrollBehavior = pageScroll, onBack = onDismiss,
                         actions = {
-                            TextButton(onClick = { onConfirm(tabs.toList(), selectedTabs) }) {
+                            if (miuix) IconButton(onClick = rememberHapticClick { onConfirm(tabs.toList(), selectedTabs) }) {
+                                Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Ok, contentDescription = "完成")
+                            } else TextButton(onClick = { onConfirm(tabs.toList(), selectedTabs) }) {
                                 Text("完成")
                             }
                         },
@@ -221,10 +248,20 @@ internal fun HomeTabEditorDialog(
                             val canToggle = !checked || selectedTabs.size > 1
                             if (miuix) {
                                 val feedback = rememberHapticClick {}
+                                val dragging = index == draggedItemIndex
+                                val settling = returningTab == type
+                                val scale by animateFloatAsState(if (dragging) 1.02f else 1f,
+                                    spring(dampingRatio = .85f, stiffness = 400f, visibilityThreshold = .0001f), label = "tab-drag-scale")
                                 top.yukonga.miuix.kmp.basic.Card(
-                                    Modifier.padding(horizontal = 16.dp, vertical = 4.dp).fillMaxWidth()
-                                        .zIndex(if (index == draggedItemIndex) 1f else 0f)
-                                        .graphicsLayer { translationY = if (index == draggedItemIndex) draggedItemOffset else 0f }
+                                    Modifier.animateItem(placementSpec = if (dragging || settling) null else spring(dampingRatio = 1f, stiffness = 450f))
+                                        .padding(horizontal = 16.dp, vertical = 4.dp).fillMaxWidth()
+                                        .zIndex(if (dragging || settling) 1f else 0f)
+                                        .graphicsLayer {
+                                            translationY = if (dragging) draggedItemOffset else if (settling) returnOffset.value else 0f
+                                            scaleX = scale
+                                            scaleY = scale
+                                        },
+                                    pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.None,
                                 ) {
                                     androidx.compose.runtime.CompositionLocalProvider(
                                         androidx.compose.ui.platform.LocalHapticFeedback provides com.example.c001apk.compose.ui.component.design.NoNativeHaptics
@@ -234,9 +271,15 @@ internal fun HomeTabEditorDialog(
                                             startAction = {
                                                 Box(Modifier.size(40.dp).pointerInput(type) {
                                                     detectDragGesturesAfterLongPress(
-                                                        onDragStart = { feedback(); draggedItemIndex = tabs.indexOf(type); draggedItemOffset = 0f },
-                                                        onDragCancel = { draggedItemIndex = -1; draggedItemOffset = 0f },
-                                                        onDragEnd = { draggedItemIndex = -1; draggedItemOffset = 0f },
+                                                        onDragStart = {
+                                                            returnJob?.cancel()
+                                                            returningTab = null
+                                                            feedback()
+                                                            draggedItemIndex = tabs.indexOf(type)
+                                                            draggedItemOffset = 0f
+                                                        },
+                                                        onDragCancel = ::finishNativeDrag,
+                                                        onDragEnd = ::finishNativeDrag,
                                                         onDrag = ::moveDraggedTab,
                                                     )
                                                 }, contentAlignment = Alignment.Center) {

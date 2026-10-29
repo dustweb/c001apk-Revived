@@ -354,6 +354,7 @@ fun FeedScreen(
     ) { paddingValues ->
 
         RefreshContainer(
+            indicatorTopInset = if (blur) paddingValues.calculateTopPadding() else 0.dp,
             modifier = Modifier.padding(
                 top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                 end = paddingValues.calculateEndPadding(layoutDirection),
