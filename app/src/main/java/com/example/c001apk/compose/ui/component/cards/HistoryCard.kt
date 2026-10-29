@@ -102,6 +102,13 @@ fun HistoryCard(
             modifier = modifier.padding(top = 10.dp, end = 10.dp),
             onOpenLink = onOpenLink
         )
+        val media = remember(data.mediaJson) { com.example.c001apk.compose.logic.model.FeedMediaJson.decode(data.mediaJson) }
+        if (media != null && media.images.isNotEmpty()) {
+            com.example.c001apk.compose.ui.component.NineImageView(
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp, end = 10.dp),
+                pic = media.pic, picArr = media.images, feedType = media.feedType)
+        }
+
 
     }
 

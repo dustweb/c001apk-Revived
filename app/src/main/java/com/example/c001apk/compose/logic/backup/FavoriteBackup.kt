@@ -26,6 +26,7 @@ object FavoriteBackup {
                 addProperty("message", favorite.message)
                 addProperty("pubDate", favorite.pubDate)
                 addProperty("time", favorite.time)
+                favorite.mediaJson?.let { addProperty("mediaJson", it) }
             })
         }
         val backup = JsonObject().apply {
@@ -77,6 +78,7 @@ object FavoriteBackup {
                 message = field("message"),
                 pubDate = field("pubDate"),
                 time = time,
+                mediaJson = item.string("mediaJson"),
             )
         }
     }

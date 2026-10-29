@@ -30,6 +30,9 @@ interface HistoryFavoriteDao {
     @Query("SELECT 1 FROM FeedEntity WHERE id = :id LIMIT 1")
     suspend fun isExist(id: String): Boolean
 
+    @Query("UPDATE FeedEntity SET mediaJson = :mediaJson WHERE id = :id")
+    suspend fun updateMedia(id: String, mediaJson: String)
+
     @Query("DELETE FROM FeedEntity WHERE id = :id")
     suspend fun delete(id: String)
 

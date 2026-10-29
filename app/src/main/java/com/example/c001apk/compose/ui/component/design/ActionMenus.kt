@@ -35,7 +35,7 @@ fun MiuixActionMenuButton(
     var expanded by remember { mutableStateOf(false) }
     GlobalPopupBlur(expanded)
     ConfiguredMenuHaptics {
-        OverlayIconDropdownMenu(entry = actionEntry(actions), modifier = modifier,
+        OverlayIconDropdownMenu(entry = actionEntry(actions), modifier = modifier.contentPress(pressedScale = .92f),
             minWidth = 48.dp, minHeight = 48.dp, onExpandedChange = { expanded = it }) {
             Icon(MiuixIcons.Medium.More, contentDescription,
                 tint = MiuixTheme.colorScheme.onSurfaceVariantActions)

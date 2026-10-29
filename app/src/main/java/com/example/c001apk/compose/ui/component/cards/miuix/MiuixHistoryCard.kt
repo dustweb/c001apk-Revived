@@ -2,6 +2,7 @@ package com.example.c001apk.compose.ui.component.cards.miuix
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import com.example.c001apk.compose.util.ShareType
 import com.example.c001apk.compose.util.Utils.richToString
 import com.example.c001apk.compose.util.copyText
 import com.example.c001apk.compose.util.getShareText
+import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -56,5 +58,11 @@ internal fun MiuixHistoryCard(
         }
         Spacer(Modifier.height(12.dp))
         ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth())
+        val media = remember(data.mediaJson) { com.example.c001apk.compose.logic.model.FeedMediaJson.decode(data.mediaJson) }
+        if (media != null && media.images.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            com.example.c001apk.compose.ui.component.NineImageView(
+                modifier = Modifier.fillMaxWidth().squircleClip(12.dp), pic = media.pic, picArr = media.images, feedType = media.feedType)
+        }
     }
 }

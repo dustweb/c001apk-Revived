@@ -17,14 +17,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 
 /** Observe without consuming: rich text, media and child actions retain their own gestures. */
 @Composable
-fun Modifier.contentPress(enabled: Boolean = true): Modifier {
+fun Modifier.contentPress(enabled: Boolean = true, pressedScale: Float = 0.985f): Modifier {
     if (!enabled) return this
     val source = remember { MutableInteractionSource() }
     val scale = remember { Animatable(1f, visibilityThreshold = 0.0001f) }
-    LaunchedEffect(source) {
+    LaunchedEffect(source, pressedScale) {
         source.interactions.collectLatest { interaction ->
             scale.animateTo(
-                if (interaction is PressInteraction.Press) 0.985f else 1f,
+                if (interaction is PressInteraction.Press) pressedScale else 1f,
                 spring(dampingRatio = 0.85f, stiffness = 350f, visibilityThreshold = 0.0001f),
             )
         }

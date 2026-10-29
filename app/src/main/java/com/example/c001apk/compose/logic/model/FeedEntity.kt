@@ -14,4 +14,5 @@ data class FeedEntity(
     val message: String,
     val pubDate: String,
     val time: String = System.currentTimeMillis().toString(),
+    @androidx.room.ColumnInfo(defaultValue = "NULL") val mediaJson: String? = null,
 )

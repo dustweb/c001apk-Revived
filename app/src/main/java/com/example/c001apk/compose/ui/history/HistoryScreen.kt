@@ -193,6 +193,9 @@ fun HistoryScreen(
         ) {
 
             items(dataList, key = { it.id }) {
+                androidx.compose.runtime.LaunchedEffect(it.id, it.mediaJson) {
+                    if (it.mediaJson == null) viewModel.loadMedia(it.id)
+                }
                 HistoryCard(
                     data = it,
                     onViewUser = onViewUser,

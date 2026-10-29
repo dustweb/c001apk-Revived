@@ -2,6 +2,9 @@ package com.example.c001apk.compose.ui.history
 
 import android.content.Context
 import android.net.Uri
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.flow.first
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.getValue
@@ -30,6 +33,7 @@ class HistoryViewModel @AssistedInject constructor(
     @Assisted val type: HistoryType = HistoryType.HISTORY,
     private val blackListRepo: BlackListRepo,
     private val historyFavoriteRepo: HistoryFavoriteRepo,
+    private val networkRepo: com.example.c001apk.compose.logic.repository.NetworkRepo,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -41,6 +45,30 @@ class HistoryViewModel @AssistedInject constructor(
     val dataList = when (type) {
         HistoryType.FAV -> historyFavoriteRepo.loadAllFavoriteListFlow()
         HistoryType.HISTORY -> historyFavoriteRepo.loadAllHistoryListFlow()
+    }
+
+    private val mediaRequests = mutableSetOf<String>()
+    private val mediaSlots = Semaphore(2)
+
+    suspend fun loadMedia(id: String) {
+        if (type != HistoryType.FAV || !mediaRequests.add(id)) return
+        try {
+            mediaSlots.withPermit {
+                withContext(Dispatchers.IO) {
+                    val response = networkRepo.getFeedContent("/v6/feed/detail?id=$id").first {
+                        it !is com.example.c001apk.compose.logic.state.LoadingState.Loading
+                    }
+                    if (response is com.example.c001apk.compose.logic.state.LoadingState.Success) {
+                        historyFavoriteRepo.updateMedia(id, com.example.c001apk.compose.logic.model.FeedMediaJson.encode(response.response))
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            mediaRequests.remove(id)
+            throw e
+        } catch (_: Exception) {
+            // Keep the local text available when a post is unavailable or the network fails.
+        }
     }
 
     var toastText by mutableStateOf<String?>(null)

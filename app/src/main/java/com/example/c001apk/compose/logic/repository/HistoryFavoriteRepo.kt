@@ -56,6 +56,11 @@ class HistoryFavoriteRepo @Inject constructor(
             )
     }
 
+    suspend fun updateMedia(id: String, mediaJson: String) {
+        browseHistoryDao.updateMedia(id, mediaJson)
+        feedFavoriteDao.updateMedia(id, mediaJson)
+    }
+
     suspend fun deleteHistory(id: String) {
         browseHistoryDao.delete(id)
     }

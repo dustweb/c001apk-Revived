@@ -133,7 +133,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             HistoryFavoriteDatabase::class.java, "browse_history"
-        ).build()
+        ).addMigrations(HistoryFavoriteDatabase.MIGRATION_1_2).build()
     }
 
     @FeedFavorite
@@ -151,6 +151,7 @@ object DatabaseModule {
             context.applicationContext,
             HistoryFavoriteDatabase::class.java, "feed_favorite"
         )
+            .addMigrations(HistoryFavoriteDatabase.MIGRATION_1_2)
             .build()
     }
 

@@ -75,15 +75,16 @@ class FeedViewModel @AssistedInject constructor(
         device: String,
         message: String,
         pubDate: String,
-        type: HistoryType = HistoryType.HISTORY
+        type: HistoryType = HistoryType.HISTORY,
+        mediaJson: String? = null,
     ) {
         when (type) {
             HistoryType.FAV -> historyFavoriteRepo.insertFavorite(
-                FeedEntity(id, feedUid, username, avatar, device, message, pubDate)
+                FeedEntity(id, feedUid, username, avatar, device, message, pubDate, mediaJson = mediaJson)
             )
 
             HistoryType.HISTORY -> historyFavoriteRepo.insertHistory(
-                FeedEntity(id, feedUid, username, avatar, device, message, pubDate)
+                FeedEntity(id, feedUid, username, avatar, device, message, pubDate, mediaJson = mediaJson)
             )
         }
 
@@ -167,9 +168,11 @@ class FeedViewModel @AssistedInject constructor(
                                 message = with(response.message.orEmpty()) {
                                     if (this.length > 150) this.substring(0, 150) else this
                                 },
-                                pubDate = response.dateline.toString()
+                                pubDate = response.dateline.toString(),
+                                mediaJson = com.example.c001apk.compose.logic.model.FeedMediaJson.encode(response),
                             )
                         }
+                        historyFavoriteRepo.updateMedia(id, com.example.c001apk.compose.logic.model.FeedMediaJson.encode(response))
                         isFav = historyFavoriteRepo.checkFavorite(id)
                         isBlocked = blackListRepo.checkUid(feedUid)
                     }
@@ -486,7 +489,8 @@ class FeedViewModel @AssistedInject constructor(
                         if (this.length > 150) this.substring(0, 150) else this
                     },
                     pubDate = response.dateline.toString(),
-                    type = HistoryType.FAV
+                    type = HistoryType.FAV,
+                    mediaJson = com.example.c001apk.compose.logic.model.FeedMediaJson.encode(response)
                 )
             }
             isFav = !isFav

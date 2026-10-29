@@ -4,6 +4,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import top.yukonga.miuix.kmp.icon.extended.Ok
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.platform.LocalConfiguration
+import top.yukonga.miuix.kmp.icon.extended.Close
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -165,15 +169,13 @@ internal fun HomeTabEditorDialog(
     }
 
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        Surface(modifier = Modifier.fillMaxSize()) {
+    val editorContent: @Composable (Modifier) -> Unit = { panelModifier ->
+        Surface(modifier = panelModifier) {
             Scaffold(
-                modifier = if (miuix) Modifier.nestedScroll(pageScroll.nestedScrollConnection) else Modifier,
+                modifier = Modifier,
+                contentWindowInsets = if (miuix) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
                 topBar = {
-                    PreferenceTopBar(
+                    if (!miuix) PreferenceTopBar(
                         title = "编辑首页板块", scrollBehavior = pageScroll, onBack = onDismiss,
                         actions = {
                             if (miuix) IconButton(onClick = rememberHapticClick { onConfirm(tabs.toList(), selectedTabs) }) {
@@ -346,6 +348,33 @@ internal fun HomeTabEditorDialog(
             }
         }
     }
+    if (miuix) {
+        var visible by remember { mutableStateOf(true) }
+        var save by remember { mutableStateOf(false) }
+        val maxHeight = LocalConfiguration.current.screenHeightDp.dp * .78f
+        com.example.c001apk.compose.ui.component.design.GlobalPopupBlur(visible)
+        top.yukonga.miuix.kmp.window.WindowBottomSheet(
+            show = visible, title = "编辑首页板块",
+            onDismissRequest = { visible = false },
+            onDismissFinished = { if (save) onConfirm(tabs.toList(), selectedTabs) else onDismiss() },
+            insideMargin = DpSize(0.dp, 0.dp),
+            allowDismiss = draggedItemIndex == -1,
+            enableNestedScroll = draggedItemIndex == -1,
+            startAction = {
+                IconButton(onClick = rememberHapticClick { visible = false }) {
+                    Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Close, "关闭", tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurface)
+                }
+            },
+            endAction = {
+                IconButton(onClick = rememberHapticClick { save = true; visible = false }) {
+                    Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Ok, "完成", tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary)
+                }
+            },
+        ) { editorContent(Modifier.fillMaxWidth().heightIn(max = maxHeight)) }
+    } else Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        editorContent(Modifier.fillMaxSize())
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

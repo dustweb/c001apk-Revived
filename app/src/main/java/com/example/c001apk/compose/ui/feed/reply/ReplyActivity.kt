@@ -584,6 +584,29 @@ class ReplyActivity : AppCompatActivity(),
         binding.tagBtn.setOnClickListener(this)
         binding.checkBox.setOnClickListener(this)
         binding.publish.setOnClickListener(this)
+        binding.replyCancel.setOnClickListener { finish() }
+        binding.replySend.setOnClickListener { if (binding.replySend.isEnabled) binding.publish.performClick() }
+        var dragStartY = 0f
+        var dragStartTime = 0L
+        binding.replyDragArea.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    binding.main.animate().cancel()
+                    dragStartY = event.rawY
+                    dragStartTime = event.eventTime
+                }
+                MotionEvent.ACTION_MOVE -> binding.main.translationY = (event.rawY - dragStartY).coerceAtLeast(0f)
+                MotionEvent.ACTION_UP -> {
+                    val distance = (event.rawY - dragStartY).coerceAtLeast(0f)
+                    val elapsed = (event.eventTime - dragStartTime).coerceAtLeast(1L)
+                    val density = resources.displayMetrics.density
+                    if (distance > 72 * density || (distance > 24 * density && distance / elapsed > density)) finish()
+                    else binding.main.animate().translationY(0f).setDuration(200L).start()
+                }
+                MotionEvent.ACTION_CANCEL -> binding.main.animate().translationY(0f).setDuration(200L).start()
+            }
+            true
+        }
         binding.editText.setOnTouchListener(this)
         binding.out.setOnTouchListener(this)
         (binding.main as? SmoothInputLayout)?.setOnVisibilityChangeListener(this)
