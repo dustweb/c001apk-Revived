@@ -189,8 +189,11 @@ fun ModalBottomSheet(
             modifier = modifier.testTag("miuix-sheet").semantics { dialog() },
             insideMargin = DpSize(0.dp, 8.dp),
             endAction = {
-                top.yukonga.miuix.kmp.basic.IconButton(onClick = { visible = false }) {
-                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Medium.Close, "关闭")
+                top.yukonga.miuix.kmp.basic.IconButton(
+                    modifier = Modifier.padding(end = 16.dp), minWidth = 48.dp, minHeight = 48.dp,
+                    onClick = com.example.c001apk.compose.ui.component.rememberHapticClick { visible = false },
+                ) {
+                    top.yukonga.miuix.kmp.basic.Icon(MiuixIcons.Medium.Close, "关闭", modifier = Modifier.size(24.dp))
                 }
             },
         ) {

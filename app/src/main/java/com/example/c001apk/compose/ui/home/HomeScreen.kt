@@ -361,12 +361,12 @@ internal fun HomeTabEditorDialog(
             allowDismiss = draggedItemIndex == -1,
             enableNestedScroll = draggedItemIndex == -1,
             startAction = {
-                IconButton(onClick = rememberHapticClick { visible = false }) {
+                IconButton(modifier = Modifier.padding(start = 16.dp), onClick = rememberHapticClick { visible = false }) {
                     Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Close, "关闭", tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurface)
                 }
             },
             endAction = {
-                IconButton(onClick = rememberHapticClick { save = true; visible = false }) {
+                IconButton(modifier = Modifier.padding(end = 16.dp), onClick = rememberHapticClick { save = true; visible = false }) {
                     Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Ok, "完成", tint = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary)
                 }
             },

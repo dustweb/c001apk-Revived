@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -56,12 +57,13 @@ fun NotificationCard(
 ) {
 
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
     val isFollow by lazy { data.type == "contacts_follow" }
 
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = if (miuix) 16.dp else 10.dp)
             .contentCard()
             .combinedClickable(
                 onClick = {
@@ -83,9 +85,11 @@ fun NotificationCard(
                     onDeleteNotice?.let { it(data.id.orEmpty()) }
                 }
             )
+            .padding(if (miuix) PaddingValues(start = 6.dp, top = 6.dp, end = 16.dp, bottom = 6.dp) else PaddingValues(0.dp))
     ) {
 
         val (avatar, username, expand, message, dateLine) = createRefs()
+        val headerBottom = createBottomBarrier(avatar, username, expand)
 
         CoilLoader(
             url = data.fromUserAvatar,
@@ -109,6 +113,7 @@ fun NotificationCard(
                 .constrainAs(username) {
                     start.linkTo(avatar.end)
                     top.linkTo(parent.top)
+                    if (miuix) bottom.linkTo(avatar.bottom)
                     end.linkTo(expand.start)
                     width = Dimension.fillToConstraints
                 },
@@ -123,7 +128,7 @@ fun NotificationCard(
                 .padding(start = 10.dp, top = 5.dp, end = 10.dp)
                 .constrainAs(message) {
                     start.linkTo(avatar.end)
-                    top.linkTo(username.bottom)
+                    top.linkTo(if (miuix) headerBottom else username.bottom)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
                 },
@@ -156,7 +161,7 @@ fun NotificationCard(
                 }
             ) {
                 Icon(
-                    imageVector = if (com.example.c001apk.compose.ui.theme.isMiuix()) Icons.Default.MoreVert else Icons.Default.ExpandMore,
+                    imageVector = if (miuix) Icons.Default.MoreVert else Icons.Default.ExpandMore,
                     contentDescription = "更多选项",
                     tint = MaterialTheme.colorScheme.outline
                 )
