@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.VectorGroup
 import androidx.compose.ui.graphics.vector.VectorPath
 
 /** Uses the same monochrome icon geometry in native editor toolbars and Compose controls. */
-class VectorGlyphDrawable(private val vector: ImageVector) : Drawable() {
+class VectorGlyphDrawable(private val vector: ImageVector, private val density: Float = android.content.res.Resources.getSystem().displayMetrics.density) : Drawable() {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paths = mutableMapOf<VectorPath, android.graphics.Path>()
     private var drawableAlpha = 255
@@ -80,6 +80,6 @@ class VectorGlyphDrawable(private val vector: ImageVector) : Drawable() {
     }
     @Deprecated("Deprecated in Android")
     override fun getOpacity() = PixelFormat.TRANSLUCENT
-    override fun getIntrinsicWidth() = vector.defaultWidth.value.toInt()
-    override fun getIntrinsicHeight() = vector.defaultHeight.value.toInt()
+    override fun getIntrinsicWidth() = (vector.defaultWidth.value * density).toInt()
+    override fun getIntrinsicHeight() = (vector.defaultHeight.value * density).toInt()
 }

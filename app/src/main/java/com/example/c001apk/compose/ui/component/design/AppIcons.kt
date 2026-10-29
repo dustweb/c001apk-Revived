@@ -104,6 +104,7 @@ object AppGlyphs {
     val Mention by lazy { glyph("Mention", "M16 8 V15 C16 19 22 16 21 11 C20 0 3 1 3 12 C3 21 13 23 18 19 M16 12 C16 5 8 7 8 12 C8 19 16 17 16 12") }
     val Globe by lazy { glyph("Globe", "M21 12 A9 9 0 1 1 3 12 A9 9 0 1 1 21 12 M3 12 H21 M12 3 C6 8 6 16 12 21 C18 16 18 8 12 3") }
     val BackToTop by lazy { glyph("BackToTop", "M5 4 H19 M6 13 L12 7 L18 13 M12 7 V21") }
+    val DragGrip by lazy { glyph("DragGrip", "M8 5 H8.1 M16 5 H16.1 M8 12 H8.1 M16 12 H16.1 M8 19 H8.1 M16 19 H16.1") }
     val Topic by lazy { glyph("Topic", "M9 3 L7 21 M17 3 L15 21 M4 9 H21 M3 16 H20") }
     val Logout by lazy { glyph("Logout", "M10 4 H5 V20 H10 M9 12 H21 M17 8 L21 12 L17 16") }
 }

@@ -39,6 +39,12 @@ fun MessageCard(
     onViewChat: ((String, String, String) -> Unit)? = null,
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixConversationCard(
+            modifier, data, onOpenLink, onViewUser, onHandleMessage, onViewChat)
+        return
+    }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()

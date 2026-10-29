@@ -255,7 +255,7 @@ fun ChatScreen(
                 )
                 .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Start))
         ) {
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             LazyColumn(
                 modifier = Modifier
@@ -652,7 +652,7 @@ fun ChatBottom(
                     )
                 }
             }
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
             if (com.example.c001apk.compose.ui.theme.isMiuix()) {
                 val scope = rememberCoroutineScope()
                 com.example.c001apk.compose.ui.component.design.FilledTabs(

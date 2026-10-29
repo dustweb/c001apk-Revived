@@ -129,6 +129,7 @@ class ReplyActivity : AppCompatActivity(),
     View.OnClickListener, OnTouchListener, SmoothInputLayout.OnVisibilityChangeListener {
 
     @Inject lateinit var userPreferencesRepository: UserPreferencesRepository
+    private lateinit var viewStyle: ReplyViewStyle
     private var predictiveReplyBack: OnBackPressedCallback? = null
     private var currentUiStyle = com.example.c001apk.compose.util.CookieUtil.uiStyle
     private var viewPalette: androidx.compose.material3.ColorScheme? = null
@@ -137,6 +138,7 @@ class ReplyActivity : AppCompatActivity(),
     private var originalCheckTint: android.content.res.ColorStateList? = null
     private var originalIcons = emptyMap<android.widget.ImageView, android.graphics.drawable.Drawable?>()
     private var nativeIcons = emptyMap<android.widget.ImageView, VectorGlyphDrawable>()
+    private var originalIconScales = emptyMap<android.widget.ImageView, android.widget.ImageView.ScaleType>()
     private var originalIconTints = emptyMap<android.widget.ImageView, android.content.res.ColorStateList?>()
     private var originalTextSizes = emptyMap<android.widget.TextView, Float>()
     private var styleDarkMode = com.example.c001apk.compose.util.CookieUtil.isDarkMode
@@ -204,6 +206,7 @@ class ReplyActivity : AppCompatActivity(),
         overridePendingTransition(0, 0)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityReplyBinding.inflate(layoutInflater)
+        viewStyle = ReplyViewStyle(binding)
         originalTextSizes = listOfNotNull(binding.title, binding.editText, binding.publish,
             binding.replyTargetName, binding.checkBox).associateWith { it.textSize }
         originalPublishColors = binding.publish.textColors
@@ -212,13 +215,14 @@ class ReplyActivity : AppCompatActivity(),
         originalIconTints = listOfNotNull(binding.emojiBtn, binding.imageBtn, binding.otherImageBtn, binding.atBtn, binding.tagBtn)
             .associateWith { it.imageTintList }
         originalIcons = originalIconTints.keys.associateWith { it.drawable }
+        originalIconScales = originalIconTints.keys.associateWith { it.scaleType }
         nativeIcons = listOfNotNull(
             binding.emojiBtn to AppGlyphs.Emoji,
             binding.imageBtn to MiuixIcons.Medium.Image,
             binding.otherImageBtn?.let { it to MiuixIcons.Medium.File },
             binding.atBtn to AppGlyphs.Mention,
             binding.tagBtn to AppGlyphs.Topic,
-        ).mapNotNull { (view, vector) -> view?.let { it to VectorGlyphDrawable(vector) } }.toMap()
+        ).mapNotNull { (view, vector) -> view?.let { it to VectorGlyphDrawable(vector, resources.displayMetrics.density) } }.toMap()
         binding.emojiBtn?.contentDescription = "表情"
         binding.imageBtn?.contentDescription = "选择图片"
         binding.otherImageBtn?.contentDescription = "选择文件"
@@ -590,6 +594,9 @@ class ReplyActivity : AppCompatActivity(),
         nativeIcons.forEach { (view, icon) ->
             val target = if (currentUiStyle == UiStyle.MIUIX) icon else originalIcons[view]
             if (view.drawable !== target) view.setImageDrawable(target)
+            view.minimumHeight = if (currentUiStyle == UiStyle.MIUIX) 48.dp else 0
+            view.scaleType = if (currentUiStyle == UiStyle.MIUIX) android.widget.ImageView.ScaleType.CENTER_INSIDE
+                else originalIconScales[view] ?: android.widget.ImageView.ScaleType.FIT_CENTER
         }
         val miuix = currentUiStyle == UiStyle.MIUIX
         val topRadius = if (miuix) 28.dp.toFloat() else 16.dp.toFloat()
@@ -635,6 +642,7 @@ class ReplyActivity : AppCompatActivity(),
             binding.checkBox.buttonTintList = originalCheckTint
             originalIconTints.forEach { (view, tint) -> view.imageTintList = tint }
         }
+        viewStyle.apply(miuix, viewPalette)
         imeScrimDrawable.color = color
         externalLaunchScrimDrawable.color = color
     }
@@ -947,6 +955,9 @@ class ReplyActivity : AppCompatActivity(),
                     binding.publish.setTextColor(
                         primaryColor
                     )
+                }
+                if (currentUiStyle == UiStyle.MIUIX) viewPalette?.let {
+                    viewStyle.updatePublish(binding.editText.text?.isNotBlank() == true, it)
                 }
             })
             setOnKeyListener(FastDeleteAtUserKeyListener)

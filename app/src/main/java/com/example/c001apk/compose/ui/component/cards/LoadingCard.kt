@@ -40,6 +40,14 @@ fun LoadingCard(
     isFeed: Boolean = false
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix() && (state == FooterState.End || state == LoadingState.Empty)) {
+        top.yukonga.miuix.kmp.basic.Text(
+            if (state == FooterState.End) "已显示全部内容" else "暂无内容",
+            modifier.fillMaxWidth().padding(vertical = 20.dp), textAlign = TextAlign.Center,
+            style = top.yukonga.miuix.kmp.theme.MiuixTheme.textStyles.footnote1,
+            color = top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurfaceVariantSummary)
+        return
+    }
     val type: Pair<Type, String?> = when (state) {
         FooterState.End -> Pair(Type.TEXT, stringResource(id = R.string.loading_end))
         is FooterState.Error -> Pair(Type.TEXT, state.errMsg)

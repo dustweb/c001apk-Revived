@@ -317,7 +317,7 @@ fun SearchResultScreen(
                 }
             }
 
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             HorizontalPager(
                 state = pagerState

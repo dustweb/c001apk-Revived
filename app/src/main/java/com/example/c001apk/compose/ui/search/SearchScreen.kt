@@ -188,7 +188,7 @@ fun SearchScreen(
                 top = paddingValues.calculateTopPadding()
             )
         ) {
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             androidx.compose.animation.AnimatedVisibility(
                 modifier = Modifier.padding(

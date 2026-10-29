@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards.miuix
 
+import com.example.c001apk.compose.ui.component.design.contentPress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -89,9 +90,9 @@ fun MiuixReplyCard(
     }
     Card(
         modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = if (feedReply) 5.dp else 0.dp)
-            .testTag("miuix-comment-${data.id}"),
+            .testTag("miuix-comment-${data.id}").contentPress(),
         cornerRadius = 20.dp, insideMargin = PaddingValues(16.dp),
-        pressFeedbackType = if (likeNotice) PressFeedbackType.None else PressFeedbackType.Sink,
+        pressFeedbackType = PressFeedbackType.None,
         onClick = if (likeNotice) null else if (feedReply) reply else ({ onOpenLink(data.url.orEmpty(), null) }),
         onLongPress = { onCopyText(data.message) },
     ) {

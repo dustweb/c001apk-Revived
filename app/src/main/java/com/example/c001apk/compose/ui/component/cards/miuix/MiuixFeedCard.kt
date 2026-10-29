@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.component.cards.miuix
 
+import com.example.c001apk.compose.ui.component.design.contentPress
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,10 +70,10 @@ fun MiuixFeedCard(
     Card(
         modifier = modifier.fillMaxWidth()
             .padding(horizontal = if (isFeedContent) 12.dp else 0.dp, vertical = if (isFeedContent) 6.dp else 0.dp)
-            .testTag("miuix-feed-${data.id}"),
+            .testTag("miuix-feed-${data.id}").contentPress(!isFeedContent),
         cornerRadius = 20.dp,
         insideMargin = PaddingValues(16.dp),
-        pressFeedbackType = if (isFeedContent) PressFeedbackType.None else PressFeedbackType.Sink,
+        pressFeedbackType = PressFeedbackType.None,
         onClick = if (isFeedContent) null else ({ onViewFeed(data.id.orEmpty(), false) }),
         onLongPress = { onCopyText(data.message) },
     ) {
@@ -208,7 +209,7 @@ private fun MiuixFeedMessage(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (!data.messageTitle.isNullOrBlank()) ContentRichText(data.messageTitle, onOpenLink, size = 18f, bold = true)
-        if (!data.message.isNullOrBlank()) ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth())
+        if (!data.message.isNullOrBlank()) ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth().testTag("feed-body-${data.id}"))
         if (!data.picArr.isNullOrEmpty()) NineImageView(Modifier.fillMaxWidth().squircleClip(12.dp),
             data.pic, data.picArr, data.feedType)
         if (!data.forwardSourceType.isNullOrEmpty()) {

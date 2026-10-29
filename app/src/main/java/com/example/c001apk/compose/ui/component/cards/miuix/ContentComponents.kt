@@ -67,7 +67,7 @@ internal fun ContentActionButton(
             selected = active
         },
         shape = RoundedCornerShape(12.dp),
-        color = if (active) MiuixTheme.colorScheme.tertiaryContainer else Color.Transparent,
+        color = Color.Transparent,
     ) {
         Row(Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -40,6 +40,12 @@ fun ChatRightCard(
     onClearFocus: () -> Unit,
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixChatBubble(
+            modifier, data, true, onGetImageUrl, onLongClick, onViewUser, onOpenLink, onClearFocus)
+        return
+    }
+
     BoxWithConstraints {
 
         val maxWidth = maxWidth - 142.dp

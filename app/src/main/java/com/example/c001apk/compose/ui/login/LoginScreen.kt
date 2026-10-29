@@ -120,7 +120,7 @@ fun LoginScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             TextField(
                 value = account,

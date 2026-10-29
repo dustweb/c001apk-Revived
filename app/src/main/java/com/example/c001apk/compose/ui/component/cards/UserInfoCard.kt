@@ -48,6 +48,10 @@ fun UserInfoCard(
     onViewFFFList: (String, String) -> Unit,
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixUserInfoCard(data, onFollow, onPMUser, onViewFFFList)
+        return
+    }
     val context = LocalContext.current
     //  val userPreferences = LocalUserPreferences.current
 

@@ -2,12 +2,8 @@ package com.example.c001apk.compose.ui.ffflist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +14,6 @@ import com.example.c001apk.compose.ui.component.design.SecondaryScrollableTabRow
 import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
 import com.example.c001apk.compose.ui.component.design.Text
-import com.example.c001apk.compose.ui.component.design.TopAppBar
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,13 +21,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.example.c001apk.compose.ui.component.settings.PreferenceTopBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
 import com.example.c001apk.compose.ui.carousel.CarouselContentScreen
-import com.example.c001apk.compose.ui.component.BackButton
 import com.example.c001apk.compose.util.CookieUtil
 import com.example.c001apk.compose.util.ReportType
 import kotlinx.coroutines.launch
@@ -76,15 +73,13 @@ fun FFFListScreen(
     var refreshState by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
+    val pageScroll = MiuixScrollBehavior()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().then(if (com.example.c001apk.compose.ui.theme.isMiuix()) Modifier.nestedScroll(pageScroll.nestedScrollConnection) else Modifier),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets.systemBars
-                    .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
-                navigationIcon = {
-                    BackButton { onBackClick() }
-                },
+            PreferenceTopBar(
+                scrollBehavior = pageScroll,
+                onBack = onBackClick,
                 title = title ?: when (type) {
                             FFFListType.FEED.name -> "我的动态"
 
@@ -158,7 +153,7 @@ fun FFFListScreen(
                         }
                     }
 
-                    HorizontalDivider()
+                    if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
                     HorizontalPager(
                         state = pagerState
@@ -224,7 +219,7 @@ fun FFFListScreen(
                 }
 
                 else -> {
-                    HorizontalDivider()
+                    if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
                     FFFContentScreen(
                         id = id,
                         uid = uid,

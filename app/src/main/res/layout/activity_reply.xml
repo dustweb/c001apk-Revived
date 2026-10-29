@@ -141,6 +141,7 @@
             app:layout_constraintTop_toBottomOf="@id/imageScrollLayout" />
 
         <LinearLayout
+            android:id="@+id/replyToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

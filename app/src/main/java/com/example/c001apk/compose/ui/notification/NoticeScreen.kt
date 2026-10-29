@@ -3,13 +3,9 @@ package com.example.c001apk.compose.ui.notification
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import com.example.c001apk.compose.ui.component.design.ElevatedCard
@@ -17,20 +13,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.Scaffold
 import com.example.c001apk.compose.ui.component.design.Text
-import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import com.example.c001apk.compose.ui.component.design.MenuAction
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.example.c001apk.compose.ui.component.settings.PreferenceTopBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.c001apk.compose.ui.component.BackButton
 import com.example.c001apk.compose.ui.component.CommonScreen
 import com.example.c001apk.compose.ui.ffflist.FFFContentViewModel
 import com.example.c001apk.compose.util.ReportType
@@ -79,15 +76,13 @@ fun NoticeScreen(
     }
     var showMessageDialog by remember { mutableStateOf(false) }
 
+    val pageScroll = MiuixScrollBehavior()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().then(if (com.example.c001apk.compose.ui.theme.isMiuix()) Modifier.nestedScroll(pageScroll.nestedScrollConnection) else Modifier),
         topBar = {
-            TopAppBar(
-                windowInsets = WindowInsets.systemBars
-                    .only(WindowInsetsSides.Start + WindowInsetsSides.Top),
-                navigationIcon = {
-                    BackButton { onBackClick() }
-                },
+            PreferenceTopBar(
+                scrollBehavior = pageScroll,
+                onBack = onBackClick,
                 title = when (type) {
                             NoticeType.AT.name -> "@我的动态"
                             NoticeType.COMMENT.name -> "@我的评论"

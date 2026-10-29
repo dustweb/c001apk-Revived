@@ -97,7 +97,9 @@ fun BlackListScreen(
 
     val context = LocalContext.current
     val focusRequest = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
+    LaunchedEffect(miuix) {
+        if (miuix) return@LaunchedEffect
         try {
             focusRequest.requestFocus()
         } catch (e: Exception) {
@@ -172,7 +174,19 @@ fun BlackListScreen(
         }
     }
 
-    Scaffold(
+    if (miuix) MiuixBlacklist(
+        type = type, entries = blackList.map { it.data }, input = textInput,
+        onInput = { if (type != BlackListType.USER.name || it.text.isDigitsOnly()) textInput = it },
+        onAdd = {
+            if (textInput.text.isNotBlank()) {
+                viewModel.save(textInput.text.trim())
+                textInput = TextFieldValue(EMPTY_STRING)
+            }
+        },
+        onOpen = { if (type == BlackListType.USER.name) onViewUser(it) else onViewTopic(it) },
+        onRemove = viewModel::delete, onClear = { showClearDialog = true },
+        onImport = ::onRestore, onExport = ::onBackup, onBack = onBackClick,
+    ) else Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -268,7 +282,7 @@ fun BlackListScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState)
         ) {
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = blackList.isNotEmpty(),

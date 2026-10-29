@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Search
@@ -40,7 +39,6 @@ import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
 import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
-import com.example.c001apk.compose.ui.component.design.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +51,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.example.c001apk.compose.ui.component.settings.PreferenceTopBar
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -104,12 +106,14 @@ private fun tabTitle(type: TabType): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTabEditorDialog(
+internal fun HomeTabEditorDialog(
     orderedTabs: List<TabType>,
     enabledTabs: Set<TabType>,
     onDismiss: () -> Unit,
     onConfirm: (List<TabType>, Set<TabType>) -> Unit,
 ) {
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
+    val pageScroll = MiuixScrollBehavior()
     var selectedTabs by remember(enabledTabs) { mutableStateOf(enabledTabs) }
     val tabs = remember(orderedTabs) {
         mutableStateListOf<TabType>().apply { addAll(orderedTabs) }
@@ -118,23 +122,32 @@ private fun HomeTabEditorDialog(
     var draggedItemIndex by remember { mutableIntStateOf(-1) }
     var draggedItemOffset by remember { mutableFloatStateOf(0f) }
 
+    fun moveDraggedTab(change: androidx.compose.ui.input.pointer.PointerInputChange, amount: androidx.compose.ui.geometry.Offset) {
+        val currentIndex = draggedItemIndex
+        if (currentIndex == -1) return
+        change.consume()
+        draggedItemOffset += amount.y
+        val currentItem = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == currentIndex } ?: return
+        val center = currentItem.offset + draggedItemOffset + currentItem.size / 2f
+        val target = listState.layoutInfo.visibleItemsInfo.firstOrNull {
+            it.index != currentIndex && center.toInt() in it.offset..(it.offset + it.size)
+        } ?: return
+        tabs.add(target.index, tabs.removeAt(currentIndex))
+        draggedItemIndex = target.index
+        draggedItemOffset += currentItem.offset - target.offset
+    }
+
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(modifier = Modifier.fillMaxSize()) {
             Scaffold(
+                modifier = if (miuix) Modifier.nestedScroll(pageScroll.nestedScrollConnection) else Modifier,
                 topBar = {
-                    TopAppBar(
-                        title = "编辑首页板块",
-                        navigationIcon = {
-                            IconButton(onClick = onDismiss) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "返回",
-                                )
-                            }
-                        },
+                    PreferenceTopBar(
+                        title = "编辑首页板块", scrollBehavior = pageScroll, onBack = onDismiss,
                         actions = {
                             TextButton(onClick = { onConfirm(tabs.toList(), selectedTabs) }) {
                                 Text("完成")
@@ -148,7 +161,8 @@ private fun HomeTabEditorDialog(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    Surface(
+                    if (miuix) top.yukonga.miuix.kmp.basic.SmallTitle("已启用 ${selectedTabs.size} / ${tabs.size} · 长按调整顺序")
+                    else Surface(
                         color = MaterialTheme.colorScheme.surfaceContainer,
                         tonalElevation = 1.dp,
                         modifier = Modifier.fillMaxWidth(),
@@ -177,8 +191,8 @@ private fun HomeTabEditorDialog(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(top = 8.dp)
-                            .pointerInput(tabs) {
-                            detectDragGesturesAfterLongPress(
+                            .pointerInput(miuix, tabs) {
+                            if (!miuix) detectDragGesturesAfterLongPress(
                                 onDragStart = { offset ->
                                     draggedItemIndex = listState.layoutInfo.visibleItemsInfo
                                         .firstOrNull { item ->
@@ -196,78 +210,91 @@ private fun HomeTabEditorDialog(
                                     draggedItemIndex = -1
                                     draggedItemOffset = 0f
                                 },
-                                onDrag = { change, dragAmount ->
-                                    val currentIndex = draggedItemIndex
-                                    if (currentIndex == -1) return@detectDragGesturesAfterLongPress
-
-                                    change.consume()
-                                    draggedItemOffset += dragAmount.y
-                                    val currentItem = listState.layoutInfo.visibleItemsInfo
-                                        .firstOrNull { it.index == currentIndex }
-                                        ?: return@detectDragGesturesAfterLongPress
-                                    val draggedCenter = currentItem.offset + draggedItemOffset + currentItem.size / 2f
-                                    val targetItem = listState.layoutInfo.visibleItemsInfo
-                                        .firstOrNull { item ->
-                                            item.index != currentIndex &&
-                                                draggedCenter.toInt() in item.offset..(item.offset + item.size)
-                                        }
-                                        ?: return@detectDragGesturesAfterLongPress
-
-                                    tabs.add(targetItem.index, tabs.removeAt(currentIndex))
-                                    draggedItemIndex = targetItem.index
-                                    draggedItemOffset += currentItem.offset - targetItem.offset
-                                },
+                                onDrag = ::moveDraggedTab,
                             )
                             },
                     ) {
                         itemsIndexed(tabs, key = { _, type -> type.name }) { index, type ->
                             val checked = type in selectedTabs
                             val canToggle = !checked || selectedTabs.size > 1
-                            ListItem(
-                                leadingContent = {
-                                    Icon(
-                                        imageVector = Icons.Default.DragHandle,
-                                        contentDescription = "长按拖动排序",
-                                        tint = MaterialTheme.colorScheme.outline,
-                                    )
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .graphicsLayer {
-                                        translationY = if (index == draggedItemIndex) draggedItemOffset else 0f
+                            if (miuix) {
+                                val feedback = rememberHapticClick {}
+                                top.yukonga.miuix.kmp.basic.Card(
+                                    Modifier.padding(horizontal = 16.dp, vertical = 4.dp).fillMaxWidth()
+                                        .zIndex(if (index == draggedItemIndex) 1f else 0f)
+                                        .graphicsLayer { translationY = if (index == draggedItemIndex) draggedItemOffset else 0f }
+                                ) {
+                                    androidx.compose.runtime.CompositionLocalProvider(
+                                        androidx.compose.ui.platform.LocalHapticFeedback provides com.example.c001apk.compose.ui.component.design.NoNativeHaptics
+                                    ) {
+                                        top.yukonga.miuix.kmp.preference.SwitchPreference(
+                                            title = tabTitle(type), checked = checked, enabled = canToggle,
+                                            startAction = {
+                                                Box(Modifier.size(40.dp).pointerInput(type) {
+                                                    detectDragGesturesAfterLongPress(
+                                                        onDragStart = { feedback(); draggedItemIndex = tabs.indexOf(type); draggedItemOffset = 0f },
+                                                        onDragCancel = { draggedItemIndex = -1; draggedItemOffset = 0f },
+                                                        onDragEnd = { draggedItemIndex = -1; draggedItemOffset = 0f },
+                                                        onDrag = ::moveDraggedTab,
+                                                    )
+                                                }, contentAlignment = Alignment.Center) {
+                                                    Icon(com.example.c001apk.compose.ui.component.design.AppGlyphs.DragGrip, "长按拖动排序")
+                                                }
+                                            },
+                                            onCheckedChange = { enabled ->
+                                                feedback()
+                                                selectedTabs = if (enabled) selectedTabs + type else selectedTabs - type
+                                            },
+                                        )
                                     }
-                                    .clickable(enabled = canToggle) {
-                                        selectedTabs = if (checked) {
-                                            selectedTabs - type
-                                        } else {
-                                            selectedTabs + type
-                                        }
+                                }
+                            } else {
+                                ListItem(
+                                    leadingContent = {
+                                        Icon(
+                                            imageVector = Icons.Default.DragHandle,
+                                            contentDescription = "长按拖动排序",
+                                            tint = MaterialTheme.colorScheme.outline,
+                                        )
                                     },
-                                headlineContent = { Text(tabTitle(type)) },
-                                supportingContent = {
-                                    Text(
-                                        text = if (checked) "已显示" else "已隐藏",
-                                        color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
-                                    )
-                                },
-                                trailingContent = {
-                                    Switch(
-                                        checked = checked,
-                                        enabled = canToggle,
-                                        onCheckedChange = { enabled ->
-                                            selectedTabs = if (enabled) {
-                                                selectedTabs + type
-                                            } else {
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .graphicsLayer {
+                                            translationY = if (index == draggedItemIndex) draggedItemOffset else 0f
+                                        }
+                                        .clickable(enabled = canToggle) {
+                                            selectedTabs = if (checked) {
                                                 selectedTabs - type
+                                            } else {
+                                                selectedTabs + type
                                             }
                                         },
-                                    )
-                                },
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = 56.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                            )
+                                    headlineContent = { Text(tabTitle(type)) },
+                                    supportingContent = {
+                                        Text(
+                                            text = if (checked) "已显示" else "已隐藏",
+                                            color = com.example.c001apk.compose.ui.component.design.secondaryTextColor(),
+                                        )
+                                    },
+                                    trailingContent = {
+                                        Switch(
+                                            checked = checked,
+                                            enabled = canToggle,
+                                            onCheckedChange = { enabled ->
+                                                selectedTabs = if (enabled) {
+                                                    selectedTabs + type
+                                                } else {
+                                                    selectedTabs - type
+                                                }
+                                            },
+                                        )
+                                    },
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(start = 56.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -446,7 +473,7 @@ fun HomeScreen(
                 }
             }
 
-            HorizontalDivider()
+            if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
             HorizontalPager(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
