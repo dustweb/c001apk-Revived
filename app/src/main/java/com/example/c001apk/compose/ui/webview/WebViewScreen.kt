@@ -17,7 +17,7 @@ import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.LinearProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
-import com.example.c001apk.compose.ui.component.design.Scaffold
+import androidx.compose.material3.Scaffold
 import com.example.c001apk.compose.ui.component.design.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -129,7 +130,7 @@ fun WebViewScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
 
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -138,13 +139,6 @@ fun WebViewScreen(
                     start = paddingValues.calculateLeftPadding(layoutDirection),
                 )
         ) {
-            AnimatedVisibility(visible = progress != 1.0f) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    progress = { animatedProgress }
-                )
-            }
-
             WebView(
                 url = url.decode,
                 isLogin = isLogin,
@@ -195,6 +189,14 @@ fun WebViewScreen(
                     }
                 }
             )
+
+            // Keep the Chromium viewport fixed while page loading progresses.
+            if (progress < 1f) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+                    progress = { animatedProgress }
+                )
+            }
 
         }
 

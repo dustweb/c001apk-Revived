@@ -55,6 +55,7 @@ message UserPreferences {
   repeated SavedAccount accounts = 49;
   int64 sessionGeneration = 50;
   int64 szlmLastAttempt = 51;
+  int64 pendingDeviceIdLogin = 52;
 }
 
 message SavedAccount {

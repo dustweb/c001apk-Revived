@@ -80,4 +80,22 @@ class AccountRepositoryTest {
         assertTrue(runCatching { repo.switchTo("1") }.isFailure)
         assertEquals(before, store.data.value)
     }
+
+    @Test fun deviceInitializationRunsForLoginButNotForAccountSwitchOrProfileRefresh() = runBlocking {
+        val store = MemoryStore()
+        val repo = AccountRepository(store, cipher)
+        repo.signIn("1", "Alice", "token-a")
+        val first = store.data.value.sessionGeneration
+        assertEquals(first, store.data.value.pendingDeviceIdLogin)
+        repo.finishLoginInitialization(first)
+        repo.updateProfile(first, "1", "Alice", "avatar")
+        assertEquals(0L, store.data.value.pendingDeviceIdLogin)
+        repo.signIn("2", "Bob", "token-b")
+        val second = store.data.value.sessionGeneration
+        repo.finishLoginInitialization(first)
+        assertEquals(second, store.data.value.pendingDeviceIdLogin)
+        repo.finishLoginInitialization(second)
+        repo.switchTo("1")
+        assertEquals(0L, store.data.value.pendingDeviceIdLogin)
+    }
 }

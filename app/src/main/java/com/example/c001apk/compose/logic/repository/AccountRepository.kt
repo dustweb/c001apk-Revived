@@ -24,6 +24,10 @@ class AccountRepository @Inject constructor(
 
     suspend fun rememberCurrent() { store.updateData { it.archiveCurrent() } }
 
+    suspend fun finishLoginInitialization(generation: Long) {
+        store.updateData { if (it.pendingDeviceIdLogin == generation) it.copy(pendingDeviceIdLogin = 0) else it }
+    }
+
     suspend fun signIn(uid: String, username: String, token: String) {
         require(uid.isNotBlank() && username.isNotBlank() && token.isNotBlank())
         store.updateData { old ->
@@ -32,7 +36,7 @@ class AccountRepository @Inject constructor(
             archived.copy(uid = uid, username = username, token = token, isLogin = true,
                 userAvatar = saved?.avatar.orEmpty(), level = saved?.level.orEmpty(),
                 experience = saved?.experience.orEmpty(), nextLevelExperience = saved?.nextLevelExperience.orEmpty(),
-                sessionGeneration = old.sessionGeneration + 1).archiveCurrent()
+                sessionGeneration = old.sessionGeneration + 1, pendingDeviceIdLogin = old.sessionGeneration + 1).archiveCurrent()
         }
         clearTransientSession()
     }
@@ -48,7 +52,7 @@ class AccountRepository @Inject constructor(
             changed = true
             archived.copy(uid = saved.uid, username = saved.username, token = token, isLogin = true,
                 userAvatar = saved.avatar, level = saved.level, experience = saved.experience,
-                nextLevelExperience = saved.nextLevelExperience, sessionGeneration = old.sessionGeneration + 1)
+                nextLevelExperience = saved.nextLevelExperience, sessionGeneration = old.sessionGeneration + 1, pendingDeviceIdLogin = 0)
         }
         if (changed) clearTransientSession()
     }
@@ -88,7 +92,7 @@ class AccountRepository @Inject constructor(
     }
 
     private fun UserPreferencesCompat.loggedOut() = copy(isLogin = false, uid = "", username = "", token = "",
-        userAvatar = "", level = "", experience = "", nextLevelExperience = "", sessionGeneration = sessionGeneration + 1)
+        userAvatar = "", level = "", experience = "", nextLevelExperience = "", sessionGeneration = sessionGeneration + 1, pendingDeviceIdLogin = 0)
 
     private fun clearTransientSession() {
         CookieUtil.SESSID = ""

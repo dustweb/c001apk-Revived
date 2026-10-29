@@ -96,47 +96,55 @@ class LoginViewModel @Inject constructor(
     }
 
     var loginData = HashMap<String, String?>()
+    var isLoggingIn by mutableStateOf(false)
+        private set
     fun onLogin() {
+        if (isLoggingIn) return
+        isLoggingIn = true
         isTryLogin = true
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.tryLogin(loginData)
-                .collect { result ->
-                    val response = result.getOrNull()
-                    response?.body()?.let {
-                        val login: LoginResponse = Gson().fromJson(
-                            response.body()?.string(),
-                            LoginResponse::class.java
-                        )
-                        if (login.status == 1) {
-                            val cookies = response.headers().values("Set-Cookie")
-                            val uid =
-                                cookies.find { it.startsWith("uid=") }?.split(";")
-                                    ?.getOrNull(0)
-                                    ?.replace("uid=", EMPTY_STRING)?.trim()
-                            val username =
-                                cookies.find { it.startsWith("username=") }?.split(";")
-                                    ?.getOrNull(0)?.replace("username=", EMPTY_STRING)?.trim()
-                            val token =
-                                cookies.findLast { it.startsWith("token=") }?.split(";")
-                                    ?.getOrNull(0)
-                                    ?.replace("token=", EMPTY_STRING)?.trim()
-                            if (!uid.isNullOrEmpty() && !username.isNullOrEmpty() && !token.isNullOrEmpty()) {
-                                try { accounts.signIn(uid, username, token) }
-                                catch (e: kotlinx.coroutines.CancellationException) { throw e }
-                                catch (e: Exception) { toastText = "保存登录信息失败，请重试" }
-                            }
-                        } else {
-                            login.message?.let {
-                                toastText = login.message
-                                when (login.message) {
-                                    "图形验证码不能为空", "图形验证码错误" -> onGetCaptcha()
+            try {
+                networkRepo.tryLogin(loginData)
+                    .collect { result ->
+                        val response = result.getOrNull()
+                        response?.body()?.let {
+                            val login: LoginResponse = Gson().fromJson(
+                                response.body()?.string(),
+                                LoginResponse::class.java
+                            )
+                            if (login.status == 1) {
+                                val cookies = response.headers().values("Set-Cookie")
+                                val uid =
+                                    cookies.find { it.startsWith("uid=") }?.split(";")
+                                        ?.getOrNull(0)
+                                        ?.replace("uid=", EMPTY_STRING)?.trim()
+                                val username =
+                                    cookies.find { it.startsWith("username=") }?.split(";")
+                                        ?.getOrNull(0)?.replace("username=", EMPTY_STRING)?.trim()
+                                val token =
+                                    cookies.findLast { it.startsWith("token=") }?.split(";")
+                                        ?.getOrNull(0)
+                                        ?.replace("token=", EMPTY_STRING)?.trim()
+                                if (!uid.isNullOrEmpty() && !username.isNullOrEmpty() && !token.isNullOrEmpty()) {
+                                    try { accounts.signIn(uid, username, token) }
+                                    catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                                    catch (e: Exception) { toastText = "保存登录信息失败，请重试" }
+                                }
+                            } else {
+                                login.message?.let {
+                                    toastText = login.message
+                                    when (login.message) {
+                                        "图形验证码不能为空", "图形验证码错误" -> onGetCaptcha()
 
-                                    "密码错误" -> if (captchaImg != null) onGetCaptcha()
+                                        "密码错误" -> if (captchaImg != null) onGetCaptcha()
+                                    }
                                 }
                             }
                         }
                     }
-                }
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (_: Exception) { toastText = "登录失败，请稍后重试或使用网页登录" }
+            finally { isLoggingIn = false }
         }
     }
 

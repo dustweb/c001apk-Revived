@@ -7,6 +7,6 @@ The SZLM registration wire format and the sample report in
 The complete license is distributed in `app/src/main/assets/licenses/szlm_res-MIT.txt`.
 
 The Kotlin client and application integration are implemented in this project.
-Registration runs only when the user requests it. It does not collect account
+Registration runs once after a successful login, or when requested in settings. It does not collect account
 credentials or real device identifiers and does not rotate identifiers in response
 to verification challenges. Existing identifiers are preserved on failure.

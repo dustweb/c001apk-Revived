@@ -181,7 +181,9 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background)
                     ) {
-                        androidx.compose.runtime.key(preferences.sessionGeneration) {
+                        if (preferences.pendingDeviceIdLogin > 0 && preferences.pendingDeviceIdLogin == preferences.sessionGeneration) {
+                            LoginInitialization()
+                        } else androidx.compose.runtime.key(preferences.sessionGeneration) {
                             CompositionLocalProvider(androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner provides navigationOwner) {
                                 MainNavigation(
                                     navController = navController,
@@ -190,6 +192,9 @@ class MainActivity : ComponentActivity() {
                                     widthSizeClass = widthSizeClass,
                                 )
                             }
+                        }
+                        viewModel.loginDeviceIdNotice?.takeIf { it.generation == preferences.sessionGeneration }?.let {
+                            LoginDeviceIdNotice(it, viewModel::dismissDeviceIdNotice)
                         }
                     }
                 }

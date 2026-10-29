@@ -65,6 +65,7 @@ data class UserPreferencesCompat(
     val accounts: List<com.example.c001apk.compose.SavedAccount> = emptyList(),
     val sessionGeneration: Long = 0,
     val szlmLastAttempt: Long = 0,
+    val pendingDeviceIdLogin: Long = 0,
 ) {
     constructor(original: UserPreferences) : this(
         themeMode = original.themeMode,
@@ -118,6 +119,7 @@ data class UserPreferencesCompat(
         accounts = original.accountsList,
         sessionGeneration = original.sessionGeneration,
         szlmLastAttempt = original.szlmLastAttempt,
+        pendingDeviceIdLogin = original.pendingDeviceIdLogin,
     )
 
     @Composable
@@ -179,6 +181,7 @@ data class UserPreferencesCompat(
         .addAllAccounts(accounts)
         .setSessionGeneration(sessionGeneration)
         .setSzlmLastAttempt(szlmLastAttempt)
+        .setPendingDeviceIdLogin(pendingDeviceIdLogin)
         .build()
 
     companion object {

@@ -94,7 +94,15 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(
+    if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+        MiuixLoginForm(
+            account = account, onAccount = { account = it }, password = password, onPassword = { password = it },
+            passwordHidden = passwordHidden, onTogglePassword = { passwordHidden = !passwordHidden },
+            captcha = captcha, onCaptcha = { captcha = it }, captchaImage = viewModel.captchaImg,
+            onRefreshCaptcha = viewModel::onGetCaptcha, ready = viewModel.requestHash.isNotEmpty(),
+            loggingIn = viewModel.isLoggingIn, onLogin = ::onLogin, onWebLogin = onWebLogin, onBack = onBackClick,
+        )
+    } else Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
@@ -232,7 +240,7 @@ fun LoginScreen(
             }
 
             FilledTonalButton(
-                enabled = viewModel.requestHash.isNotEmpty(),
+                enabled = viewModel.requestHash.isNotEmpty() && !viewModel.isLoggingIn,
                 onClick = {
                     onLogin()
                 },

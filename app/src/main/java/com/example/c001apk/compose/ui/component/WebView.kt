@@ -84,8 +84,8 @@ fun WebView(
                     javaScriptCanOpenWindowsAutomatically = true
                     loadsImagesAutomatically = true
                     allowFileAccess = false
-                    userAgentString = prefs.userAgent
-                    if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                    userAgentString = WebSettings.getDefaultUserAgent(context)
+                    if (!isLogin && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
                         WebSettingsCompat.setAlgorithmicDarkeningAllowed(this, isDarkMode)
                     }
                 }

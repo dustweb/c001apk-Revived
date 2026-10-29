@@ -28,10 +28,11 @@ class DeviceIdentityRepository @Inject constructor(
     private val client = OkHttpClient.Builder().callTimeout(20, TimeUnit.SECONDS)
         .connectTimeout(10, TimeUnit.SECONDS).retryOnConnectionFailure(false).followRedirects(false).build()
 
-    suspend fun acquire(): String = withContext(Dispatchers.IO) {
+    suspend fun acquire(expectedSession: Long? = null): String = withContext(Dispatchers.IO) {
         check(acquisition.tryLock()) { "正在获取，请稍候" }
         try {
             val before = store.data.first()
+            check(expectedSession == null || (before.isLogin && before.sessionGeneration == expectedSession)) { "账号已切换" }
             val now = System.currentTimeMillis()
             check(now - before.szlmLastAttempt >= 60_000) { "获取过于频繁，请稍后再试" }
             store.updateData { it.copy(szlmLastAttempt = now) }
@@ -45,6 +46,7 @@ class DeviceIdentityRepository @Inject constructor(
                     ?: error("服务未返回有效标识，可手动输入")
             }
             store.updateData { current ->
+                check(expectedSession == null || (current.isLogin && current.sessionGeneration == expectedSession)) { "账号已切换" }
                 check(current.szlmId == before.szlmId && current.xAppDevice == before.xAppDevice) { "设备参数已更新，已保留当前值" }
                 current.withId(id)
             }
