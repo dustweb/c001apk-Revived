@@ -61,7 +61,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import top.yukonga.miuix.kmp.icon.extended.ListView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.c001apk.compose.ui.component.design.FullScreenDialog as Dialog
@@ -370,6 +369,12 @@ fun HomeScreen(
     val context = LocalContext.current
     var showTabEditor by rememberSaveable { mutableStateOf(false) }
     val selectedTabIndex = pagerState.currentPage.coerceIn(tabList.indices)
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
+    val onTabSelected: (Int) -> Unit = { index ->
+        if (pagerState.currentPage == index) onRefresh()
+        selectedTabType = tabList[index]
+        scope.launch { pagerState.animateScrollToPage(index) }
+    }
 
     LaunchedEffect(pagerState, tabList) {
         val targetType = selectedTabType.takeIf(tabList::contains)
@@ -415,17 +420,18 @@ fun HomeScreen(
         Column(
             modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
         ) {
-            Row(
+            if (miuix) {
+                MiuixHomeHeader(
+                    labels = tabList.map { tabTitle(it) },
+                    selectedTabIndex = selectedTabIndex,
+                    onTabSelected = onTabSelected,
+                    onSearch = onSearch,
+                    onEditTabs = { showTabEditor = true },
+                )
+            } else Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val onTabSelected: (Int) -> Unit = { index ->
-                    if (pagerState.currentPage == index) {
-                        onRefresh()
-                    }
-                    selectedTabType = tabList[index]
-                    scope.launch { pagerState.animateScrollToPage(index) }
-                }
                 SecondaryScrollableTabRow(
                     labels = tabList.map { tabTitle(it) },
                     onTabSelected = onTabSelected,
@@ -462,10 +468,7 @@ fun HomeScreen(
                     modifier = Modifier.size(40.dp),
                     onClick = rememberHapticClick { showTabEditor = true },
                 ) {
-                    if (com.example.c001apk.compose.ui.theme.isMiuix()) Icon(
-                        imageVector = top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.ListView,
-                        contentDescription = "编辑首页板块",
-                    ) else Icon(
+                    Icon(
                         modifier = Modifier.size(21.dp),
                         painter = painterResource(R.drawable.ic_menu),
                         contentDescription = "编辑首页板块",
