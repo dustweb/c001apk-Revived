@@ -2,9 +2,16 @@
 <resources>
 
     <style name="Theme.C001apkCompose" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/startup_background</item>
         <item name="colorSurface">@color/color_surface</item>
         <item name="colorOnSurface">@color/color_on_surface</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialAlertDialog.Rounded</item>
+    </style>
+
+    <style name="Theme.C001apkCompose.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/startup_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_revived</item>
+        <item name="postSplashScreenTheme">@style/Theme.C001apkCompose</item>
     </style>
 
     <style name="radius12">

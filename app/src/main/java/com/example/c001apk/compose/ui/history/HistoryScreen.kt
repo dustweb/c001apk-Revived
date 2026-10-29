@@ -117,7 +117,7 @@ fun HistoryScreen(
                     ) {
                         IconButton(
                             enabled = !viewModel.isBackupBusy,
-                            onClick = { showClearDialog = true }
+                            onClick = com.example.c001apk.compose.ui.component.rememberHapticClick { showClearDialog = true }
                         ) {
                             Icon(imageVector = Icons.Default.ClearAll, contentDescription = "清空列表")
                         }
@@ -126,7 +126,7 @@ fun HistoryScreen(
                         Box {
                             IconButton(
                                 enabled = !viewModel.isBackupBusy,
-                                onClick = { showBackupMenu = true }
+                                onClick = com.example.c001apk.compose.ui.component.rememberHapticClick { showBackupMenu = true }
                             ) {
                                 if (viewModel.isBackupBusy) {
                                     CircularProgressIndicator(
@@ -144,7 +144,7 @@ fun HistoryScreen(
                                 DropdownMenuItem(
                                     text = { Text("导入收藏") },
                                     leadingIcon = { Icon(Icons.Default.Download, contentDescription = null) },
-                                    onClick = {
+                                    onClick = com.example.c001apk.compose.ui.component.rememberHapticClick {
                                         showBackupMenu = false
                                         try {
                                             importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
@@ -157,7 +157,7 @@ fun HistoryScreen(
                                     text = { Text("导出收藏") },
                                     leadingIcon = { Icon(Icons.Default.Upload, contentDescription = null) },
                                     enabled = dataList.isNotEmpty(),
-                                    onClick = {
+                                    onClick = com.example.c001apk.compose.ui.component.rememberHapticClick {
                                         showBackupMenu = false
                                         val date = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.ROOT).format(Date())
                                         try {

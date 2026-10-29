@@ -46,6 +46,7 @@ fun LicenseScreen(
 }
 
 private val licenseList = listOf(
+    LicenseItem("Google", "AndroidX SplashScreen", "https://developer.android.com/develop/ui/views/launch/splash-screen", LicenseType.Apache2),
     LicenseItem("kongwufang", "SZLM protocol reference", "https://github.com/kongwufang/szlm_res", LicenseType.MIT),
     LicenseItem(
         "compose-miuix-ui contributors",

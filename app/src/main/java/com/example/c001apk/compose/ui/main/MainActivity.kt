@@ -60,7 +60,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 /**
  * Created by bggRGjQaUbCoE on 2024/5/29
@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel by viewModels<MainViewModel>()
     private val searchViewModel by viewModels<SearchViewModel>()
     private var stableStatusBarInset: Int? = null
+    private var initialThemeReady = false
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -92,6 +93,8 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
+        splash.setKeepOnScreenCondition { !initialThemeReady }
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             enqueueDeepLink(intent)
@@ -100,10 +103,6 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setupStableStatusBarInsets()
-
-        val initialPreferences = runBlocking {
-            userPreferencesRepository.data.first()
-        }
 
         setContent {
 
@@ -115,7 +114,7 @@ class MainActivity : ComponentActivity() {
 
             val userPreferences by userPreferencesRepository.data
                 .collectAsStateWithLifecycle(
-                    initialValue = initialPreferences,
+                    initialValue = null,
                     lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
                 )
 
@@ -176,6 +175,7 @@ class MainActivity : ComponentActivity() {
                     contentScale = preferences.contentScale,
                     uiStyle = preferences.uiStyle,
                 ) {
+                    androidx.compose.runtime.SideEffect { initialThemeReady = true }
                     Surface(
                         modifier = Modifier
                             .fillMaxSize()

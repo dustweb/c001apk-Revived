@@ -206,6 +206,7 @@ dependencies {
     implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.hilt.navigation.compose)

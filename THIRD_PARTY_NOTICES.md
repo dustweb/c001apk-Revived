@@ -10,3 +10,10 @@ The Kotlin client and application integration are implemented in this project.
 Registration runs once after a successful login, or when requested in settings. It does not collect account
 credentials or real device identifiers and does not rotate identifiers in response
 to verification challenges. Existing identifiers are preserved on failure.
+
+The animated about-page background adapts the OS2 shader and phone presets from
+the [Miuix example](https://github.com/compose-miuix-ui/miuix/tree/39c40f99844227b853f0049a0933b1f3ae6c00ba/example/shared/src/commonMain/kotlin/component/effect)
+(Copyright 2026, compose-miuix-ui contributors, Apache-2.0).
+It uses Miuix's runtime shader API with app-owned lifecycle and rendering code.
+The shader clamps empty color fields to avoid division by zero. The full license
+is distributed in `app/src/main/assets/licenses/miuix-background-Apache-2.0.txt`.
