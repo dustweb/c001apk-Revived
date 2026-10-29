@@ -27,7 +27,8 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
     private val originalLayoutHint = binding.textInputLayout.hint
     private val originalHintEnabled = binding.textInputLayout.isHintEnabled
     private val originalBackground = binding.editText.background
-    private val originalHint = binding.editText.hint
+    private var originalHint = binding.editText.hint
+    private var originalCounterColor = binding.textInputLayout.counterTextColor
     private val originalDrawables = binding.checkBox.compoundDrawablesRelative
     private val originalDrawablePadding = binding.checkBox.compoundDrawablePadding
     private val originalEditorPadding = intArrayOf(binding.editText.paddingLeft, binding.editText.paddingTop, binding.editText.paddingRight, binding.editText.paddingBottom)
@@ -39,6 +40,10 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
 
     fun apply(native: Boolean, palette: ColorScheme?) {
         if (native && palette == null) return
+        if (native && !nativeApplied) {
+            originalHint = binding.editText.hint
+            originalCounterColor = binding.textInputLayout.counterTextColor
+        }
         val hasTarget = binding.replyTargetName.visibility == View.VISIBLE
         binding.replyDragArea.visibility = if (native) View.VISIBLE else View.GONE
         binding.replyCancel.visibility = if (native) View.VISIBLE else View.GONE
@@ -64,6 +69,7 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
             binding.editText.background = originalBackground
             binding.editText.hint = originalHint
             binding.editText.minLines = originalMinLines
+            binding.textInputLayout.setCounterTextColor(originalCounterColor)
             originalEditorPadding.let { binding.editText.setPadding(it[0], it[1], it[2], it[3]) }
             binding.checkBox.setCompoundDrawablesRelativeWithIntrinsicBounds(originalDrawables[0], originalDrawables[1], originalDrawables[2], originalDrawables[3])
             binding.checkBox.compoundDrawablePadding = originalDrawablePadding

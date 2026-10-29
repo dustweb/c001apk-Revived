@@ -181,6 +181,12 @@ class UiStyleSwitchTest {
                         assertEquals(style == UiStyle.MIUIX, it.findViewById<android.view.View>(R.id.replyCancel).isShown)
                         assertEquals(style == UiStyle.MIUIX, it.findViewById<android.view.View>(R.id.replyDragHandle).isShown)
                         assertEquals(style == UiStyle.MD3, it.findViewById<android.view.View>(R.id.publish).isShown)
+                        if (style == UiStyle.MD3) {
+                            listOf(R.id.emojiBtn, R.id.imageBtn, R.id.otherImageBtn, R.id.atBtn, R.id.tagBtn).forEach { id ->
+                                val toolbarIcon = it.findViewById<android.widget.ImageView>(id)
+                                org.junit.Assert.assertNotNull("MD3 toolbar icon must retain its theme tint", toolbarIcon.imageTintList)
+                            }
+                        }
                         val icon = it.findViewById<android.widget.ImageView>(R.id.imageBtn).drawable
                         assertEquals(style == UiStyle.MIUIX,
                             icon is com.example.c001apk.compose.view.VectorGlyphDrawable)

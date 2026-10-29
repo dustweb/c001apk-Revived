@@ -15,6 +15,8 @@ The animated about-page background adapts the OS3 shader and phone presets from
 the [Miuix example](https://github.com/compose-miuix-ui/miuix/tree/39c40f99844227b853f0049a0933b1f3ae6c00ba/example/shared/src/commonMain/kotlin/component/effect)
 (Copyright 2026, compose-miuix-ui contributors, Apache-2.0).
 It uses Miuix's runtime shader API with app-owned lifecycle and rendering code.
+The glass card uses the example's `Overlay_Thin_Light` / `Pured_Regular_Light`
+blend presets from `component/blend/ColorBlendToken.kt` under the same license.
 The motion and color-cycle behavior was checked against
 [InstallerX-Revived](https://github.com/wxxsfxyzm/InstallerX-Revived/tree/35d7c7a06e86b280789a171d8b213becac1a0fd7/app/src/main/java/com/rosan/installer/ui/library/effect),
 which uses the same Miuix example effect.

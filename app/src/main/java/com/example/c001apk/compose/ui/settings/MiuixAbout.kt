@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,24 +38,45 @@ import com.example.c001apk.compose.constant.Constants.URL_SOURCE_CODE
 import com.example.c001apk.compose.constant.Constants.URL_SOURCE_CODE_FORK
 import com.example.c001apk.compose.ui.component.LauncherIconImage
 import com.example.c001apk.compose.ui.component.BackButton
+import com.example.c001apk.compose.logic.providable.LocalUserPreferences
+import com.example.c001apk.compose.ui.component.design.isMiuixWindowBlurEnabled
 import com.example.c001apk.compose.util.openInBrowser
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.window.WindowDialog
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurBlendMode
+import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 
 @Composable
 internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll: ScrollState) {
     BoxWithConstraints(Modifier.fillMaxSize().testTag("miuix-about-page")) {
-        val heroHeight = (maxHeight * .60f).coerceIn(if (maxWidth > maxHeight) 260.dp else 340.dp, 560.dp)
+        val heroHeight = (maxHeight * .46f).coerceIn(if (maxWidth > maxHeight) 260.dp else 300.dp, 480.dp)
         val heroPixels = with(LocalDensity.current) { heroHeight.toPx() }
         val collapsed by remember(scroll, heroPixels) { derivedStateOf { scroll.value > heroPixels * .65f } }
-        AboutAnimatedBackground(Modifier.matchParentSize()) { (1f - scroll.value / heroPixels).coerceIn(0f, 1f) }
+        val dark = LocalUserPreferences.current.isDarkMode()
+        val backdrop = if (isMiuixWindowBlurEnabled()) rememberLayerBackdrop() else null
+        // Capture only the background; the glass card must remain outside its source layer.
+        AboutAnimatedBackground(Modifier.matchParentSize().then(if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier)) {
+            (1f - scroll.value / heroPixels).coerceIn(0f, 1f)
+        }
+        val glassColors = BlurDefaults.blurColors(blendColors = if (dark) listOf(
+            BlendColorEntry(Color(0x4DA9A9A9), BlurBlendMode.Luminosity),
+            BlendColorEntry(Color(0x1A9C9C9C), BlurBlendMode.PlusDarker),
+        ) else listOf(
+            BlendColorEntry(Color(0x340034F9), BlurBlendMode.Overlay),
+            BlendColorEntry(Color(0xB3FFFFFF), BlurBlendMode.HardLight),
+        ))
         Scaffold(containerColor = Color.Transparent,
             topBar = { SmallTopAppBar(title = if (collapsed) "关于" else "", color = Color.Transparent,
                 navigationIcon = { BackButton(onBack) }) },
@@ -61,8 +84,12 @@ internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll:
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll), horizontalAlignment = Alignment.CenterHorizontally) {
                 Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(horizontal = 16.dp)) {
                     AboutHeader(compact = false, modifier = Modifier.heightIn(min = heroHeight))
-                    Card(Modifier.fillMaxWidth().testTag("about-links"),
-                        colors = CardDefaults.defaultColors(MiuixTheme.colorScheme.surfaceContainer.copy(alpha = .86f))) {
+                    SmallTitle("关于", textColor = MiuixTheme.colorScheme.primary,
+                        insideMargin = PaddingValues(horizontal = 12.dp, vertical = 8.dp))
+                    Card(Modifier.fillMaxWidth().testTag("about-links").then(if (backdrop != null)
+                        Modifier.textureBlur(backdrop = backdrop, shape = RoundedCornerShape(CardDefaults.CornerRadius),
+                            blurRadius = 60f, colors = glassColors) else Modifier),
+                        colors = CardDefaults.defaultColors(Color.White.copy(alpha = if (dark) .18f else .65f))) {
                         ProjectLinks()
                         ArrowPreference(title = "开源许可证", onClick = onLicense)
                     }

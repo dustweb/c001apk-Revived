@@ -638,10 +638,13 @@ class ReplyActivity : AppCompatActivity(),
             binding.checkBox.buttonTintList = android.content.res.ColorStateList.valueOf(palette.primary.toArgb())
         }
         if (!miuix) {
-            originalPublishColors?.let { binding.publish.setTextColor(it) }
+            if (binding.editText.text?.isNotBlank() == true) binding.publish.setTextColor(resolvePrimaryColor())
+            else originalPublishColors?.let { binding.publish.setTextColor(it) }
             originalHintColors?.let { binding.editText.setHintTextColor(it) }
             binding.checkBox.buttonTintList = originalCheckTint
-            originalIconTints.forEach { (view, tint) -> view.imageTintList = tint }
+            val toolbarTint = ColorStateList.valueOf(viewPalette?.onSurfaceVariant?.toArgb() ?: textColor)
+            // A null ImageView tint clears the XML vector's tint and exposes its black paths.
+            originalIconTints.forEach { (view, tint) -> view.imageTintList = tint ?: toolbarTint }
         }
         viewStyle.apply(miuix, viewPalette)
         imeScrimDrawable.color = color

@@ -16,6 +16,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -590,7 +591,9 @@ fun FeedScreen(
             onDismissRequest = {
                 resetBottomSheet()
             },
-            modifier = Modifier.padding(top = topInset),
+            modifier = Modifier.padding(top = topInset).then(
+                if (miuix) Modifier else Modifier.consumeWindowInsets(PaddingValues(top = topInset))
+            ),
             sheetState = bottomSheetState,
             title = "全部回复",
         ) {
