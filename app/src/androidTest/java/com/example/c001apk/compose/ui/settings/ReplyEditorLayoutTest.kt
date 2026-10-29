@@ -43,20 +43,22 @@ class ReplyEditorLayoutTest {
                     var ready = false
                     scenario.onActivity {
                         val title = it.findViewById<TextView>(R.id.title)
-                        val publish = it.findViewById<TextView>(R.id.publish)
+                        val publish = it.findViewById<ImageView>(R.id.replySend)
                         ready = it.findViewById<TextInputLayout>(R.id.textInputLayout).boxBackgroundMode == TextInputLayout.BOX_BACKGROUND_NONE &&
                             title.width > title.paint.measureText(title.text.toString()) &&
-                            publish.width - publish.paddingLeft - publish.paddingRight >= publish.paint.measureText(publish.text.toString())
+                            publish.isShown && publish.width > 0
                     }
                     ready
                 }
                 scenario.onActivity {
                     val title = it.findViewById<TextView>(R.id.title)
-                    val publish = it.findViewById<TextView>(R.id.publish)
+                    val publish = it.findViewById<ImageView>(R.id.replySend)
                     val editor = it.findViewById<TextInputEditText>(R.id.editText)
                     val image = it.findViewById<ImageView>(R.id.imageBtn)
                     val density = it.resources.displayMetrics.density
-                    assertTrue(title.right < publish.left)
+                    assertTrue(title.right <= publish.left)
+                    assertTrue(it.findViewById<android.view.View>(R.id.replyDragHandle).isShown)
+                    assertFalse(it.findViewById<android.view.View>(R.id.publish).isShown)
                     assertTrue(image.drawable.intrinsicHeight >= density * 20)
                     assertTrue(image.height >= density * 40)
                     assertEquals(ImageView.ScaleType.CENTER_INSIDE, image.scaleType)
@@ -82,7 +84,7 @@ class ReplyEditorLayoutTest {
                 compose.waitUntil(10_000) {
                     var ready = false
                     scenario.onActivity { activity ->
-                        val publish = activity.findViewById<TextView>(R.id.publish)
+                        val publish = activity.findViewById<ImageView>(R.id.replySend)
                         val toolbarButton = activity.findViewById<ImageView>(R.id.emojiBtn)
                         val visible = android.graphics.Rect()
                         ready = activity.hasWindowFocus() && publish.width > 0 &&
@@ -110,9 +112,9 @@ class ReplyEditorLayoutTest {
                     var ready = false
                     runCatching { scenario.onActivity {
                         val title = it.findViewById<TextView>(R.id.title)
-                        val publish = it.findViewById<TextView>(R.id.publish)
+                        val publish = it.findViewById<ImageView>(R.id.replySend)
                         ready = it.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE &&
-                            title.width > 0 && title.right < publish.left &&
+                            title.width > 0 && publish.isShown && title.right <= publish.left &&
                             it.findViewById<TextInputLayout>(R.id.textInputLayout).boxBackgroundMode == TextInputLayout.BOX_BACKGROUND_NONE
                     } }
                     ready
@@ -120,7 +122,7 @@ class ReplyEditorLayoutTest {
                 scenario.onActivity {
                     assertEquals("发布面板布局预览，不会发送", it.findViewById<TextInputEditText>(R.id.editText).text.toString())
                     val title = it.findViewById<TextView>(R.id.title)
-                    val publish = it.findViewById<TextView>(R.id.publish)
+                    val publish = it.findViewById<ImageView>(R.id.replySend)
                     assertTrue(title.width >= title.paint.measureText(title.text.toString()))
                     assertTrue(publish.right <= (publish.parent as android.view.View).width)
                 }
@@ -132,7 +134,10 @@ class ReplyEditorLayoutTest {
                 }
                 scenario.onActivity {
                     assertEquals("发布面板布局预览，不会发送", it.findViewById<TextInputEditText>(R.id.editText).text.toString())
-                    assertTrue(it.findViewById<TextView>(R.id.publish).isEnabled)
+                    assertTrue(it.findViewById<TextView>(R.id.publish).isShown)
+                    assertTrue(it.findViewById<TextView>(R.id.publish).isClickable)
+                    assertFalse(it.findViewById<android.view.View>(R.id.replySend).isShown)
+                    assertFalse(it.findViewById<android.view.View>(R.id.replyDragHandle).isShown)
                 }
             } finally {
                 runBlocking { repository.setUiStyle(original.uiStyle); repository.setFontScale(original.fontScale); repository.setContentScale(original.contentScale) }

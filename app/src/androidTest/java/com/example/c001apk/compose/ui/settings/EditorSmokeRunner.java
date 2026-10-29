@@ -55,12 +55,12 @@ public class EditorSmokeRunner extends Instrumentation {
             runOnMainSync(() -> {
                 View root = editor.getWindow().getDecorView();
                 TextView title = (TextView) find(root, "发布动态", false);
-                TextView publish = (TextView) find(root, "发布", false);
+                View publish = find(root, "发送", true);
                 Rect rect = new Rect();
-                if (title == null || publish == null) error[0] = "Header text is missing";
+                if (title == null || publish == null) error[0] = "Header controls are missing";
                 else if (title.getLeft() + title.getPaddingLeft() < editor.getResources().getDisplayMetrics().density * 8) error[0] = "Title has no start inset";
                 else if (!publish.getGlobalVisibleRect(rect) || rect.width() != publish.getWidth()) error[0] = "Publish button is clipped";
-                else if (publish.getWidth() - publish.getPaddingLeft() - publish.getPaddingRight() < publish.getPaint().measureText("发布")) error[0] = "Publish text is clipped";
+                else if (publish.getWidth() < editor.getResources().getDisplayMetrics().density * 48) error[0] = "Send touch target is too small";
             });
             final String headerError = error[0];
             runOnMainSync(() -> {

@@ -57,13 +57,14 @@ class EditorWindowTest {
             scenario.onActivity { activity ->
                 val views = activity.window.decorView.children().toList()
                 val title = views.filterIsInstance<TextView>().first { it.text.toString() == "发布动态" }
-                val publish = views.filterIsInstance<TextView>().first { it.text.toString() == "发布" }
+                val publish = views.first { it.contentDescription == "发送" && it.isShown }
                 val density = activity.resources.displayMetrics.density
                 assertTrue("Title needs a start inset", title.left + title.paddingLeft >= 8 * density)
                 val visible = Rect()
                 assertTrue(publish.getGlobalVisibleRect(visible))
                 assertEquals("Publish button is clipped", publish.width, visible.width())
-                assertTrue("Publish label is clipped", publish.width - publish.paddingLeft - publish.paddingRight >= publish.paint.measureText(publish.text.toString()))
+                assertTrue(publish.width >= 48 * density)
+                assertTrue(views.any { it.contentDescription == "关闭" && it.isShown })
                 views.filterIsInstance<EditText>().first().setText("窗口测试，不会发送")
             }
             val bounds = Rect()

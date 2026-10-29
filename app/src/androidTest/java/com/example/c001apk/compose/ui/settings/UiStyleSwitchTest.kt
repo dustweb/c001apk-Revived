@@ -164,7 +164,7 @@ class UiStyleSwitchTest {
             }
             val original = runBlocking { repository.data.first().uiStyle }
             try {
-                for (style in listOf(UiStyle.MIUIX, UiStyle.MD3)) {
+                for (style in listOf(UiStyle.MIUIX, UiStyle.MD3, UiStyle.MIUIX)) {
                     runBlocking { repository.setUiStyle(style) }
                     compose.waitUntil(5_000) {
                         var applied = false
@@ -177,6 +177,10 @@ class UiStyleSwitchTest {
                     }
                     scenario.onActivity {
                         assertSame(originalActivity, it)
+                        assertEquals(style == UiStyle.MIUIX, it.findViewById<android.view.View>(R.id.replySend).isShown)
+                        assertEquals(style == UiStyle.MIUIX, it.findViewById<android.view.View>(R.id.replyCancel).isShown)
+                        assertEquals(style == UiStyle.MIUIX, it.findViewById<android.view.View>(R.id.replyDragHandle).isShown)
+                        assertEquals(style == UiStyle.MD3, it.findViewById<android.view.View>(R.id.publish).isShown)
                         val icon = it.findViewById<android.widget.ImageView>(R.id.imageBtn).drawable
                         assertEquals(style == UiStyle.MIUIX,
                             icon is com.example.c001apk.compose.view.VectorGlyphDrawable)

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -18,7 +18,8 @@ import top.yukonga.miuix.kmp.theme.TextStyles
 
 fun Activity.observeViewTheme(repository: UserPreferencesRepository,
     onTheme: (UserPreferencesCompat, Boolean, ColorScheme, TextStyles) -> Unit) {
-    val observer = ComposeView(this).apply {
+    val observer = ComposeView(this)
+    observer.apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             val prefs by repository.data.collectAsStateWithLifecycle(initialValue = null)
@@ -28,14 +29,25 @@ fun Activity.observeViewTheme(repository: UserPreferencesRepository,
                     C001apkComposeTheme(darkTheme = dark, themeType = value.themeType,
                         seedColor = value.seedColor, materialYou = value.materialYou, pureBlack = value.pureBlack,
                         paletteStyle = value.paletteStyle, fontScale = value.fontScale,
-                        contentScale = value.contentScale, uiStyle = value.uiStyle) {
+                        contentScale = value.contentScale, uiStyle = value.uiStyle,
+                        provideWindowHost = false) {
                         val colors = MaterialTheme.colorScheme
                         val textStyles = MiuixTheme.textStyles
-                        SideEffect { onTheme(value, dark, colors, textStyles) }
+                        // Native Views must be updated outside Compose's measure/layout pass.
+                        DisposableEffect(value, dark, colors, textStyles) {
+                            val update = Runnable {
+                                if (!isDestroyed && observer.isAttachedToWindow) {
+                                    onTheme(value, dark, colors, textStyles)
+                                }
+                            }
+                            observer.post(update)
+                            onDispose { observer.removeCallbacks(update) }
+                        }
                     }
                 }
             }
         }
     }
-    (window.decorView as ViewGroup).addView(observer, ViewGroup.LayoutParams(0, 0))
+    // DecorView can survive Activity recreation; content children get a fresh recomposer.
+    addContentView(observer, ViewGroup.LayoutParams(0, 0))
 }

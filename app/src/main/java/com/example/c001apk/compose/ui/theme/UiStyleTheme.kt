@@ -76,7 +76,12 @@ fun ColorScheme.withMiuixSurfaces(colors: Colors): ColorScheme = copy(
 )
 
 @Composable
-fun UiStyleTheme(style: UiStyle, controller: ThemeController, content: @Composable () -> Unit) {
+fun UiStyleTheme(
+    style: UiStyle,
+    controller: ThemeController,
+    provideWindowHost: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     val materialIndication = LocalIndication.current
     val materialOverscroll = LocalOverscrollFactory.current
     // Keep the provider tree stable so a style change does not discard page state.
@@ -89,7 +94,9 @@ fun UiStyleTheme(style: UiStyle, controller: ThemeController, content: @Composab
             LocalIndication provides if (style == UiStyle.MIUIX) LocalIndication.current
                 else materialIndication,
         ) {
-            Scaffold(
+            if (!provideWindowHost) {
+                content()
+            } else Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = Color.Transparent,
                 contentWindowInsets = WindowInsets(0, 0, 0, 0),

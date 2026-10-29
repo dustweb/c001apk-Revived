@@ -71,6 +71,7 @@ fun C001apkComposeTheme(
     contentScale: Float = 1.00f,
     uiStyle: UiStyle = LocalUserPreferences.current.uiStyle,
     applySystemBars: Boolean = true,
+    provideWindowHost: Boolean = true,
     content: @Composable () -> Unit
 ) {
 
@@ -156,7 +157,7 @@ fun C001apkComposeTheme(
                         LocalDensity.current.fontScale * fontScale,
                     )
                 ) {
-                    UiStyleTheme(uiStyle, miuixController, content)
+                    UiStyleTheme(uiStyle, miuixController, provideWindowHost, content)
                 }
             }
         }
