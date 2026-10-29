@@ -4,80 +4,76 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import com.example.c001apk.compose.constant.Constants.EMPTY_STRING
+import com.example.c001apk.compose.logic.repository.AccountRepository
 import com.example.c001apk.compose.logic.repository.NetworkRepo
 import com.example.c001apk.compose.logic.repository.UserPreferencesRepository
 import com.example.c001apk.compose.ui.base.PrefsViewModel
 import com.example.c001apk.compose.util.CookieUtil
-import com.example.c001apk.compose.util.CookieUtil.SESSID
 import com.example.c001apk.compose.util.encode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * Created by bggRGjQaUbCoE on 2024/6/3
- */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val networkRepo: NetworkRepo,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val accounts: AccountRepository,
 ) : PrefsViewModel(userPreferencesRepository) {
-
-    init {
-        getCheckLoginInfo()
-    }
-
     var badge by mutableIntStateOf(0)
         private set
+    private var navigationGeneration = -1L
+    private var navigationStore = androidx.lifecycle.ViewModelStore()
+    fun navigationOwner(generation: Long): androidx.lifecycle.ViewModelStoreOwner {
+        if (navigationGeneration != generation) {
+            navigationStore.clear()
+            navigationStore = androidx.lifecycle.ViewModelStore()
+            navigationGeneration = generation
+        }
+        val store = navigationStore
+        return object : androidx.lifecycle.ViewModelStoreOwner { override val viewModelStore = store }
+    }
 
-    private fun getCheckLoginInfo() {
+    override fun onCleared() {
+        navigationStore.clear()
+        super.onCleared()
+    }
+
+    init {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.checkLoginInfo()
-                .collect { result ->
-                    val response = result.getOrNull()
-                    if (response != null) {
-                        response.body()?.data?.let { login ->
-                            badge = login.notifyCount.badge
-                            CookieUtil.atme = login.notifyCount.atme
-                            CookieUtil.atcommentme = login.notifyCount.atcommentme
-                            CookieUtil.feedlike = login.notifyCount.feedlike
-                            CookieUtil.contacts_follow = login.notifyCount.contactsFollow
-                            CookieUtil.message = login.notifyCount.message
-
-                            userPreferencesRepository.apply {
-                                setUid(login.uid)
-                                setUserAvatar(login.userAvatar)
-                                setUsername(login.username.encode)
-                                setToken(login.token)
-                                setIsLogin(true)
-                            }
-                        }
-
-                        if (response.body()?.message == "登录信息有误") {
-                            userPreferencesRepository.apply {
-                                setUid(EMPTY_STRING)
-                                setUserAvatar(EMPTY_STRING)
-                                setUsername(EMPTY_STRING)
-                                setToken(EMPTY_STRING)
-                                setIsLogin(false)
-                            }
-                        }
-
-                        try {
-                            val session = response.headers().values("Set-Cookie")[0]
-                            SESSID = session.substring(0, session.indexOf(";"))
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
+            userPreferencesRepository.data.map { it.sessionGeneration }.distinctUntilChanged().collectLatest { generation ->
+                badge = 0
+                CookieUtil.SESSID = ""
+                CookieUtil.atme = null; CookieUtil.atcommentme = null; CookieUtil.feedlike = null
+                CookieUtil.contacts_follow = null; CookieUtil.message = null
+                val session = userPreferencesRepository.data.first()
+                networkRepo.checkLoginInfo().collect { result ->
+                    if (userPreferencesRepository.data.first().sessionGeneration != generation) return@collect
+                    val response = result.getOrNull() ?: return@collect
+                    response.body()?.data?.takeIf { session.isLogin && it.uid == session.uid }?.let { login ->
+                        badge = login.notifyCount.badge
+                        CookieUtil.atme = login.notifyCount.atme
+                        CookieUtil.atcommentme = login.notifyCount.atcommentme
+                        CookieUtil.feedlike = login.notifyCount.feedlike
+                        CookieUtil.contacts_follow = login.notifyCount.contactsFollow
+                        CookieUtil.message = login.notifyCount.message
+                        try { accounts.updateProfile(generation, login.uid, login.username.encode, login.userAvatar, token = login.token) }
+                        catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                        catch (_: Exception) { /* Keep the last stored profile if secure storage is unavailable. */ }
                     }
+                    if (session.isLogin && response.body()?.message == "登录信息有误") accounts.expire(generation)
+                    if (userPreferencesRepository.data.first().sessionGeneration != generation) return@collect
+                    response.headers().values("Set-Cookie").firstOrNull { it.startsWith("SESSID=") }
+                        ?.let { CookieUtil.SESSID = it.substringBefore(';') }
                 }
+            }
         }
     }
 
-    fun resetBadge() {
-        badge = 0
-    }
-
+    fun resetBadge() { badge = 0 }
 }

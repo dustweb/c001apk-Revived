@@ -12,6 +12,11 @@ import java.util.Random
 
 
 object TokenDeviceUtils {
+    fun withIdentifier(device: String, identifier: String): String {
+        val decoded = Base64.decode(device.reversed(), Base64.DEFAULT).toString(StandardCharsets.UTF_8)
+        require(';' in decoded)
+        return encode(identifier + decoded.substring(decoded.indexOf(';')))
+    }
 
     fun encode(deviceInfo: String): String {
         val charset: Charset = StandardCharsets.UTF_8

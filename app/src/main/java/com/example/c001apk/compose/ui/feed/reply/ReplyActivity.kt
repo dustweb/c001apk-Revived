@@ -132,6 +132,7 @@ class ReplyActivity : AppCompatActivity(),
     private var predictiveReplyBack: OnBackPressedCallback? = null
     private var currentUiStyle = com.example.c001apk.compose.util.CookieUtil.uiStyle
     private var viewPalette: androidx.compose.material3.ColorScheme? = null
+    private var replySessionGeneration: Long? = null
     private var originalPublishColors: android.content.res.ColorStateList? = null
     private var originalHintColors: android.content.res.ColorStateList? = null
     private var originalCheckTint: android.content.res.ColorStateList? = null
@@ -649,6 +650,11 @@ class ReplyActivity : AppCompatActivity(),
 
     private fun initObserve() {
         observeViewTheme(userPreferencesRepository) { prefs, dark, palette, typography ->
+            if (replySessionGeneration != null && replySessionGeneration != prefs.sessionGeneration) {
+                finish()
+                return@observeViewTheme
+            }
+            replySessionGeneration = prefs.sessionGeneration
             currentUiStyle = prefs.uiStyle
             window.setMiuixBlurBehind(prefs.uiStyle == UiStyle.MIUIX && prefs.blurEnabled && prefs.blurScope == com.example.c001apk.compose.BlurScope.GLOBAL && SDK_INT >= 33)
             predictiveReplyBack?.isEnabled = currentUiStyle == UiStyle.MIUIX

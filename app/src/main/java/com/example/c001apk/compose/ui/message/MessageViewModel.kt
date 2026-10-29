@@ -26,6 +26,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/11
@@ -36,6 +37,7 @@ class MessageViewModel @AssistedInject constructor(
     networkRepo: NetworkRepo,
     blackListRepo: BlackListRepo,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val accounts: com.example.c001apk.compose.logic.repository.AccountRepository,
 ) : BaseViewModel(networkRepo, blackListRepo) {
 
     var fffList by mutableStateOf<List<String>>(emptyList())
@@ -57,22 +59,20 @@ class MessageViewModel @AssistedInject constructor(
 
     private fun fetchProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            networkRepo.getProfile(uid)
+            val session = userPreferencesRepository.data.first()
+            networkRepo.getProfile(session.uid)
                 .collect { result ->
                     val data = result.getOrNull()
-                    if (data?.data != null) {
+                    if (data?.data != null && userPreferencesRepository.data.first().sessionGeneration == session.sessionGeneration) {
                         fffList = listOf(
                             data.data.feed?.id ?: "0",
                             data.data.follow ?: "0",
                             data.data.fans ?: "0"
                         )
-                        userPreferencesRepository.apply {
-                            setUserAvatar(data.data.userAvatar.orEmpty())
-                            setUsername(data.data.username.encode)
-                            setLevel(data.data.level ?: "0")
-                            setExperience(data.data.experience ?: "0")
-                            setNextLevelExperience(data.data.nextLevelExperience ?: "0")
-                        }
+                        try { accounts.updateProfile(session.sessionGeneration, session.uid, data.data.username.encode,
+                            data.data.userAvatar.orEmpty(), data.data.level ?: "0", data.data.experience ?: "0", data.data.nextLevelExperience ?: "0") }
+                        catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                        catch (_: Exception) { /* Preserve the current session on a storage failure. */ }
                     } else {
                         result.exceptionOrNull()?.printStackTrace()
                     }
@@ -82,13 +82,7 @@ class MessageViewModel @AssistedInject constructor(
 
     fun onLogout() {
         viewModelScope.launch {
-            userPreferencesRepository.apply {
-                setUid(Constants.EMPTY_STRING)
-                setUserAvatar(Constants.EMPTY_STRING)
-                setUsername(Constants.EMPTY_STRING)
-                setToken(Constants.EMPTY_STRING)
-                setIsLogin(false)
-            }
+            accounts.signOut()
             fffList = emptyList()
             badgeList = listOf(null)
             loadingState = LoadingState.Success(emptyList())

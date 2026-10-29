@@ -46,6 +46,7 @@ fun LicenseScreen(
 }
 
 private val licenseList = listOf(
+    LicenseItem("kongwufang", "SZLM protocol reference", "https://github.com/kongwufang/szlm_res", LicenseType.MIT),
     LicenseItem(
         "compose-miuix-ui contributors",
         "Miuix",

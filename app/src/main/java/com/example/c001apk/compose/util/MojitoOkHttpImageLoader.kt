@@ -16,7 +16,7 @@ import kotlin.concurrent.thread
 class MojitoOkHttpImageLoader(context: Context) : ImageLoader {
 
     private val client = OkHttpClient.Builder()
-        .addInterceptor(AddCookiesInterceptor)
+        .addInterceptor(com.example.c001apk.compose.c001Application.apiCookies)
         .build()
 
     private val callMap = ConcurrentHashMap<Int, Call>()

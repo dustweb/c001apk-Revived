@@ -26,7 +26,35 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val launcherIconManager: LauncherIconManager,
+    private val deviceIdentity: com.example.c001apk.compose.logic.repository.DeviceIdentityRepository,
 ) : PrefsViewModel(userPreferencesRepository) {
+    var acquiringDeviceId by mutableStateOf(false)
+        private set
+    var deviceIdMessage by mutableStateOf<String?>(null)
+        private set
+
+    fun acquireDeviceId() {
+        if (acquiringDeviceId) return
+        acquiringDeviceId = true
+        deviceIdMessage = null
+        viewModelScope.launch {
+            try {
+                deviceIdentity.acquire()
+                deviceIdMessage = "已自动获取并保存"
+            } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (e: Exception) {
+                deviceIdMessage = if (e is IllegalStateException) e.message else "获取失败，请检查网络或手动输入"
+            } finally { acquiringDeviceId = false }
+        }
+    }
+
+    fun saveDeviceId(text: String, onSaved: () -> Unit) {
+        viewModelScope.launch {
+            try { deviceIdentity.save(text); onSaved() }
+            catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (e: Exception) { deviceIdMessage = "保存失败，请检查 ID 后重试" }
+        }
+    }
 
     fun setBlurScope(value: com.example.c001apk.compose.BlurScope) {
         viewModelScope.launch { userPreferencesRepository.setBlurScope(value) }

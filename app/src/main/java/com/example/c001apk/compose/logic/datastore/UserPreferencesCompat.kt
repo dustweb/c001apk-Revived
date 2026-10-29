@@ -62,6 +62,9 @@ data class UserPreferencesCompat(
     val uiStyle: UiStyle = UiStyle.MD3,
     val blurEnabled: Boolean = true,
     val blurScope: com.example.c001apk.compose.BlurScope = com.example.c001apk.compose.BlurScope.GLOBAL,
+    val accounts: List<com.example.c001apk.compose.SavedAccount> = emptyList(),
+    val sessionGeneration: Long = 0,
+    val szlmLastAttempt: Long = 0,
 ) {
     constructor(original: UserPreferences) : this(
         themeMode = original.themeMode,
@@ -112,6 +115,9 @@ data class UserPreferencesCompat(
         uiStyle = original.uiStyle.takeUnless { it == UiStyle.UNRECOGNIZED } ?: UiStyle.MD3,
         blurEnabled = if (original.hasBlurEnabled()) original.blurEnabled else true,
         blurScope = original.blurScope.takeUnless { it == com.example.c001apk.compose.BlurScope.UNRECOGNIZED } ?: com.example.c001apk.compose.BlurScope.GLOBAL,
+        accounts = original.accountsList,
+        sessionGeneration = original.sessionGeneration,
+        szlmLastAttempt = original.szlmLastAttempt,
     )
 
     @Composable
@@ -170,6 +176,9 @@ data class UserPreferencesCompat(
         .setUiStyle(uiStyle)
         .setBlurEnabled(blurEnabled)
         .setBlurScope(blurScope)
+        .addAllAccounts(accounts)
+        .setSessionGeneration(sessionGeneration)
+        .setSzlmLastAttempt(szlmLastAttempt)
         .build()
 
     companion object {

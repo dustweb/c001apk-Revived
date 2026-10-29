@@ -114,12 +114,15 @@ object NetworkModule {
     @Api1Service
     @Singleton
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(cookies: AddCookiesInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(AddCookiesInterceptor)
+            .addInterceptor(cookies)
             .addInterceptor(
-                HttpLoggingInterceptor().setLevel(
-                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                HttpLoggingInterceptor().apply {
+                    redactHeader("Cookie"); redactHeader("Set-Cookie"); redactHeader("Authorization")
+                    redactHeader("X-App-Device"); redactHeader("X-App-Token")
+                }.setLevel(
+                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                     else HttpLoggingInterceptor.Level.NONE
                 )
             )
@@ -130,12 +133,15 @@ object NetworkModule {
     @Api1ServiceNoRedirect
     @Singleton
     @Provides
-    fun provideNoOkHttpClient(): OkHttpClient {
+    fun provideNoOkHttpClient(cookies: AddCookiesInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(AddCookiesInterceptor)
+            .addInterceptor(cookies)
             .addInterceptor(
-                HttpLoggingInterceptor().setLevel(
-                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                HttpLoggingInterceptor().apply {
+                    redactHeader("Cookie"); redactHeader("Set-Cookie"); redactHeader("Authorization")
+                    redactHeader("X-App-Device"); redactHeader("X-App-Token")
+                }.setLevel(
+                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                     else HttpLoggingInterceptor.Level.NONE
                 )
             )
@@ -150,8 +156,11 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .addInterceptor(LoginCookiesInterceptor)
             .addInterceptor(
-                HttpLoggingInterceptor().setLevel(
-                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+                HttpLoggingInterceptor().apply {
+                    redactHeader("Cookie"); redactHeader("Set-Cookie"); redactHeader("Authorization")
+                    redactHeader("X-App-Device"); redactHeader("X-App-Token")
+                }.setLevel(
+                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.HEADERS
                     else HttpLoggingInterceptor.Level.NONE
                 )
             )

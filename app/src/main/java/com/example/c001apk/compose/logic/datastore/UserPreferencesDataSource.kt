@@ -124,7 +124,9 @@ class UserPreferencesDataSource @Inject constructor(
     }
 
     suspend fun setXAppDevice(value: String) = withContext(Dispatchers.IO) {
-        userPreferences.updateData { it.copy(xAppDevice = value) }
+        userPreferences.updateData {
+            it.copy(xAppDevice = com.example.c001apk.compose.util.TokenDeviceUtils.withIdentifier(value, it.szlmId))
+        }
     }
 
     suspend fun setXAppToken(value: String) = withContext(Dispatchers.IO) {

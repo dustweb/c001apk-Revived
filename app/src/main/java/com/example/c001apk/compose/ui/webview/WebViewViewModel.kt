@@ -12,17 +12,14 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class WebViewViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val accounts: com.example.c001apk.compose.logic.repository.AccountRepository
 ) : ViewModel() {
 
-    fun setIsLogin(uid: String, username: String, token: String) {
+    fun setIsLogin(uid: String, username: String, token: String, onFailure: () -> Unit) {
         viewModelScope.launch {
-            userPreferencesRepository.apply {
-                setUid(uid)
-                setUsername(username)
-                setToken(token)
-                setIsLogin(true)
-            }
+            try { accounts.signIn(uid, username, token) }
+            catch (e: kotlinx.coroutines.CancellationException) { throw e }
+            catch (e: Exception) { onFailure() }
         }
     }
 

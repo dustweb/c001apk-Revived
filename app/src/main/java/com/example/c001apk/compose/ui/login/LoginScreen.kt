@@ -246,10 +246,6 @@ fun LoginScreen(
         }
     }
 
-    if (prefs.isLogin) {
-        onBackClick()
-    }
-
     viewModel.toastText?.let {
         context.makeToast(it)
         viewModel.reset()

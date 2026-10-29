@@ -106,7 +106,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val navController = rememberAppNavController()
 
             // 窗口重新获得焦点时，Compose 会把焦点补到第一个可聚焦节点上，
             // 导致左上角按钮/Tab 长时间显示 Focus 高亮（看起来像被按住）。
@@ -125,6 +124,9 @@ class MainActivity : ComponentActivity() {
             } else {
                 checkNotNull(userPreferences)
             }
+
+            val navController = androidx.compose.runtime.key(preferences.sessionGeneration) { rememberAppNavController() }
+            val navigationOwner = androidx.compose.runtime.remember(preferences.sessionGeneration) { viewModel.navigationOwner(preferences.sessionGeneration) }
 
             CompositionLocalProvider(
                 LocalUserPreferences provides preferences
@@ -179,12 +181,16 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background)
                     ) {
-                        MainNavigation(
-                            navController = navController,
-                            badge = viewModel.badge,
-                            resetBadge = viewModel::resetBadge,
-                            widthSizeClass = widthSizeClass,
-                        )
+                        androidx.compose.runtime.key(preferences.sessionGeneration) {
+                            CompositionLocalProvider(androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner provides navigationOwner) {
+                                MainNavigation(
+                                    navController = navController,
+                                    badge = viewModel.badge,
+                                    resetBadge = viewModel::resetBadge,
+                                    widthSizeClass = widthSizeClass,
+                                )
+                            }
+                        }
                     }
                 }
             }

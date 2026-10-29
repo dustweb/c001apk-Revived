@@ -64,7 +64,7 @@ fun MessageScreen(
         hiltViewModel<MessageViewModel, MessageViewModel.ViewModelFactory> { factory ->
             factory.create(url = "/v6/notification/list")
         }
-    var showLogoutDialog by remember { mutableStateOf(false) }
+    var showAccounts by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(prefs.isLogin) {
@@ -92,9 +92,9 @@ fun MessageScreen(
                 level = prefs.level,
                 experience = prefs.experience,
                 nextLevelExperience = prefs.nextLevelExperience,
-                onLogin = onLogin,
-                onLogout = {
-                    showLogoutDialog = true
+                onLogin = { showAccounts = true },
+                onAccounts = {
+                    showAccounts = true
                 },
                 onViewUser = onViewUser
             )
@@ -197,33 +197,9 @@ fun MessageScreen(
 
     }
 
-    when {
-        showLogoutDialog -> {
-            AlertDialog(
-                onDismissRequest = { showLogoutDialog = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.onLogout()
-                            showLogoutDialog = false
-                        })
-                    {
-                        Text(text = stringResource(id = android.R.string.ok))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showLogoutDialog = false })
-                    {
-                        Text(text = stringResource(id = android.R.string.cancel))
-                    }
-                },
-                title = {
-                    Text(text = "确定退出登录？", modifier = Modifier.fillMaxWidth())
-                }
-            )
-        }
+    if (showAccounts) AccountSheet(onDismiss = { showAccounts = false }, onLogin = onLogin)
 
+    when {
         showDeleteDialog -> {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },

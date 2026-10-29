@@ -8,7 +8,7 @@ import okhttp3.Request
 object CoolApkLivePhotoVideoUrlResolver : LivePhotoVideoUrlResolver {
 
     private val client = OkHttpClient.Builder()
-        .addInterceptor(AddCookiesInterceptor)
+        .addInterceptor(com.example.c001apk.compose.c001Application.apiCookies)
         .followRedirects(false)
         .followSslRedirects(false)
         .build()

@@ -2,6 +2,7 @@ package com.example.c001apk.compose.ui.component.cards.miuix
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import top.yukonga.miuix.kmp.icon.extended.Contacts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +23,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 @Composable
 fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, name: String,
     level: String, experience: String, nextLevel: String, onLogin: () -> Unit,
-    onLogout: () -> Unit, onUser: (String) -> Unit) {
+    onAccounts: () -> Unit, onUser: (String) -> Unit) {
     Card(modifier.fillMaxWidth().padding(16.dp), insideMargin = PaddingValues(16.dp)) {
         if (!loggedIn) {
             BasicComponent(title = "登录酷安", summary = "查看关注、私信和互动消息",
@@ -40,8 +41,8 @@ fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, na
                 val total = nextLevel.toFloatOrNull()?.takeIf { it > 0f } ?: 1f
                 LinearProgressIndicator(progress = ((experience.toFloatOrNull() ?: 0f) / total).coerceIn(0f, 1f))
             }
-            IconButton(onClick = rememberHapticClick(onClick = onLogout)) {
-                Icon(AppGlyphs.Logout, "退出登录", tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
+            IconButton(onClick = rememberHapticClick(onClick = onAccounts)) {
+                Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Contacts, "账号管理", tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
             }
         }
     }

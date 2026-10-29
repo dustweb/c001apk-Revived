@@ -52,6 +52,19 @@ message UserPreferences {
   UiStyle uiStyle = 46;
   optional bool blurEnabled = 47;
   BlurScope blurScope = 48;
+  repeated SavedAccount accounts = 49;
+  int64 sessionGeneration = 50;
+  int64 szlmLastAttempt = 51;
+}
+
+message SavedAccount {
+  string uid = 1;
+  string username = 2;
+  string encryptedToken = 3;
+  string avatar = 4;
+  string level = 5;
+  string experience = 6;
+  string nextLevelExperience = 7;
 }
 
 enum BlurScope {

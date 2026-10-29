@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.outlined.ManageAccounts
 import com.example.c001apk.compose.ui.component.design.FilledTonalButton
 import com.example.c001apk.compose.ui.component.design.Icon
 import com.example.c001apk.compose.ui.component.design.IconButton
@@ -44,13 +44,13 @@ fun MessageHeaderCard(
     experience: String,
     nextLevelExperience: String,
     onLogin: () -> Unit,
-    onLogout: () -> Unit,
+    onAccounts: () -> Unit,
     onViewUser: (String) -> Unit
 ) {
 
     if (com.example.c001apk.compose.ui.theme.isMiuix()) {
         com.example.c001apk.compose.ui.component.cards.miuix.MiuixAccountHeader(modifier, isLogin, userAvatar, userName,
-            level, experience, nextLevelExperience, onLogin, onLogout, onViewUser)
+            level, experience, nextLevelExperience, onLogin, onAccounts, onViewUser)
         return
     }
 
@@ -162,7 +162,7 @@ fun MessageHeaderCard(
         if (isLogin) {
             IconButton(
                 onClick = {
-                    onLogout()
+                    onAccounts()
                 },
                 modifier = Modifier
                     .constrainAs(logout) {
@@ -172,8 +172,8 @@ fun MessageHeaderCard(
                     }
             ) {
                 Icon(
-                    Icons.AutoMirrored.Default.Logout,
-                    contentDescription = "退出登录"
+                    Icons.Outlined.ManageAccounts,
+                    contentDescription = "账号管理"
                 )
             }
         }

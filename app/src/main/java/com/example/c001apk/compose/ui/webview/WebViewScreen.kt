@@ -150,19 +150,14 @@ fun WebViewScreen(
                 isLogin = isLogin,
                 onFinishLogin = { cookie ->
                     if (cookie.isNotEmpty()) {
-                        val split = cookie.split(";")
-                        val uid =
-                            split.find { it.contains("uid=") }?.replace("uid=", EMPTY_STRING)
-                                ?.trim()
-                        val username =
-                            split.find { it.contains("username=") }
-                                ?.replace("username=", EMPTY_STRING)?.trim()
-                        val token =
-                            split.find { it.contains("token=") }?.replace("token=", EMPTY_STRING)
-                                ?.trim()
+                        val values = cookie.split(';').map { it.trim() }
+                            .filter { '=' in it }.associate { it.substringBefore('=') to it.substringAfter('=') }
+                        val uid = values["uid"]
+                        val username = values["username"]
+                        val token = values["token"]
                         if (!uid.isNullOrEmpty() && !username.isNullOrEmpty() && !token.isNullOrEmpty()) {
 
-                            viewModel.setIsLogin(uid, username, token)
+                            viewModel.setIsLogin(uid, username, token) { context.makeToast("保存登录信息失败，请重试") }
 
                         } else {
                             context.makeToast(WEB_LOGIN_FAILED)
@@ -203,10 +198,6 @@ fun WebViewScreen(
 
         }
 
-    }
-
-    if (isLogin && prefs.isLogin) {
-        onBackClick()
     }
 
     PageBackAction(enabled = hasWebHistory) {

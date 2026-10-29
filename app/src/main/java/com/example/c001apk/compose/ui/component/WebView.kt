@@ -31,6 +31,10 @@ import com.example.c001apk.compose.util.makeToast
 import com.example.c001apk.compose.util.openInBrowser
 import java.net.URISyntaxException
 
+private class SessionWebView(context: Context) : WebView(context) {
+    var released = false
+}
+
 /**
  * Created by bggRGjQaUbCoE on 2024/6/9
  */
@@ -58,7 +62,7 @@ fun WebView(
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { context ->
-            WebView(context).apply {
+            SessionWebView(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
@@ -89,15 +93,7 @@ fun WebView(
                 CookieManager.getInstance().let {
                     it.setAcceptCookie(true)
                     it.setAcceptThirdPartyCookies(this@apply, true)
-                    if (prefs.isLogin) {
-                        it.removeAllCookies { }
-                        it.setCookie(".coolapk.com", "DID=${prefs.szlmId}")
-                        it.setCookie(".coolapk.com", "forward=https://www.coolapk.com")
-                        it.setCookie(".coolapk.com", "displayVersion=v14")
-                        it.setCookie(".coolapk.com", "uid=${prefs.uid}")
-                        it.setCookie(".coolapk.com", "username=${prefs.username}")
-                        it.setCookie(".coolapk.com", "token=${prefs.token}")
-                    }
+
                 }
 
                 setDownloadListener { url, userAgent, contentDisposition, mimetype, _ ->
@@ -135,6 +131,22 @@ fun WebView(
                 }
 
                 webViewClient = object : WebViewClient() {
+                    private var completingLogin = false
+                    private fun finishLoginIfReady(url: String?): Boolean {
+                        if (!isLogin || completingLogin || url == null || released) return false
+                        val uri = Uri.parse(url)
+                        if (uri.host != "www.coolapk.com" || uri.path !in listOf("", "/")) return false
+                        val cookie = CookieManager.getInstance().getCookie(url).orEmpty()
+                        val names = cookie.split(';').map { it.trim().substringBefore('=') }.toSet()
+                        if (!names.containsAll(listOf("uid", "username", "token"))) return false
+                        completingLogin = true
+                        onFinishLogin(cookie)
+                        return true
+                    }
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        super.onPageFinished(view, url)
+                        finishLoginIfReady(url)
+                    }
                     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
                         super.doUpdateVisitedHistory(view, url, isReload)
                         onHistoryChanged(view?.canGoBack() == true)
@@ -147,10 +159,7 @@ fun WebView(
                         request?.let {
                             val requestUrl = request.url.toString()
 
-                            if (isLogin && requestUrl == "https://www.coolapk.com/") {
-                                val cookie = CookieManager.getInstance().getCookie(requestUrl)
-                                onFinishLogin(cookie)
-                            }
+                            if (finishLoginIfReady(requestUrl)) return true
 
                             try {
                                 //处理intent协议
@@ -204,8 +213,18 @@ fun WebView(
                     }
                 }
 
-                loadUrl(url, mapOf("X-Requested-With" to APP_ID))
+                val host = Uri.parse(url).host.orEmpty()
+                if (host == "coolapk.com" || host.endsWith(".coolapk.com")) {
+                    com.example.c001apk.compose.util.prepareCoolapkWebCookies(prefs, isLogin) {
+                        if (!released) loadUrl(url, mapOf("X-Requested-With" to APP_ID))
+                    }
+                } else loadUrl(url, mapOf("X-Requested-With" to APP_ID))
             }
+        },
+        onRelease = { webView ->
+            webView.released = true
+            webView.stopLoading()
+            webView.destroy()
         },
         update = { webView ->
 

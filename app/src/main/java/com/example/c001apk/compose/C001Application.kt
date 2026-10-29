@@ -23,6 +23,7 @@ lateinit var c001Application: C001Application
 
 @HiltAndroidApp
 class C001Application : Application() {
+    @javax.inject.Inject lateinit var apiCookies: AddCookiesInterceptor
 
     override fun onCreate() {
         super.onCreate()
@@ -38,7 +39,7 @@ class C001Application : Application() {
                 .crossfade(true)
                 .okHttpClient {
                     OkHttpClient.Builder()
-                        .addInterceptor(AddCookiesInterceptor)
+                        .addInterceptor(apiCookies)
                         .build()
                 }
                 .components {

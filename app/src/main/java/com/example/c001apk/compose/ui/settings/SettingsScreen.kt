@@ -519,19 +519,7 @@ fun SettingsScreen(
             }
 
             showSZLMIDDialog -> {
-                EditTextDialog(
-                    data = prefs.szlmId,
-                    title = "数字联盟 ID",
-                    onDismiss = {
-                        showSZLMIDDialog = false
-                    },
-                    setData = {
-                        viewModel.setSZLMId(it)
-                        viewModel.setXAppDevice(
-                            encode("$it; ; ; ${randomMacAddress()}; ${prefs.manufacturer}; ${prefs.brand}; ${prefs.model}; ${prefs.buildNumber}; null")
-                        )
-                    }
-                )
+                DeviceIdentityDialog(prefs.szlmId, viewModel) { showSZLMIDDialog = false }
             }
 
             showFontScaleDialog -> {

@@ -30,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val networkRepo: NetworkRepo,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val accounts: com.example.c001apk.compose.logic.repository.AccountRepository
 ) : ViewModel() {
 
     var requestHash by mutableStateOf(EMPTY_STRING)
@@ -121,12 +121,9 @@ class LoginViewModel @Inject constructor(
                                     ?.getOrNull(0)
                                     ?.replace("token=", EMPTY_STRING)?.trim()
                             if (!uid.isNullOrEmpty() && !username.isNullOrEmpty() && !token.isNullOrEmpty()) {
-                                userPreferencesRepository.apply {
-                                    setIsLogin(true)
-                                    setUid(uid)
-                                    setUsername(username)
-                                    setToken(token)
-                                }
+                                try { accounts.signIn(uid, username, token) }
+                                catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                                catch (e: Exception) { toastText = "保存登录信息失败，请重试" }
                             }
                         } else {
                             login.message?.let {
