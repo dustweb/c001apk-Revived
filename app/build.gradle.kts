@@ -84,7 +84,7 @@ android {
         // main 上 DevLog 的调用会被 R8 整段剪掉，不产生字符串拼接与 IO 开销。
         buildConfigField("boolean", "DEV_LOG", (!isMainBranch).toString())
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = providers.gradleProperty("testRunner").orElse("androidx.test.runner.AndroidJUnitRunner").get()
 
         vectorDrawables {
             useSupportLibrary = true

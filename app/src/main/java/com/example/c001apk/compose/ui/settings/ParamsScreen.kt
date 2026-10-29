@@ -1,5 +1,14 @@
 package com.example.c001apk.compose.ui.settings
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.foundation.text.selection.SelectionContainer
+import com.example.c001apk.compose.ui.component.settings.PreferenceTopBar
+import com.example.c001apk.compose.ui.component.design.AlertDialog
+import com.example.c001apk.compose.ui.component.design.Text
+import com.example.c001apk.compose.ui.component.design.TextButton
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,17 +49,12 @@ fun ParamsScreen(
 
     val rememberScrollState = rememberScrollState()
     val prefs = LocalUserPreferences.current
+    val miuix = isMiuix()
+    val behavior = MiuixScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    BackButton { onBackClick() }
-                },
-                title = stringResource(id = R.string.params_title),
-            )
-        }
+        modifier = Modifier.fillMaxSize().then(if (miuix) Modifier.nestedScroll(behavior.nestedScrollConnection) else Modifier),
+        topBar = { PreferenceTopBar(stringResource(R.string.params_title), behavior, onBack = onBackClick) },
     ) { paddingValues ->
         Column(
             Modifier
@@ -167,9 +172,12 @@ fun ParamsScreen(
                 )
 
             }
-            BasicListItem(
-                headlineText = stringResource(id = R.string.params_regenerate)
-            ) {
+            if (miuix) {
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = stringResource(R.string.params_regenerate), onClick = viewModel::regenerateParams,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                )
+            } else BasicListItem(headlineText = stringResource(R.string.params_regenerate)) {
                 viewModel.regenerateParams()
             }
 
@@ -185,18 +193,24 @@ fun ParamsItem(
     setData: ((String) -> Unit)? = null
 ) {
 
-    var showDialog by remember {
+    var showDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
-    if (isMiuix() && setData != null) {
-        ArrowPreference(title = title, summary = data, onClick = { showDialog = true })
+    if (isMiuix()) {
+        val preview = data?.let { if (it.length > 72) it.take(72) + "…" else it }
+        ArrowPreference(title = title, summary = preview, onClick = { showDialog = true })
     } else {
         BasicListItem(headlineText = title, supportingText = data,
             onClick = if (setData != null) ({ showDialog = true }) else null)
     }
 
     when {
+        showDialog && setData == null -> {
+            AlertDialog(onDismissRequest = { showDialog = false }, title = { Text(title) },
+                text = { SelectionContainer { Text(data.orEmpty(), Modifier.verticalScroll(rememberScrollState())) } },
+                confirmButton = { TextButton(onClick = { showDialog = false }) { Text("关闭") } })
+        }
         showDialog -> {
             EditTextDialog(
                 data = data.orEmpty(),

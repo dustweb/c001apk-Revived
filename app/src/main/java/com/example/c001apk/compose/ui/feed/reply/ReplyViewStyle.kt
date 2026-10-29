@@ -7,6 +7,8 @@ import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.StateListDrawable
 import android.view.Gravity
 import android.view.View
+import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.toArgb
 import androidx.constraintlayout.widget.Barrier
@@ -23,6 +25,15 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
     private val density = binding.root.resources.displayMetrics.density
     private fun dp(value: Int) = (value * density).toInt()
     private val barrierId = View.generateViewId()
+    private val headerId = View.generateViewId()
+    private val originalTitleParams = ConstraintLayout.LayoutParams(binding.title.layoutParams as ConstraintLayout.LayoutParams)
+    private val originalPublishParams = ConstraintLayout.LayoutParams(binding.publish.layoutParams as ConstraintLayout.LayoutParams)
+    private val header = LinearLayout(binding.root.context).apply {
+        id = headerId
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        setPadding(dp(16), 0, dp(16), 0)
+    }
     private val originalConstraints = ConstraintSet().apply {
         clone(binding.inputLayout)
         for (index in 0 until binding.inputLayout.childCount) {
@@ -46,6 +57,11 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
     fun apply(native: Boolean, palette: ColorScheme?) {
         if (!native) {
             if (!nativeApplied) return
+            header.removeAllViews()
+            binding.inputLayout.removeView(header)
+            binding.inputLayout.findViewById<View>(barrierId)?.let(binding.inputLayout::removeView)
+            binding.inputLayout.addView(binding.title, 0, originalTitleParams)
+            binding.inputLayout.addView(binding.publish, 3, originalPublishParams)
             originalConstraints.applyTo(binding.inputLayout)
             originalPadding.forEach { (view, p) -> view.setPadding(p[0], p[1], p[2], p[3]) }
             binding.title.minHeight = 0
@@ -66,25 +82,28 @@ internal class ReplyViewStyle(private val binding: ActivityReplyBinding) {
             return
         }
         if (palette == null) return
+        if (!nativeApplied) {
+            binding.inputLayout.removeView(binding.title)
+            binding.inputLayout.removeView(binding.publish)
+            header.addView(binding.title, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(12) })
+            header.addView(binding.publish, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+            binding.inputLayout.addView(header, ConstraintLayout.LayoutParams(0, ConstraintLayout.LayoutParams.WRAP_CONTENT))
+        }
         nativeApplied = true
         val constraints = ConstraintSet().apply {
             clone(binding.inputLayout)
-            constrainWidth(R.id.publish, ConstraintSet.WRAP_CONTENT)
-            constrainHeight(R.id.publish, ConstraintSet.WRAP_CONTENT)
-            setMargin(R.id.publish, ConstraintSet.END, dp(16))
-            setMargin(R.id.publish, ConstraintSet.TOP, dp(12))
-            constrainWidth(R.id.title, 0)
-            connect(R.id.title, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, dp(16))
-            connect(R.id.title, ConstraintSet.END, R.id.publish, ConstraintSet.START, dp(12))
-            connect(R.id.title, ConstraintSet.TOP, R.id.publish, ConstraintSet.TOP)
-            connect(R.id.title, ConstraintSet.BOTTOM, R.id.publish, ConstraintSet.BOTTOM)
+            constrainWidth(headerId, ConstraintLayout.LayoutParams.MATCH_PARENT)
+            constrainHeight(headerId, ConstraintSet.WRAP_CONTENT)
+            connect(headerId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(headerId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+            connect(headerId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, dp(12))
             connect(R.id.replyAvatar, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, dp(16))
-            connect(R.id.replyAvatar, ConstraintSet.TOP, R.id.publish, ConstraintSet.BOTTOM, dp(8))
+            connect(R.id.replyAvatar, ConstraintSet.TOP, headerId, ConstraintSet.BOTTOM, dp(8))
             connect(R.id.replyTargetName, ConstraintSet.START, R.id.replyAvatar, ConstraintSet.END, dp(8))
             connect(R.id.replyTargetName, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, dp(16))
             connect(R.id.replyTargetName, ConstraintSet.TOP, R.id.replyAvatar, ConstraintSet.TOP)
             connect(R.id.replyTargetName, ConstraintSet.BOTTOM, R.id.replyAvatar, ConstraintSet.BOTTOM)
-            createBarrier(barrierId, Barrier.BOTTOM, 0, R.id.title, R.id.publish, R.id.replyAvatar, R.id.replyTargetName)
+            createBarrier(barrierId, Barrier.BOTTOM, 0, headerId, R.id.replyAvatar, R.id.replyTargetName)
             constrainWidth(R.id.textInputLayout, 0)
             connect(R.id.textInputLayout, ConstraintSet.TOP, barrierId, ConstraintSet.BOTTOM, dp(12))
             connect(R.id.textInputLayout, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, dp(16))

@@ -90,6 +90,25 @@ class PredictiveNavigationTest {
         }
     }
 
+    @Test fun materialDetailIsFullyVisibleAndBackCancellationKeepsIt() {
+        style = UiStyle.MD3
+        launch()
+        val original = detailModel
+        var frame = compose.onRoot().captureToImage().toPixelMap()
+        assertTrue(frame[frame.width / 2, frame.height / 2].blue > .98f)
+        compose.runOnIdle { activity.onBackPressedDispatcher.dispatchOnBackStarted(
+            BackEventCompat(0f, 500f, 0f, BackEventCompat.EDGE_LEFT)) }
+        progress(.5f)
+        compose.waitForIdle()
+        frame = compose.onRoot().captureToImage().toPixelMap()
+        val center = frame[frame.width / 2, frame.height / 2]
+        assertTrue("MD3 must cross-fade instead of using the Miuix slide: $center", center.red > .02f && center.blue > .02f)
+        compose.runOnIdle { activity.onBackPressedDispatcher.dispatchOnBackCancelled() }
+        compose.waitForIdle()
+        compose.onNode(hasSetTextAction()).assertTextEquals("未发送的草稿")
+        compose.runOnIdle { assertSame(original, detailModel); assertEquals("detail", controller.currentDestination?.route) }
+    }
+
     @Test fun committedGesturePopsExactlyOneEntry() {
         launch()
         compose.runOnIdle {

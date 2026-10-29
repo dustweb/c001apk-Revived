@@ -1052,6 +1052,8 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     private fun showEmoji() {
+        // A pending startup IME retry must not reopen the keyboard over an explicit panel request.
+        imeRetryHandler.removeCallbacks(imeRetryRunnable)
         val insets = ViewCompat.getRootWindowInsets(binding.editText)
         val animatePanelEntrance = binding.main is SmoothInputLayout &&
             !isEmojiPanelVisible &&

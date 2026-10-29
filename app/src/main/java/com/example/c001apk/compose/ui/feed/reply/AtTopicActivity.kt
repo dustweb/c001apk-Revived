@@ -122,6 +122,7 @@ private fun AtTopicScreen(
 ) {
     val isTopic = type == "topic"
     var keyword by rememberSaveable { mutableStateOf("") }
+    var searchExpanded by rememberSaveable { mutableStateOf(false) }
     val title = if (isTopic) "搜索话题" else "搜索用户"
 
     Scaffold(
@@ -138,7 +139,13 @@ private fun AtTopicScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            OutlinedTextField(
+            if (com.example.c001apk.compose.ui.theme.isMiuix()) {
+                top.yukonga.miuix.kmp.basic.InputField(
+                    query = keyword, onQueryChange = { keyword = it }, onSearch = { searchExpanded = false },
+                    expanded = searchExpanded, onExpandedChange = { searchExpanded = it }, label = title,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                )
+            } else OutlinedTextField(
                 value = keyword,
                 onValueChange = { keyword = it },
                 modifier = Modifier

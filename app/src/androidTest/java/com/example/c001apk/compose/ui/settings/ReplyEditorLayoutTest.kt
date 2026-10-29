@@ -7,6 +7,10 @@ import android.graphics.Canvas
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.example.c001apk.compose.R
@@ -73,6 +77,33 @@ class ReplyEditorLayoutTest {
                     val bitmap = Bitmap.createBitmap(panel.width, panel.height, Bitmap.Config.ARGB_8888)
                     panel.draw(Canvas(bitmap))
                     File(it.cacheDir, "miuix-pages-editor.png").outputStream().use { output -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, output) }
+                }
+                scenario.recreate()
+                compose.waitUntil(10_000) {
+                    var ready = false
+                    scenario.onActivity { activity ->
+                        val publish = activity.findViewById<TextView>(R.id.publish)
+                        val toolbarButton = activity.findViewById<ImageView>(R.id.emojiBtn)
+                        val visible = android.graphics.Rect()
+                        ready = activity.hasWindowFocus() && publish.width > 0 &&
+                            activity.findViewById<android.view.View>(R.id.main).translationY == 0f &&
+                            toolbarButton.getGlobalVisibleRect(visible) && visible.height() == toolbarButton.height &&
+                            androidx.core.view.ViewCompat.getRootWindowInsets(publish)?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
+                    }
+                    ready
+                }
+                onView(withId(R.id.emojiBtn)).perform(click())
+                compose.waitUntil(5_000) {
+                    var open = false
+                    scenario.onActivity {
+                        open = it.findViewById<android.view.View>(R.id.emojiLayout).isShown &&
+                            androidx.core.view.ViewCompat.getRootWindowInsets(it.window.decorView)?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) != true
+                    }
+                    open
+                }
+                InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()?.let { bitmap ->
+                    File(context.cacheDir, "miuix-editor-window.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                    bitmap.recycle()
                 }
                 scenario.onActivity { it.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
                 compose.waitUntil(10_000) {

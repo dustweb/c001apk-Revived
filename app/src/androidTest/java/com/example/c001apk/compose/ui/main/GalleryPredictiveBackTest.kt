@@ -20,7 +20,10 @@ import java.io.File
 class GalleryPredictiveBackTest {
     @get:Rule val compose = createEmptyComposeRule()
 
-    @Test fun imagePreviewRestoresOnCancelAndClosesOnCommit() {
+    @Test fun imagePreviewRestoresOnCancelAndClosesOnCommit() = verifyPreview(true)
+    @Test fun materialPreviewDoesNotUseMiuixGestureScaling() = verifyPreview(false)
+
+    private fun verifyPreview(enabled: Boolean) {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val fixture = File(context.cacheDir, "predictive-gallery-test.png")
         val bitmap = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888).apply { eraseColor(android.graphics.Color.BLUE) }
@@ -28,7 +31,7 @@ class GalleryPredictiveBackTest {
         bitmap.recycle()
         try {
             ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-                scenario.onActivity { activity -> Mojito.start(activity) { urls(fixture.toURI().toString()) } }
+                scenario.onActivity { activity -> Mojito.start(activity) { predictiveBackPreview(enabled); urls(fixture.toURI().toString()) } }
                 var gallery: ImageMojitoActivity? = null
                 compose.waitUntil(10_000) {
                     InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -43,7 +46,7 @@ class GalleryPredictiveBackTest {
                     root = activity.findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
                     activity.onBackPressedDispatcher.dispatchOnBackStarted(BackEventCompat(0f, 100f, 0f, BackEventCompat.EDGE_LEFT))
                     activity.onBackPressedDispatcher.dispatchOnBackProgressed(BackEventCompat(100f, 100f, .5f, BackEventCompat.EDGE_LEFT))
-                    assertTrue(root.scaleX < 1f)
+                    if (enabled) assertTrue(root.scaleX < 1f) else assertEquals(1f, root.scaleX, 0f)
                     activity.onBackPressedDispatcher.dispatchOnBackCancelled()
                 }
                 compose.waitUntil(5_000) { root.scaleX == 1f && root.translationX == 0f }

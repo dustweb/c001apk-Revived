@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MoreVert
+import com.example.c001apk.compose.ui.theme.isMiuix
 import androidx.compose.material.icons.filled.Smartphone
 import com.example.c001apk.compose.ui.component.design.DropdownMenu
 import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
@@ -195,7 +197,7 @@ fun HistoryHeader(
                 }
             ) {
                 Icon(
-                    imageVector = Icons.Default.ExpandMore,
+                    imageVector = if (isMiuix()) Icons.Default.MoreVert else Icons.Default.ExpandMore,
                     contentDescription = "更多选项",
                     tint = MaterialTheme.colorScheme.outline
                 )

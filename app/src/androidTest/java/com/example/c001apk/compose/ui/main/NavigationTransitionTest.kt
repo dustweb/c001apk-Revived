@@ -75,7 +75,7 @@ class NavigationTransitionTest {
         compose.waitForIdle()
         compose.runOnIdle {
             assertEquals(1, mainCreated)
-            assertEquals(0, mainDisposed)
+            assertEquals(if (miuix) 0 else 1, mainDisposed)
             if (systemBack) activity.onBackPressedDispatcher.onBackPressed()
             else controller.popBackStack()
         }
@@ -97,8 +97,8 @@ class NavigationTransitionTest {
         compose.mainClock.advanceTimeBy(1_000)
         compose.runOnIdle {
             assertEquals(Router.MAIN.name, controller.currentDestination?.route)
-            assertEquals(1, mainCreated)
-            assertEquals(0, mainDisposed)
+            assertEquals(if (miuix) 1 else 2, mainCreated)
+            assertEquals(if (miuix) 0 else 1, mainDisposed)
         }
     }
 }

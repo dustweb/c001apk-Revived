@@ -29,6 +29,9 @@ class MojitoBuilder {
     private var headerSize: Int = 0
     private var footerSize: Int = 0
     private var autoLoadTarget: Boolean = true
+    private var predictiveBackPreview: Boolean = false
+
+    fun predictiveBackPreview(enabled: Boolean) = apply { predictiveBackPreview = enabled }
 
     fun originImageUrls(data: List<String>) = apply {
         this.originImageUrls = data
@@ -287,6 +290,7 @@ class MojitoBuilder {
             headerSize = this.headerSize,
             footerSize = this.footerSize,
             autoLoadTarget = this.autoLoadTarget,
+            predictiveBackPreview = this.predictiveBackPreview,
             errorDrawableResIdList = this.errorDrawableResIdList
         )
     }

@@ -61,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,15 +139,15 @@ fun SettingsScreen(
     val hapticStrengthList by lazy { HapticStrength.options.map { it.label } }
 
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
-    var showAboutDialog by remember { mutableStateOf(false) }
-    var showSZLMIDDialog by remember { mutableStateOf(false) }
-    var showFontScaleDialog by remember { mutableStateOf(false) }
-    var showContentScaleDialog by remember { mutableStateOf(false) }
-    var showImageQualityDialog by remember { mutableStateOf(false) }
-    var showCleanCacheDialog by remember { mutableStateOf(false) }
-    var showThemeTypeDialog by remember { mutableStateOf(false) }
-    var showLauncherIconDialog by remember { mutableStateOf(false) }
-    var showHapticStrengthDialog by remember { mutableStateOf(false) }
+    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+    var showSZLMIDDialog by rememberSaveable { mutableStateOf(false) }
+    var showFontScaleDialog by rememberSaveable { mutableStateOf(false) }
+    var showContentScaleDialog by rememberSaveable { mutableStateOf(false) }
+    var showImageQualityDialog by rememberSaveable { mutableStateOf(false) }
+    var showCleanCacheDialog by rememberSaveable { mutableStateOf(false) }
+    var showThemeTypeDialog by rememberSaveable { mutableStateOf(false) }
+    var showLauncherIconDialog by rememberSaveable { mutableStateOf(false) }
+    var showHapticStrengthDialog by rememberSaveable { mutableStateOf(false) }
     var cacheSize by remember { mutableStateOf(getTotalCacheSize(context)) }
     val showHapticStrengthDialogClick = rememberHapticClick {
         showHapticStrengthDialog = true
@@ -718,7 +719,7 @@ fun EditTextDialog(
     hint: String? = null,
     maxLength: Int? = null,
 ) {
-    var text by remember {
+    var text by rememberSaveable(stateSaver = androidx.compose.ui.text.input.TextFieldValue.Saver) {
         mutableStateOf(
             TextFieldValue(
                 text = data,
@@ -786,7 +787,7 @@ fun SliderDialog(
     onDismiss: () -> Unit,
     setData: (Float) -> Unit
 ) {
-    var progress by remember { mutableFloatStateOf(data) }
+    var progress by rememberSaveable { mutableFloatStateOf(data) }
     AlertDialog(
         onDismissRequest = {
             onDismiss()

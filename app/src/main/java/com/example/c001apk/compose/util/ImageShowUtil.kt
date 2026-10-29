@@ -429,6 +429,7 @@ object ImageShowUtil {
         urls: List<String>,
         previewUrls: List<String>? = null,
     ): MutableMap<Int, MojitoMediaImageFactory> {
+        predictiveBackPreview(CookieUtil.uiStyle == com.example.c001apk.compose.UiStyle.MIUIX)
         val mediaFactories = mutableMapOf<Int, MojitoMediaImageFactory>()
         val mediaHints = urls.map(String::coolApkRichMediaHint)
         val richMediaPositions = urls.indices

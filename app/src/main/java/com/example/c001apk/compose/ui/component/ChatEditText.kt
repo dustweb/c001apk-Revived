@@ -26,6 +26,7 @@ import com.example.c001apk.compose.util.OnTextInputListener
 @Composable
 fun ChatEditText(
     modifier: Modifier = Modifier,
+    initialText: String = "",
     showSendBtn: (Boolean) -> Unit,
     updateInputText: (String) -> Unit,
     clearText: Boolean,
@@ -91,6 +92,8 @@ fun ChatEditText(
                     )
                 )
                 setOnKeyListener(FastDeleteAtUserKeyListener)
+                setText(initialText)
+                setSelection(text.length)
             }
         },
         update = { editText ->

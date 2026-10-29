@@ -147,9 +147,10 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
         binding.viewPager.post(updateStatusBarRunnable)
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackStarted(backEvent: BackEventCompat) {
-                binding.root.animate().cancel()
+                if (activityConfig.predictiveBackPreview) binding.root.animate().cancel()
             }
             override fun handleOnBackProgressed(backEvent: BackEventCompat) {
+                if (!activityConfig.predictiveBackPreview) return
                 val progress = backEvent.progress.coerceIn(0f, 1f)
                 val direction = if (backEvent.swipeEdge == BackEventCompat.EDGE_LEFT) 1f else -1f
                 binding.root.scaleX = 1f - progress * 0.12f
@@ -164,6 +165,7 @@ class ImageMojitoActivity : AppCompatActivity(), IMojitoActivity {
                 backToMin()
             }
             private fun restorePreview() {
+                if (!activityConfig.predictiveBackPreview) return
                 binding.root.animate().scaleX(1f).scaleY(1f).translationX(0f)
                     .setDuration(180L).start()
             }

@@ -1,69 +1,51 @@
 package com.example.c001apk.compose.ui.main
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.snapshots.Snapshot
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.*
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.compose.LocalOwnersProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigationevent.NavigationEventDispatcher
 import androidx.navigationevent.NavigationEventDispatcherOwner
 import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
-import androidx.navigation.*
-import androidx.navigation.compose.LocalOwnersProvider
-import androidx.navigation.compose.rememberNavController
-import com.example.c001apk.compose.ui.theme.isMiuix
+import com.example.c001apk.compose.UiStyle
+import com.example.c001apk.compose.ui.component.SlideTransition
+import com.example.c001apk.compose.ui.theme.LocalUiStyle
 import kotlinx.coroutines.flow.collectLatest
 import top.yukonga.miuix.kmp.nav.core.*
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
-import top.yukonga.miuix.kmp.nav.transition.navGraphicsTransition
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-/** AndroidX owns routes, arguments and saved state; Miuix owns the interactive presentation. */
-@Navigator.Name("app-page")
-class AppPageNavigator : Navigator<AppPageNavigator.Destination>() {
-    val entries get() = state.backStack
-
-    override fun createDestination() = Destination(this)
-
-    override fun navigate(entries: List<NavBackStackEntry>, navOptions: NavOptions?, navigatorExtras: Extras?) {
-        entries.forEach(state::pushWithTransition)
-    }
-
-    override fun popBackStack(popUpTo: NavBackStackEntry, savedState: Boolean) {
-        state.popWithTransition(popUpTo, savedState)
-    }
-
-    fun prepare() = entries.value.forEach(state::prepareForTransition)
-    fun complete(entry: NavBackStackEntry) = state.markTransitionComplete(entry)
-    fun completeTransitions() = state.transitionsInProgress.value.toList().forEach(state::markTransitionComplete)
-
-    class Destination(navigator: AppPageNavigator) : NavDestination(navigator) {
-        var content: @Composable (NavBackStackEntry) -> Unit = {}
-    }
-}
-
 @Composable
-fun rememberAppNavController(): NavHostController {
-    val navigator = remember { AppPageNavigator() }
-    return rememberNavController(navigator)
-}
+fun rememberAppNavController(): NavHostController = rememberNavController()
 
-fun NavGraphBuilder.appComposable(
-    route: String,
-    arguments: List<NamedNavArgument> = emptyList(),
-    content: @Composable (NavBackStackEntry) -> Unit,
-) {
-    val navigator = provider.getNavigator<AppPageNavigator>("app-page")
-    addDestination(AppPageNavigator.Destination(navigator).apply {
-        this.route = route
-        arguments.forEach { addArgument(it.name, it.argument) }
-        this.content = content
-    })
+class AppGraphBuilder {
+    internal data class Page(
+        val route: String,
+        val arguments: List<NamedNavArgument>,
+        val content: @Composable (NavBackStackEntry) -> Unit,
+    )
+    internal val pages = mutableListOf<Page>()
+
+    fun appComposable(
+        route: String,
+        arguments: List<NamedNavArgument> = emptyList(),
+        content: @Composable (NavBackStackEntry) -> Unit,
+    ) {
+        pages += Page(route, arguments, content)
+    }
 }
 
 private class PageKey(val entry: NavBackStackEntry) : NavKey {
@@ -72,12 +54,7 @@ private class PageKey(val entry: NavBackStackEntry) : NavKey {
     override fun toString() = entry.id
 }
 
-private val MaterialPageTransition = navGraphicsTransition(opaqueDepth = 2f) { scope ->
-    val depth = scope.relativeDepth.coerceIn(-1f, 1f)
-    translationX = -depth * scope.layoutSize.width * 0.15f
-    alpha = 1f - kotlin.math.abs(depth)
-}
-
+/** Routes and entry state are shared; each style owns its navigation and back gesture runtime. */
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -85,33 +62,91 @@ fun AppNavHost(
     modifier: Modifier = Modifier,
     isPane: Boolean = false,
     backEnabled: Boolean = true,
-    builder: NavGraphBuilder.() -> Unit,
+    builder: AppGraphBuilder.() -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val storeOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    val graph = remember(navController, startDestination, builder) {
-        navController.createGraph(startDestination = startDestination, builder = builder)
+    val definitions = remember(navController, startDestination, builder) { AppGraphBuilder().apply(builder) }
+    val latestDefinitions = rememberUpdatedState(definitions)
+    val navigator = navController.navigatorProvider.getNavigator<ComposeNavigator>("composable")
+    val activeEntry by navController.currentBackStackEntryAsState()
+    val latestEntryId = rememberUpdatedState(activeEntry?.id)
+    val stateHolder = rememberSaveableStateHolder()
+    val requestedStyle = LocalUiStyle.current
+    var hostStyle by remember { mutableStateOf(requestedStyle) }
+    // Let the old host save and detach before the other runtime attaches the same entry.
+    LaunchedEffect(requestedStyle) {
+        withFrameNanos { }
+        hostStyle = requestedStyle
+    }
+    val contents = remember(hostStyle) { mutableMapOf<NavBackStackEntry, @Composable () -> Unit>() }
+    val render: @Composable (NavBackStackEntry) -> Unit = { entry ->
+        // A fresh host gets a fresh composition with stable saveable keys, never a detached tree.
+        contents.getOrPut(entry) {
+            movableContentOf {
+                entry.LocalOwnersProvider(stateHolder) {
+                    val isTop = latestEntryId.value == entry.id
+                    Box(Modifier.fillMaxSize().then(if (isTop) Modifier else Modifier.clearAndSetSemantics {})) {
+                        latestDefinitions.value.pages.first { it.route == entry.destination.route }.content(entry)
+                    }
+                }
+            }
+        }.invoke()
+    }
+    val latestRender = rememberUpdatedState(render)
+    val graph = remember(navController, startDestination, definitions) {
+        navController.createGraph(startDestination = startDestination) {
+            definitions.pages.forEach { page ->
+                composable(page.route, page.arguments) { entry -> latestRender.value(entry) }
+            }
+        }
     }
     navController.setViewModelStore(storeOwner.viewModelStore)
     navController.graph = graph
-    val navigator = navController.navigatorProvider.getNavigator<AppPageNavigator>("app-page")
+    val entries by navigator.backStack.collectAsState()
+    SideEffect { contents.keys.removeAll { it.lifecycle.currentState == androidx.lifecycle.Lifecycle.State.DESTROYED } }
     DisposableEffect(navController, lifecycleOwner) {
         navController.setLifecycleOwner(lifecycleOwner)
-        onDispose { navigator.completeTransitions() }
+        onDispose { }
     }
 
-    val entries by navigator.entries.collectAsState()
-    // This list is a presentation mirror. AndroidX persists the authoritative stack and entry IDs.
-    val stack = remember(navController) { navBackStackOf() }
+    if (hostStyle != requestedStyle) {
+        Box(modifier)
+    } else if (hostStyle == UiStyle.MD3) {
+        NavHost(
+            navController = navController,
+            graph = graph,
+            modifier = modifier,
+            enterTransition = { SlideTransition.slideLeft.enterTransition() },
+            exitTransition = { SlideTransition.slideLeft.exitTransition() },
+            popEnterTransition = { SlideTransition.slideRight.enterTransition() },
+            popExitTransition = { SlideTransition.slideRight.exitTransition() },
+        )
+    } else {
+        MiuixNavHost(navController, navigator, entries, modifier, isPane, backEnabled, render)
+    }
+}
+
+@Composable
+private fun MiuixNavHost(
+    controller: NavHostController,
+    navigator: ComposeNavigator,
+    entries: List<NavBackStackEntry>,
+    modifier: Modifier,
+    isPane: Boolean,
+    backEnabled: Boolean,
+    render: @Composable (NavBackStackEntry) -> Unit,
+) {
     val keys = entries.map(::PageKey)
+    val stack = remember(controller) { navBackStackOf().apply { addAll(keys) } }
     SideEffect {
         if (stack.toList() != keys) Snapshot.withMutableSnapshot {
             stack.clear()
             stack.addAll(keys)
         }
     }
-    val stateHolder = rememberSaveableStateHolder()
-    val miuix = isMiuix()
+    val visible by controller.visibleEntries.collectAsState()
+    val latestVisible = rememberUpdatedState(visible)
     val cornerRadius = rememberNavSystemCornerRadius()
     val parentDispatcher = checkNotNull(LocalNavigationEventDispatcherOwner.current)
     val backOwner = remember(parentDispatcher) {
@@ -121,45 +156,40 @@ fun AppNavHost(
     }
     SideEffect {
         try { backOwner.navigationEventDispatcher.isEnabled = backEnabled }
-        catch (_: IllegalStateException) { /* The Activity has already disposed the dispatcher tree. */ }
+        catch (_: IllegalStateException) { /* Activity disposal also disposes its dispatcher tree. */ }
     }
     DisposableEffect(backOwner) {
         onDispose {
+            latestVisible.value.forEach(navigator::onTransitionComplete)
             try { backOwner.navigationEventDispatcher.dispose() }
-            catch (_: IllegalStateException) { /* Parent disposal also disposes its descendants. */ }
+            catch (_: IllegalStateException) { /* Parent disposal already released this dispatcher. */ }
         }
     }
     CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides backOwner) {
         if (stack.isNotEmpty()) NavDisplay(
             backStack = stack,
             modifier = modifier,
-            onBack = { navController.popBackStack() },
-            transition = if (miuix) NavTransitions.MiuixDefault else MaterialPageTransition,
-            effects = if (miuix) NavDisplayEffects(
+            onBack = { controller.popBackStack() },
+            transition = NavTransitions.MiuixDefault,
+            effects = NavDisplayEffects(
                 cornerClipRadius = if (isPane) 0.dp else cornerRadius,
                 backdropColor = MiuixTheme.colorScheme.surface,
-            ) else NavDisplayEffects.None,
+            ),
         ) {
             entry<PageKey>(contentKey = { it.entry.id }) { page ->
                 val motion = LocalNavTransitionScope.current
                 LaunchedEffect(motion, navigator) {
                     snapshotFlow { motion.isRunning }.collectLatest { running ->
-                        if (running) navigator.prepare() else {
-                            // Reconciliation begins after composition; do not complete a just-pushed entry early.
+                        if (running) navigator.backStack.value.forEach(navigator::prepareForTransition) else {
                             withFrameNanos { }
-                            if (!motion.isRunning) navigator.completeTransitions()
+                            if (!motion.isRunning) latestVisible.value.forEach(navigator::onTransitionComplete)
                         }
                     }
                 }
                 DisposableEffect(page.entry) {
-                    onDispose { navigator.complete(page.entry) }
+                    onDispose { navigator.onTransitionComplete(page.entry) }
                 }
-                page.entry.LocalOwnersProvider(stateHolder) {
-                    val isTop = entries.lastOrNull()?.id == page.entry.id
-                    Box(Modifier.fillMaxSize().then(if (isTop) Modifier else Modifier.clearAndSetSemantics {})) {
-                        (page.entry.destination as AppPageNavigator.Destination).content(page.entry)
-                    }
-                }
+                render(page.entry)
             }
         }
     }

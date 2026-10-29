@@ -22,6 +22,8 @@ import com.example.c001apk.compose.ui.component.design.FloatingActionButton
 import com.example.c001apk.compose.ui.component.design.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +45,7 @@ internal fun HomeFeedActions(
 ) {
     val scope = rememberCoroutineScope()
     val scrollingUp = listState.isScrollingUp()
-    val canScrollToTop = listState.canScrollBackward
+    val canScrollToTop = rememberBackToTopVisible(listState)
     var returningToTop by remember { mutableStateOf(false) }
     val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
     val buttonColor = if (miuix) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
@@ -99,4 +101,22 @@ internal fun HomeFeedActions(
             }
         }
     }
+}
+
+@Composable
+internal fun rememberBackToTopVisible(listState: LazyListState): Boolean {
+    var visible by remember(listState) { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        val heights = mutableMapOf<Int, Int>()
+        snapshotFlow { listState.layoutInfo }.collect { layout ->
+            layout.visibleItemsInfo.forEach { heights[it.index] = it.size + layout.mainAxisItemSpacing }
+            val first = listState.firstVisibleItemIndex
+            val viewport = layout.viewportEndOffset - layout.viewportStartOffset
+            // Count measured pixels, including header items and unusually tall posts.
+            val distance = (0 until first).sumOf { heights[it]?.toLong() ?: viewport.toLong() } +
+                listState.firstVisibleItemScrollOffset
+            visible = viewport > 0 && distance >= viewport * 2L
+        }
+    }
+    return visible
 }

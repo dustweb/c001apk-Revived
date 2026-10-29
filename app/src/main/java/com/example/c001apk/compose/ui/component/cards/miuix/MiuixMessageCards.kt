@@ -23,7 +23,7 @@ fun MiuixConversationCard(modifier: Modifier, data: HomeFeedResponse.Data,
     onOpenLink: (String, String?) -> Unit, onViewUser: (String) -> Unit,
     onHandleMessage: ((String, Int) -> Unit)?, onViewChat: ((String, String, String) -> Unit)?) {
     Card(modifier.fillMaxWidth().contentPress().testTag("miuix-conversation-${data.ukey}"),
-        insideMargin = PaddingValues(16.dp),
+        insideMargin = PaddingValues(16.dp), pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.None,
         onClick = { onViewChat?.invoke(data.ukey.orEmpty(), data.messageUid.orEmpty(), data.messageUsername.orEmpty()) },
         onLongPress = { onHandleMessage?.invoke(data.ukey.orEmpty(), data.isTop ?: 0) }) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -65,7 +65,7 @@ fun MiuixChatBubble(modifier: Modifier, data: HomeFeedResponse.Data, outgoing: B
             verticalAlignment = Alignment.Top) {
             if (!outgoing) { avatar(); Spacer(Modifier.width(10.dp)) }
             Card(Modifier.widthIn(max = bubbleWidth).testTag("miuix-chat-${data.id}"),
-                cornerRadius = 20.dp, insideMargin = PaddingValues(horizontal = 14.dp, vertical = 12.dp),
+                cornerRadius = 16.dp, insideMargin = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
                 colors = CardColors(background, foreground),
                 onLongPress = { onLongClick(data.id.orEmpty(), data.message.orEmpty(), pic) }) {
                 if (!data.message.isNullOrEmpty()) LinkText(text = data.message, textSize = 16f,

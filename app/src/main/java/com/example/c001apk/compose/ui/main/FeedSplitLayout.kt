@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.Layout
 import kotlin.math.roundToInt
+import androidx.activity.compose.BackHandler
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 @Composable
 internal fun FeedSplitLayout(
@@ -59,10 +61,10 @@ internal fun FeedSplitLayout(
             detail?.placeRelative(mainWidth, 0)
         }
     }
-    PredictiveBackHandler(
+    if (isMiuix()) PredictiveBackHandler(
         enabled = showDetail && canHandleBack,
         onProgress = { events -> events.collect { progress.snapTo(1f - it.progress) } },
         onCommit = { scope.launch { progress.animateTo(0f); onClose() } },
         onCancel = { scope.launch { progress.animateTo(1f) } },
-    )
+    ) else BackHandler(showDetail && canHandleBack, onClose)
 }

@@ -44,6 +44,11 @@ fun AppCard(
     onHandleRecent: ((String, String, String, Int) -> Unit)? = null,
 ) {
 
+    if (com.example.c001apk.compose.ui.theme.isMiuix() && appCardType == AppCardType.TOPIC) {
+        com.example.c001apk.compose.ui.component.cards.miuix.MiuixTopicCard(modifier, data, onOpenLink)
+        return
+    }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()

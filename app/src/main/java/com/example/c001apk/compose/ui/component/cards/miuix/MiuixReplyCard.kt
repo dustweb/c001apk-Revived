@@ -196,6 +196,7 @@ private fun ReplyIdentity(author: String, target: String, avatar: String?, onOpe
 @Composable
 private fun ReplySource(author: String?, message: String?, picture: String?, url: String?, onOpenLink: (String, String?) -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+        .clip(RoundedCornerShape(14.dp))
         .then(if (!url.isNullOrEmpty()) Modifier.clickable { onOpenLink(url, null) } else Modifier),
         shape = RoundedCornerShape(14.dp), color = MiuixTheme.colorScheme.surface) {
         Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

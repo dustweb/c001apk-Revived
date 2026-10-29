@@ -8,6 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -340,7 +342,7 @@ fun ChatScreen(
             ChatBottom(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(cardBg())
+                    .background(if (com.example.c001apk.compose.ui.theme.isMiuix()) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.background else cardBg())
                     .padding(bottom = androidx.compose.animation.core.animateDpAsState(
                         targetValue = with(androidx.compose.ui.platform.LocalDensity.current) {
                             androidx.compose.foundation.layout.WindowInsets.ime.getBottom(this).toDp()
@@ -485,29 +487,15 @@ fun ChatBottom(
     var shouldShowSendBtn by remember { mutableStateOf(false) }
     var showEmojiPanel by remember { mutableStateOf(false) }
     var clickedEmoji by remember { mutableStateOf<String?>(null) }
-    var textInput by remember { mutableStateOf(EMPTY_STRING) }
+    var textInput by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(EMPTY_STRING) }
     var pagerState: PagerState
     val context = LocalContext.current
 
-    Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(modifier = Modifier.size(48.dp), onClick = {
-                        onClearFocus()
-                        showEmojiPanel = !showEmojiPanel
-                    }) {
-                Icon(imageVector = Icons.Outlined.EmojiEmotions, contentDescription = "表情",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            ChatEditText(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 6.dp)
-                    .then(if (com.example.c001apk.compose.ui.theme.isMiuix()) {
-                        Modifier.squircleSurface(
-                            top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.secondaryContainer,
-                            top.yukonga.miuix.kmp.basic.TextFieldDefaults.CornerRadius)
-                    } else Modifier.clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface))
-                    .padding(horizontal = if (com.example.c001apk.compose.ui.theme.isMiuix()) 12.dp else 6.dp),
+    val miuix = com.example.c001apk.compose.ui.theme.isMiuix()
+    val actionTint = if (miuix) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.onSurfaceVariantActions
+        else MaterialTheme.colorScheme.onSurfaceVariant
+    val inputRenderer = androidx.compose.runtime.rememberUpdatedState<@Composable (Modifier) -> Unit> { inputModifier ->
+        ChatEditText(modifier = inputModifier, initialText = textInput,
                 showSendBtn = { shouldShowSendBtn = it },
                 updateInputText = {
                     textInput = it
@@ -524,6 +512,43 @@ fun ChatBottom(
                     showEmojiPanel = false
                 },
             )
+    }
+    val input = remember { androidx.compose.runtime.movableContentOf<Modifier> { inputRenderer.value(it) } }
+
+    Column(modifier = modifier) {
+        if (miuix) {
+            top.yukonga.miuix.kmp.basic.Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                insideMargin = PaddingValues(8.dp),
+                pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.None,
+            ) {
+                input(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { onClearFocus(); showEmojiPanel = !showEmojiPanel }) {
+                        Icon(Icons.Outlined.EmojiEmotions, "表情", tint = actionTint)
+                    }
+                    IconButton(onClick = onPickImage) { Icon(Icons.Outlined.AddPhotoAlternate, "选择图片", tint = actionTint) }
+                    IconButton(onClick = onPickOtherImage) {
+                        Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.File, "选择文件中的图片", tint = actionTint)
+                    }
+                    Spacer(Modifier.weight(1f))
+                    top.yukonga.miuix.kmp.basic.TextButton(
+                        text = "发送", enabled = shouldShowSendBtn, onClick = { onSendMessage(textInput) },
+                        colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    )
+                }
+            }
+        } else Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(modifier = Modifier.size(48.dp), onClick = {
+                        onClearFocus()
+                        showEmojiPanel = !showEmojiPanel
+                    }) {
+                Icon(imageVector = Icons.Outlined.EmojiEmotions, contentDescription = "表情",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            input(Modifier.weight(1f).padding(vertical = 6.dp)
+                .clip(RoundedCornerShape(4.dp)).background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 6.dp))
             if (!shouldShowSendBtn) {
                 Row {
                     IconButton(modifier = Modifier.size(48.dp), onClick = {
@@ -635,6 +660,7 @@ fun ChatBottom(
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Outlined.Backspace,
                                             contentDescription = "删除一个字符",
+                                            tint = actionTint,
                                             modifier = Modifier.size(28.dp)
                                         )
                                     }
