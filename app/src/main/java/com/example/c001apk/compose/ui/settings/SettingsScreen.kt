@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -205,12 +206,7 @@ fun SettingsScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(
-                    top = paddingValues.calculateTopPadding(),
-                    start = paddingValues.calculateLeftPadding(layoutDirection),
-                    end = paddingValues.calculateRightPadding(layoutDirection)
-                )
-                .verticalScroll(rememberScrollState)
+                .pageScroll(rememberScrollState, paddingValues)
         ) {
             if (miuix) {
                 MiuixSettingsContent(

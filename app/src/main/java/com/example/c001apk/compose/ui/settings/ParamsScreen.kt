@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -59,8 +60,7 @@ fun ParamsScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState)
+                .pageScroll(rememberScrollState, paddingValues)
         ) {
 
             PreferenceGroup("应用信息", showTitleInMd3 = false) {

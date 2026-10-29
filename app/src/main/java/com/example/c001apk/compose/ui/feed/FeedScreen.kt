@@ -121,6 +121,7 @@ fun FeedScreen(
 
     val context = LocalContext.current
     val miuix = isMiuix()
+    val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
     val layoutDirection = LocalLayoutDirection.current
     val lazyListState = rememberLazyListState()
     var dropdownMenuExpanded by remember { mutableStateOf(false) }
@@ -354,7 +355,7 @@ fun FeedScreen(
 
         RefreshContainer(
             modifier = Modifier.padding(
-                top = paddingValues.calculateTopPadding(),
+                top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                 end = paddingValues.calculateEndPadding(layoutDirection),
                 start = paddingValues.calculateStartPadding(layoutDirection)
             ),
@@ -367,7 +368,7 @@ fun FeedScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding()),
+                contentPadding = PaddingValues(top = if (blur) paddingValues.calculateTopPadding() else 0.dp, bottom = paddingValues.calculateBottomPadding()),
                 state = lazyListState
             ) {
                 when (viewModel.feedState) {

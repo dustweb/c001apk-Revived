@@ -68,6 +68,7 @@ fun FFFContentScreen(
     var showRecentDialog by remember { mutableStateOf(false) }
 
     CommonScreen(
+        needTopPadding = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled(),
         viewModel = viewModel,
         refreshState = refreshState,
         resetRefreshState = resetRefreshState,

@@ -9,6 +9,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -28,12 +31,13 @@ fun AppNavigationScaffold(
     content: @Composable () -> Unit,
 ) {
     val miuix = isMiuix()
+    val blur = isMiuixBlurEnabled()
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (compact) {
                 if (miuix) {
-                    MiuixNavigationBar {
+                    MiuixNavigationBar(color = barBackground(MiuixTheme.colorScheme.surface)) {
                         destinations.forEachIndexed { index, destination ->
                             MiuixNavigationBarItem(
                                 selected = selected == index, onClick = { onSelect(index) },
@@ -60,7 +64,7 @@ fun AppNavigationScaffold(
         },
     ) { padding ->
         // Only navigation controls change implementation; the page keeps its composition position.
-        Row(Modifier.fillMaxSize().padding(padding)) {
+        Row(Modifier.fillMaxSize().padding(if (blur) PaddingValues() else padding)) {
             if (!compact) {
                 if (miuix) {
                     top.yukonga.miuix.kmp.basic.NavigationRail {
@@ -85,7 +89,9 @@ fun AppNavigationScaffold(
                     }
                 }
             }
-            Box(Modifier.weight(1f).fillMaxHeight()) { content() }
+            CompositionLocalProvider(LocalNavigationPadding provides if (blur) padding.calculateBottomPadding() else 0.dp) {
+                Box(Modifier.weight(1f).fillMaxHeight()) { content() }
+            }
         }
     }
 }

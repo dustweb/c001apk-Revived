@@ -112,9 +112,11 @@ fun FFFListScreen(
             )
         }
     ) { paddingValues ->
+        val blurList = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled() &&
+            type != FFFListType.FOLLOW.name && type != FFFListType.REPLY.name
 
         Column(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
+            modifier = Modifier.padding(top = if (blurList) 0.dp else paddingValues.calculateTopPadding())
         ) {
             when (type) {
                 FFFListType.FOLLOW.name, FFFListType.REPLY.name -> {
@@ -225,6 +227,7 @@ fun FFFListScreen(
                         uid = uid,
                         type = type,
                         paddingValues = PaddingValues(
+                            top = if (blurList) paddingValues.calculateTopPadding() else 0.dp,
                             start = paddingValues.calculateLeftPadding(layoutDirection),
                             bottom = paddingValues.calculateBottomPadding(),
                         ),

@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.login
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -116,8 +117,8 @@ fun LoginScreen(
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.fillMaxSize().imePadding()
+                .pageScroll(rememberScrollState(), paddingValues)
         ) {
 
             if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()

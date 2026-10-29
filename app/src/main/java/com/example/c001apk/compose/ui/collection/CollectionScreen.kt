@@ -88,10 +88,11 @@ fun CollectionScreen(
             )
         }
     ) { paddingValues ->
+        val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
 
         RefreshContainer(
             modifier = Modifier.padding(
-                top = paddingValues.calculateTopPadding(),
+                top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                 start = paddingValues.calculateLeftPadding(layoutDirection),
             ),
             isRefreshing = viewModel.isRefreshing,
@@ -104,7 +105,7 @@ fun CollectionScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 10.dp + paddingValues.calculateBottomPadding()),
+                contentPadding = PaddingValues(top = if (blur) paddingValues.calculateTopPadding() else 0.dp, bottom = 10.dp + paddingValues.calculateBottomPadding()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 state = lazyListState
             ) {

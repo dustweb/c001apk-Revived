@@ -28,6 +28,10 @@ class SettingsViewModel @Inject constructor(
     private val launcherIconManager: LauncherIconManager,
 ) : PrefsViewModel(userPreferencesRepository) {
 
+    fun setBlurEnabled(value: Boolean) {
+        viewModelScope.launch { userPreferencesRepository.setBlurEnabled(value) }
+    }
+
     fun setUiStyle(value: UiStyle) {
         viewModelScope.launch { userPreferencesRepository.setUiStyle(value) }
     }

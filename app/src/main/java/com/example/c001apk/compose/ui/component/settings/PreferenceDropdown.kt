@@ -2,6 +2,9 @@ package com.example.c001apk.compose.ui.component.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -20,6 +23,8 @@ internal fun PreferenceDropdown(
     summary: String? = null,
     enabled: Boolean = true,
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    com.example.c001apk.compose.ui.component.design.GlobalPopupBlur(expanded)
     val click = rememberHapticClick {}
     val haptics = remember(click) {
         object : HapticFeedback {
@@ -29,7 +34,7 @@ internal fun PreferenceDropdown(
     PreferenceFrame {
         CompositionLocalProvider(LocalHapticFeedback provides haptics) {
             OverlayDropdownPreference(title = title, summary = summary, items = items, selectedIndex = selectedIndex,
-                enabled = enabled, modifier = modifier, onSelectedIndexChange = onSelectedIndexChange)
+                enabled = enabled, modifier = modifier, onExpandedChange = { expanded = it }, onSelectedIndexChange = onSelectedIndexChange)
         }
     }
 }

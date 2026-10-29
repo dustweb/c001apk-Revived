@@ -71,6 +71,7 @@ fun AppListScreen(
 
     ) {
         LazyColumn(
+            contentPadding = com.example.c001apk.compose.ui.component.design.LocalHomePadding.current,
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
         ) {

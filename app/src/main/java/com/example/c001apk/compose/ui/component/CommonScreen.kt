@@ -71,11 +71,13 @@ fun CommonScreen(
         it(lazyListState.isScrollingUp())
     }
 
+    val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
+    val navigationPadding = com.example.c001apk.compose.ui.component.design.LocalNavigationPadding.current
     RefreshContainer(
         modifier = Modifier.padding(
             start = paddingValues.calculateLeftPadding(layoutDirection),
             end = paddingValues.calculateRightPadding(layoutDirection),
-            top = if (needTopPadding) paddingValues.calculateTopPadding() else 0.dp
+            top = if (needTopPadding && !blur) paddingValues.calculateTopPadding() else 0.dp
         ),
         isRefreshing = viewModel.isRefreshing,
         onRefresh = viewModel::refresh,
@@ -85,8 +87,8 @@ fun CommonScreen(
             modifier = Modifier
                 .fillMaxSize(),
             contentPadding = PaddingValues(
-                top = 10.dp,
-                bottom = 10.dp + paddingValues.calculateBottomPadding()
+                top = 10.dp + if (needTopPadding && blur) paddingValues.calculateTopPadding() else 0.dp,
+                bottom = 10.dp + maxOf(paddingValues.calculateBottomPadding(), navigationPadding)
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             state = lazyListState

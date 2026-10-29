@@ -24,14 +24,26 @@ fun Scaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val miuix = isMiuix()
+    val backdrop = rememberPageBackdrop()
+    val navigationPadding = LocalNavigationPadding.current
     CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides contentColor) {
         top.yukonga.miuix.kmp.basic.Scaffold(
-            modifier = modifier, topBar = topBar, bottomBar = bottomBar, snackbarHost = snackbarHost,
-            floatingActionButton = floatingActionButton, contentWindowInsets = contentWindowInsets,
+            modifier = modifier,
+            topBar = { BlurredBar(backdrop) { topBar() } },
+            bottomBar = { BlurredBar(backdrop) { bottomBar() } }, snackbarHost = snackbarHost,
+            floatingActionButton = { Box(Modifier.padding(bottom = navigationPadding)) { floatingActionButton() } }, contentWindowInsets = contentWindowInsets,
             containerColor = if (containerColor != Color.Unspecified) containerColor
                 else if (miuix) MiuixTheme.colorScheme.surface else MaterialTheme.colorScheme.background,
         ) { padding ->
-            Box(Modifier.consumeWindowInsets(padding)) { content(padding) }
+            val bodyPadding = PaddingValues(
+                start = padding.calculateStartPadding(androidx.compose.ui.platform.LocalLayoutDirection.current),
+                top = padding.calculateTopPadding(),
+                end = padding.calculateEndPadding(androidx.compose.ui.platform.LocalLayoutDirection.current),
+                bottom = padding.calculateBottomPadding() + navigationPadding,
+            )
+            Box(Modifier.consumeWindowInsets(padding).pageBackdrop(backdrop)) {
+                content(bodyPadding)
+            }
         }
     }
 }

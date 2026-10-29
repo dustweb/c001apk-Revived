@@ -15,6 +15,10 @@ class UserPreferencesDataSource @Inject constructor(
 ) {
     val data get() = userPreferences.data
 
+    suspend fun setBlurEnabled(value: Boolean) = withContext(Dispatchers.IO) {
+        userPreferences.updateData { it.copy(blurEnabled = value) }
+    }
+
     suspend fun setUiStyle(value: UiStyle) = withContext(Dispatchers.IO) {
         userPreferences.updateData { it.copy(uiStyle = value) }
     }

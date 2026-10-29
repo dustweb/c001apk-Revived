@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,7 +56,11 @@ fun ThemeSettingsScreen(onBack: () -> Unit, viewModel: SettingsViewModel = hiltV
             .then(if (miuix) Modifier.nestedScroll(behavior.nestedScrollConnection) else Modifier),
         topBar = { PreferenceTopBar("主题设置", behavior, onBack = onBack) },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll)) {
+        Column(Modifier.fillMaxSize().pageScroll(scroll, padding)) {
+            if (miuix) PreferenceGroup("界面效果") {
+                SwitchListItem(value = prefs.blurEnabled, leadingImageVector = Icons.Outlined.Palette, headlineText = "全局模糊",
+                    supportingText = "模糊顶栏、导航栏和弹窗背后的内容", onValueChanged = viewModel::setBlurEnabled)
+            }
             PreferenceGroup("配色") {
                 DropdownListItem(value = prefs.themeMode, headlineText = "深色主题",
                     selections = listOf(

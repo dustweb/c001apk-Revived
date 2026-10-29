@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,7 @@ internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll:
             .nestedScroll(behavior.nestedScrollConnection),
         topBar = { PreferenceTopBar("关于", behavior, onBack) },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(scroll),
+        Column(Modifier.fillMaxSize().pageScroll(scroll, padding),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Column(Modifier.widthIn(max = 640.dp).fillMaxWidth().padding(horizontal = 16.dp)) {
                 AboutHeader(compact = false)
@@ -67,6 +68,7 @@ internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll:
 @Composable
 internal fun MiuixAboutDialog(onDismiss: () -> Unit) {
     var visible by remember { mutableStateOf(true) }
+    com.example.c001apk.compose.ui.component.design.GlobalPopupBlur(visible)
     WindowDialog(show = visible, modifier = Modifier.testTag("miuix-about-dialog"),
         onDismissRequest = { visible = false }, onDismissFinished = onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

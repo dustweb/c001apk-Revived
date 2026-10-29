@@ -85,15 +85,16 @@ fun AppUpdateScreen(
             )
         }
     ) { paddingValues ->
+        val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = paddingValues.calculateTopPadding(),
+                    top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                     start = paddingValues.calculateLeftPadding(layoutDirection),
                 ),
             contentPadding = PaddingValues(
-                start = 10.dp, end = 10.dp, top = 10.dp,
+                start = 10.dp, end = 10.dp, top = 10.dp + if (blur) paddingValues.calculateTopPadding() else 0.dp,
                 bottom = 10.dp + paddingValues.calculateBottomPadding()
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)

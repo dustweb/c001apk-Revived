@@ -26,12 +26,12 @@ fun PreferenceTopBar(
         val wide = LocalWindowInfo.current.containerSize.width / displayDensity >= 600f
         if (wide) {
             top.yukonga.miuix.kmp.basic.SmallTopAppBar(
-                title = title, scrollBehavior = scrollBehavior, navigationIcon = navigation,
+                title = title, color = com.example.c001apk.compose.ui.component.design.barBackground(top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.surface), scrollBehavior = scrollBehavior, navigationIcon = navigation,
                 actions = actions, modifier = Modifier.testTag("compact-preference-header"),
             )
         } else {
             top.yukonga.miuix.kmp.basic.TopAppBar(
-                title = title, scrollBehavior = scrollBehavior, navigationIcon = navigation,
+                title = title, color = com.example.c001apk.compose.ui.component.design.barBackground(top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.surface), scrollBehavior = scrollBehavior, navigationIcon = navigation,
                 actions = actions, modifier = Modifier.testTag("collapsing-preference-header"),
             )
         }

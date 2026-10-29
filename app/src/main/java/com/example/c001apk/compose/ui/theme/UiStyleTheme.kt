@@ -1,5 +1,8 @@
 package com.example.c001apk.compose.ui.theme
 
+import com.example.c001apk.compose.ui.component.design.LocalModalBlur
+import com.example.c001apk.compose.ui.component.design.rememberModalBlurState
+import com.example.c001apk.compose.ui.component.design.modalBackgroundBlur
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.foundation.layout.WindowInsets
@@ -77,9 +80,11 @@ fun UiStyleTheme(style: UiStyle, controller: ThemeController, content: @Composab
     val materialIndication = LocalIndication.current
     val materialOverscroll = LocalOverscrollFactory.current
     // Keep the provider tree stable so a style change does not discard page state.
+    val modalBlur = rememberModalBlurState()
     MiuixTheme(controller = controller) {
         CompositionLocalProvider(
             LocalUiStyle provides style,
+            LocalModalBlur provides modalBlur,
             LocalOverscrollFactory provides if (style == UiStyle.MIUIX) LocalOverscrollFactory.current else materialOverscroll,
             LocalIndication provides if (style == UiStyle.MIUIX) LocalIndication.current
                 else materialIndication,
@@ -89,7 +94,7 @@ fun UiStyleTheme(style: UiStyle, controller: ThemeController, content: @Composab
                 containerColor = Color.Transparent,
                 contentWindowInsets = WindowInsets(0, 0, 0, 0),
             ) { padding ->
-                Box(Modifier.fillMaxSize().padding(padding)) { content() }
+                Box(Modifier.fillMaxSize().padding(padding).modalBackgroundBlur(modalBlur)) { content() }
             }
         }
     }

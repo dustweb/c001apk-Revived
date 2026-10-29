@@ -48,6 +48,7 @@ fun AlertDialog(
 ) {
     if (isMiuix()) {
         var visible by remember { mutableStateOf(true) }
+        GlobalPopupBlur(visible)
         WindowDialog(show = visible, modifier = modifier.semantics { dialog() },
             onDismissRequest = { visible = false }, onDismissFinished = onDismissRequest) {
             CompositionLocalProvider(LocalContentColor provides MiuixTheme.colorScheme.onSurface) {
@@ -82,6 +83,7 @@ fun DropdownMenu(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (isMiuix()) {
+        GlobalPopupBlur(expanded)
         OverlayListPopup(show = expanded, popupModifier = modifier, onDismissRequest = onDismissRequest,
             alignment = PopupPositionProvider.Align.End) {
             CompositionLocalProvider(

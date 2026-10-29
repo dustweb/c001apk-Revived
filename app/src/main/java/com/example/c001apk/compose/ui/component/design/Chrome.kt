@@ -47,7 +47,7 @@ fun TopAppBar(
             }
         }
         top.yukonga.miuix.kmp.basic.Surface(
-            modifier = modifier, color = colors?.containerColor ?: MiuixTheme.colorScheme.surface,
+            modifier = modifier, color = barBackground(colors?.containerColor ?: MiuixTheme.colorScheme.surface),
         ) {
             Row(
                 Modifier.fillMaxWidth().windowInsetsPadding(windowInsets).height(64.dp)
@@ -87,7 +87,7 @@ fun TopAppBar(
         top.yukonga.miuix.kmp.basic.SmallTopAppBar(title = title,
             modifier = modifier.windowInsetsPadding(windowInsets),
             defaultWindowInsetsPadding = false, navigationIcon = navigationIcon, actions = actions,
-            color = colors?.containerColor ?: MiuixTheme.colorScheme.surface)
+            color = barBackground(colors?.containerColor ?: MiuixTheme.colorScheme.surface))
     } else androidx.compose.material3.TopAppBar(title = { androidx.compose.material3.Text(title) },
         modifier = modifier, navigationIcon = navigationIcon, actions = actions,
         windowInsets = windowInsets, colors = colors ?: TopAppBarDefaults.topAppBarColors(), scrollBehavior = scrollBehavior)
@@ -182,6 +182,7 @@ fun ModalBottomSheet(
     if (isMiuix()) {
         var visible by remember { mutableStateOf(true) }
         val maxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.88f
+        GlobalPopupBlur(visible)
         WindowBottomSheet(
             show = visible, title = title,
             onDismissRequest = { visible = false }, onDismissFinished = onDismissRequest,

@@ -17,6 +17,7 @@ fun ActionDialog(title: String, actions: List<MenuAction>, onDismiss: () -> Unit
     var visible by remember { mutableStateOf(true) }
     var selected by remember { mutableStateOf<(() -> Unit)?>(null) }
     if (isMiuix()) {
+        GlobalPopupBlur(visible)
         WindowDialog(show = visible, title = title, modifier = Modifier.testTag("miuix-action-dialog"),
             onDismissRequest = { visible = false },
             onDismissFinished = { onDismiss(); selected?.invoke() }) {
@@ -47,6 +48,7 @@ fun ProgressContent() {
 
 @Composable
 fun ProgressDialog(message: String) {
+    GlobalPopupBlur(true)
     if (isMiuix()) WindowDialog(show = true, title = message, onDismissRequest = null) {
         ProgressContent()
     } else AlertDialog(onDismissRequest = {}, confirmButton = {}, title = { androidx.compose.material3.Text(message) },

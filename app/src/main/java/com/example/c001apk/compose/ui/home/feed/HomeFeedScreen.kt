@@ -83,6 +83,8 @@ fun HomeFeedScreen(
     }
 
     CommonScreen(
+        paddingValues = com.example.c001apk.compose.ui.component.design.LocalHomePadding.current,
+        needTopPadding = true,
         viewModel = viewModel,
         refreshState = refreshState,
         resetRefreshState = resetRefreshState,

@@ -248,12 +248,13 @@ fun ChatScreen(
             .exclude(WindowInsets.navigationBars)
             .exclude(WindowInsets.ime),
     ) { paddingValues ->
+        val blur = com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = paddingValues.calculateTopPadding(),
+                    top = if (blur) 0.dp else paddingValues.calculateTopPadding(),
                 )
                 .windowInsetsPadding(windowInsets.only(WindowInsetsSides.Start))
         ) {
@@ -264,6 +265,7 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxSize(),
                 reverseLayout = true,
+                contentPadding = PaddingValues(top = if (blur) paddingValues.calculateTopPadding() else 0.dp),
                 state = lazyListState,
             ) {
                 when (viewModel.loadingState) {

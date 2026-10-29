@@ -39,6 +39,9 @@ import com.example.c001apk.compose.ui.component.design.Tab
 import androidx.compose.material3.TabRowDefaults
 import com.example.c001apk.compose.ui.component.design.Text
 import com.example.c001apk.compose.ui.component.design.TextButton
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.PaddingValues
+import com.example.c001apk.compose.ui.component.design.LocalHomePadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -395,6 +398,17 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            if (miuix) {
+                MiuixHomeHeader(
+                    labels = tabList.map { tabTitle(it) },
+                    selectedTabIndex = selectedTabIndex,
+                    onTabSelected = onTabSelected,
+                    onSearch = onSearch,
+                    onEditTabs = { showTabEditor = true },
+                )
+            }
+        },
         floatingActionButton = {
             HomeFeedActions(
                 listState = homeFeedListState,
@@ -418,17 +432,9 @@ fun HomeScreen(
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier.fillMaxSize().padding(top = paddingValues.calculateTopPadding()),
+            modifier = Modifier.fillMaxSize().padding(top = if (miuix) 0.dp else paddingValues.calculateTopPadding()),
         ) {
-            if (miuix) {
-                MiuixHomeHeader(
-                    labels = tabList.map { tabTitle(it) },
-                    selectedTabIndex = selectedTabIndex,
-                    onTabSelected = onTabSelected,
-                    onSearch = onSearch,
-                    onEditTabs = { showTabEditor = true },
-                )
-            } else Row(
+            if (!miuix) Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -478,6 +484,7 @@ fun HomeScreen(
 
             if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 
+            CompositionLocalProvider(LocalHomePadding provides if (miuix) paddingValues else PaddingValues()) {
             HorizontalPager(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 state = pagerState,
@@ -515,6 +522,7 @@ fun HomeScreen(
                     )
                 }
 
+            }
             }
 
         }

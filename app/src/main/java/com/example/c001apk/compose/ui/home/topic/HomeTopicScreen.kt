@@ -70,7 +70,7 @@ fun HomeTopicScreen(
     var pageState: PagerState
     var tabList: List<TopicBean>?
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().padding(top = com.example.c001apk.compose.ui.component.design.LocalHomePadding.current.calculateTopPadding())) {
         when (viewModel.loadingState) {
             LoadingState.Loading, LoadingState.Empty, is LoadingState.Error -> {
                 Box(modifier = Modifier.fillMaxSize()) {

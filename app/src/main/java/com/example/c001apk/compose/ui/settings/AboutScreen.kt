@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,8 +66,7 @@ fun AboutScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState)
+                .pageScroll(rememberScrollState, paddingValues)
         ) {
             Box(
                 Modifier

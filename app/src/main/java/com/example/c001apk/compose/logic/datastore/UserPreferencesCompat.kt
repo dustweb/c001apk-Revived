@@ -60,6 +60,7 @@ data class UserPreferencesCompat(
     val customHaptics: Boolean,
     val reverseHapticEffects: Boolean,
     val uiStyle: UiStyle = UiStyle.MD3,
+    val blurEnabled: Boolean = true,
 ) {
     constructor(original: UserPreferences) : this(
         themeMode = original.themeMode,
@@ -108,6 +109,7 @@ data class UserPreferencesCompat(
         customHaptics = original.customHaptics,
         reverseHapticEffects = original.reverseHapticEffects,
         uiStyle = original.uiStyle.takeUnless { it == UiStyle.UNRECOGNIZED } ?: UiStyle.MD3,
+        blurEnabled = if (original.hasBlurEnabled()) original.blurEnabled else true,
     )
 
     @Composable
@@ -164,6 +166,7 @@ data class UserPreferencesCompat(
         .setCustomHaptics(customHaptics)
         .setReverseHapticEffects(reverseHapticEffects)
         .setUiStyle(uiStyle)
+        .setBlurEnabled(blurEnabled)
         .build()
 
     companion object {

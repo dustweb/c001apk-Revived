@@ -1,5 +1,7 @@
 package com.example.c001apk.compose.ui.search
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -184,9 +186,9 @@ fun SearchScreen(
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier.padding(
-                top = paddingValues.calculateTopPadding()
-            )
+            modifier = if (com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled())
+                Modifier.pageScroll(rememberScrollState(), paddingValues)
+            else Modifier.padding(top = paddingValues.calculateTopPadding())
         ) {
             if (!com.example.c001apk.compose.ui.theme.isMiuix()) HorizontalDivider()
 

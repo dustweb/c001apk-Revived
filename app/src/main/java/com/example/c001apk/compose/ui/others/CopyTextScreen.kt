@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.others
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -40,9 +41,8 @@ fun CopyTextScreen(text: String) {
                         lineHeight = 35.sp
                     ),
                     modifier = Modifier
-                        .padding(paddingValues)
                         .align(Alignment.Center)
-                        .verticalScroll(rememberScrollState())
+                        .pageScroll(rememberScrollState(), paddingValues)
                         .padding(horizontal = 20.dp, vertical = 25.dp)
                 )
             }

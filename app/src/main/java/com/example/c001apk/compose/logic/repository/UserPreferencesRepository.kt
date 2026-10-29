@@ -15,6 +15,8 @@ class UserPreferencesRepository @Inject constructor(
 ) {
     val data get() = userPreferencesDataSource.data
 
+    suspend fun setBlurEnabled(value: Boolean) = userPreferencesDataSource.setBlurEnabled(value)
+
     suspend fun setUiStyle(value: UiStyle) = userPreferencesDataSource.setUiStyle(value)
 
     suspend fun setThemeMode(value: ThemeMode) = userPreferencesDataSource.setThemeMode(value)

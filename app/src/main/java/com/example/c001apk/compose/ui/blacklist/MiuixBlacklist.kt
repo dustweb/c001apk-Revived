@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.blacklist
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -32,7 +33,7 @@ fun MiuixBlacklist(type: String, entries: List<String>, input: TextFieldValue,
     val scroll = MiuixScrollBehavior()
     Scaffold(Modifier.fillMaxSize().nestedScroll(scroll.nestedScrollConnection).testTag("miuix-blacklist"),
         topBar = { PreferenceTopBar(if (user) "用户黑名单" else "话题黑名单", scroll, onBack) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).imePadding().verticalScroll(rememberScrollState()),
+        Column(Modifier.fillMaxSize().imePadding().pageScroll(rememberScrollState(), padding),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Card(Modifier.padding(horizontal = 16.dp).fillMaxWidth(), insideMargin = PaddingValues(16.dp)) {
                 TextField(value = input, onValueChange = onInput, singleLine = true,

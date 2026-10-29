@@ -2,6 +2,9 @@ package com.example.c001apk.compose.ui.component.design
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,9 +32,11 @@ fun MiuixActionMenuButton(
     modifier: Modifier = Modifier,
     contentDescription: String = "更多选项",
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    GlobalPopupBlur(expanded)
     ConfiguredMenuHaptics {
         OverlayIconDropdownMenu(entry = actionEntry(actions), modifier = modifier,
-            minWidth = 48.dp, minHeight = 48.dp) {
+            minWidth = 48.dp, minHeight = 48.dp, onExpandedChange = { expanded = it }) {
             Icon(MiuixIcons.Medium.More, contentDescription,
                 tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
         }
@@ -40,6 +45,7 @@ fun MiuixActionMenuButton(
 
 @Composable
 fun MiuixActionMenu(expanded: Boolean, onDismiss: () -> Unit, actions: List<MenuAction>) {
+    GlobalPopupBlur(expanded)
     ConfiguredMenuHaptics {
         OverlayDropdownPopup(entry = actionEntry(actions), show = expanded, onDismiss = onDismiss,
             onDismissFinished = {}, maxHeight = null,

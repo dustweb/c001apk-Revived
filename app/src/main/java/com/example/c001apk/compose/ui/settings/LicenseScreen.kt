@@ -1,5 +1,6 @@
 package com.example.c001apk.compose.ui.settings
 
+import com.example.c001apk.compose.ui.component.design.pageScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +35,7 @@ fun LicenseScreen(
         }
     ) { paddingValues ->
         androidx.compose.foundation.layout.Column(
-            Modifier.fillMaxSize().padding(paddingValues)
-                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+            Modifier.fillMaxSize().pageScroll(androidx.compose.foundation.rememberScrollState(), paddingValues)
         ) {
             com.example.c001apk.compose.ui.component.settings.PreferenceGroup("使用的开源组件", showTitleInMd3 = false) {
                 licenseList.forEach { LicenseRow(it) }

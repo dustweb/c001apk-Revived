@@ -50,6 +50,7 @@ message UserPreferences {
   bool customHaptics = 44;
   bool reverseHapticEffects = 45;
   UiStyle uiStyle = 46;
+  optional bool blurEnabled = 47;
 }
 
 enum UiStyle {

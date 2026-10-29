@@ -112,6 +112,7 @@ fun showAppDialog(
                         }
                     }
                     if (isMiuix()) {
+                        GlobalPopupBlur(visible.value)
                         top.yukonga.miuix.kmp.window.WindowDialog(show = visible.value, title = title,
                             onDismissRequest = if (cancelable) close else null,
                             onDismissFinished = { handler.removeCallbacks(finish); finish.run() }, content = body)

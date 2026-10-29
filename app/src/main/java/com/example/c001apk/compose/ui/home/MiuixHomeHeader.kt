@@ -1,13 +1,10 @@
 package com.example.c001apk.compose.ui.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -19,6 +16,7 @@ import top.yukonga.miuix.kmp.basic.TabRowWithContour
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBarDefaults
 import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.ListView
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -31,16 +29,14 @@ internal fun MiuixHomeHeader(
     onEditTabs: () -> Unit,
 ) {
     val haptic = rememberHapticClick {}
-    Column(Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))) {
         Row(
             Modifier.fillMaxWidth().height(TopAppBarDefaults.CollapsedHeight).padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(Modifier.size(48.dp))
+            Spacer(Modifier.width(96.dp))
             Box(
-                Modifier.weight(1f).fillMaxHeight()
-                    .clickable(onClickLabel = "编辑首页板块", onClick = rememberHapticClick(onClick = onEditTabs))
-                    .semantics { contentDescription = "编辑首页板块" },
+                Modifier.weight(1f).fillMaxHeight(),
                 contentAlignment = Alignment.Center,
             ) {
                 Text("主页", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.Medium,
@@ -48,6 +44,9 @@ internal fun MiuixHomeHeader(
             }
             IconButton(modifier = Modifier.size(48.dp), onClick = rememberHapticClick(onClick = onSearch)) {
                 Icon(MiuixIcons.Medium.Search, "搜索", Modifier.size(24.dp), tint = MiuixTheme.colorScheme.onSurface)
+            }
+            IconButton(modifier = Modifier.size(48.dp), onClick = rememberHapticClick(onClick = onEditTabs)) {
+                Icon(MiuixIcons.Medium.ListView, "编辑首页板块", Modifier.size(24.dp), tint = MiuixTheme.colorScheme.onSurface)
             }
         }
         if (labels.isNotEmpty()) BoxWithConstraints(Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, bottom = 8.dp)) {

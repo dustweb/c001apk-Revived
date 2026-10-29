@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
+import com.example.c001apk.compose.ui.component.design.setMiuixBlurBehind
 import android.content.Intent
 import android.graphics.Color
 import android.content.res.ColorStateList
@@ -650,6 +651,7 @@ class ReplyActivity : AppCompatActivity(),
     private fun initObserve() {
         observeViewTheme(userPreferencesRepository) { prefs, dark, palette, typography ->
             currentUiStyle = prefs.uiStyle
+            window.setMiuixBlurBehind(prefs.uiStyle == UiStyle.MIUIX && prefs.blurEnabled && SDK_INT >= 33)
             predictiveReplyBack?.isEnabled = currentUiStyle == UiStyle.MIUIX
             styleDarkMode = dark
             viewPalette = palette

@@ -36,11 +36,11 @@ class MiuixSettingsTest {
             .assert(hasAnyDescendant(hasText("应用图标")))
         val expandedHeight = compose.onNodeWithTag("collapsing-preference-header").fetchSemanticsNode().boundsInRoot.height
         capture("settings-expanded")
-        compose.onNode(hasScrollAction()).performTouchInput { swipeUp() }
+        compose.onNode(hasScrollAction()).performTouchInput { swipe(androidx.compose.ui.geometry.Offset(center.x, height * .7f), androidx.compose.ui.geometry.Offset(center.x, height * .3f)) }
         val collapsedHeight = compose.onNodeWithTag("collapsing-preference-header").fetchSemanticsNode().boundsInRoot.height
         assertTrue("The large title must collapse with scrolling", collapsedHeight < expandedHeight * 0.8f)
         capture("settings-collapsed")
-        compose.onNodeWithText("主题设置").performScrollTo().performClick()
+        scrollAndClick("主题设置")
         compose.onNodeWithTag("theme-settings-page").assertExists()
         capture("theme-light")
         compose.onNodeWithText("深色主题").performClick()
@@ -93,7 +93,7 @@ class MiuixSettingsTest {
 
     @Test
     fun aboutPageGroupsLinksAndKeepsNavigationDuringStyleSwitch() = withSettings { repository, scenario, activity ->
-        compose.onNodeWithText("关于").performScrollTo().performClick()
+        scrollAndClick("关于")
         compose.onNodeWithTag("miuix-about-page").assertExists()
         compose.onNodeWithTag("about-links")
             .assert(hasAnyDescendant(hasText("本项目地址")))
@@ -110,7 +110,7 @@ class MiuixSettingsTest {
     @Test
     fun parameterDraftSurvivesStyleSwitchAndLicensePageUsesGroupedRows() = withSettings { repository, _, _ ->
         val originalVersion = runBlocking { repository.data.first().versionName }
-        compose.onNodeWithText("机型参数").performScrollTo().performClick()
+        scrollAndClick("机型参数")
         compose.onNodeWithText(context.getString(R.string.params_version_name)).performClick()
         compose.onNode(hasSetTextAction()).performTextReplacement("temporary-draft")
         runBlocking { repository.setUiStyle(UiStyle.MD3) }
@@ -119,7 +119,7 @@ class MiuixSettingsTest {
         assertTrue(runBlocking { repository.data.first().versionName } == originalVersion)
         runBlocking { repository.setUiStyle(UiStyle.MIUIX) }
         pressBack()
-        compose.onNodeWithText("关于").performScrollTo().performClick()
+        scrollAndClick("关于")
         compose.onNodeWithText("开源许可证").performClick()
         compose.onNodeWithText("Miuix").assertExists()
         compose.onNodeWithTag("preference-group-使用的开源组件").assertExists()
@@ -143,6 +143,16 @@ class MiuixSettingsTest {
                 runBlocking { repository.setUiStyle(original.uiStyle); repository.setThemeMode(original.themeMode) }
             }
         }
+    }
+
+    private fun scrollAndClick(text: String) {
+        val node = compose.onNodeWithText(text).performScrollTo()
+        val targetY = context.resources.displayMetrics.heightPixels * .55f
+        val delta = node.fetchSemanticsNode().boundsInRoot.center.y - targetY
+        // The scroll viewport extends behind the translucent bars; tap within the visible body.
+        compose.onNode(hasScrollAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.ScrollBy) { it(0f, delta) }
+        compose.waitForIdle()
+        node.performClick()
     }
 
     private fun capture(name: String) {
