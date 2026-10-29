@@ -26,6 +26,8 @@ fun Scaffold(
     val miuix = isMiuix()
     val backdrop = rememberPageBackdrop()
     val navigationPadding = LocalNavigationPadding.current
+    val view = androidx.compose.ui.platform.LocalView.current
+    val tabBarHost = remember(backdrop, view) { TabBarHost(view, backdrop) }
     CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides contentColor) {
         top.yukonga.miuix.kmp.basic.Scaffold(
             modifier = modifier,
@@ -41,8 +43,13 @@ fun Scaffold(
                 end = padding.calculateEndPadding(androidx.compose.ui.platform.LocalLayoutDirection.current),
                 bottom = padding.calculateBottomPadding() + navigationPadding,
             )
-            Box(Modifier.consumeWindowInsets(padding).pageBackdrop(backdrop)) {
-                CompositionLocalProvider(LocalPageBackdrop provides backdrop) { content(bodyPadding) }
+            Box(Modifier.consumeWindowInsets(padding)) {
+                Box(Modifier.pageBackdrop(backdrop)) {
+                    CompositionLocalProvider(LocalPageBackdrop provides backdrop, LocalTabBarHost provides tabBarHost) {
+                        content(bodyPadding)
+                    }
+                }
+                TabBarOverlayHost(tabBarHost, Modifier.matchParentSize())
             }
         }
     }

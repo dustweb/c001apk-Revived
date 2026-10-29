@@ -89,9 +89,7 @@ internal fun Modifier.modalBackgroundBlur(state: ModalBlurState): Modifier {
     }
 }
 
-internal class BackdropCapture { var recording: Boolean = false }
-
-internal class PageBackdrop(val layer: LayerBackdrop, val capture: BackdropCapture) {
+internal class PageBackdrop(val layer: LayerBackdrop) {
     var position by mutableStateOf(Offset.Zero)
 }
 
@@ -102,17 +100,13 @@ internal fun Modifier.pageBackdrop(backdrop: PageBackdrop?): Modifier = if (back
 internal fun rememberPageBackdrop(): PageBackdrop? {
     if (!isMiuixBlurEnabled()) return null
     val background = MiuixTheme.colorScheme.surface
-    val capture = remember { BackdropCapture() }
-    val layer = rememberLayerBackdrop {
-        capture.recording = true
-        try { drawRect(background); drawContent() } finally { capture.recording = false }
-    }
-    return remember(layer) { PageBackdrop(layer, capture) }
+    val layer = rememberLayerBackdrop { drawRect(background); drawContent() }
+    return remember(layer) { PageBackdrop(layer) }
 }
 
 @Composable
 internal fun BlurredBar(backdrop: PageBackdrop?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    Box(modifier.drawWithContent { if (backdrop?.capture?.recording != true) drawContent() }) {
+    Box(modifier) {
         if (backdrop != null && Build.VERSION.SDK_INT >= 33) {
             val layer = rememberGraphicsLayer()
             val density = LocalDensity.current
@@ -165,10 +159,3 @@ internal fun Window.setMiuixBlurBehind(enabled: Boolean) {
 internal fun Modifier.pageScroll(state: ScrollState, padding: PaddingValues): Modifier =
     if (isMiuixBlurEnabled()) verticalScroll(state).padding(padding)
     else padding(padding).verticalScroll(state)
-
-@Composable
-internal fun TabBarSurface(modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
-    val backdrop = if (LocalBlurredBar.current) null else LocalPageBackdrop.current
-    if (backdrop == null) Box(modifier, content = content)
-    else BlurredBar(backdrop, modifier, content)
-}

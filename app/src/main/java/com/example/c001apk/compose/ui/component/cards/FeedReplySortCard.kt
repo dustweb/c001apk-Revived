@@ -36,7 +36,7 @@ fun FeedReplySortCard(
     updateSortReply: (Int) -> Unit,
 ) {
     if (isMiuix()) {
-        com.example.c001apk.compose.ui.component.design.TabBarSurface(modifier.fillMaxWidth()) {
+        com.example.c001apk.compose.ui.component.design.TabBarSurface(modifier.fillMaxWidth(), estimatedHeight = 100.dp) {
         Column(Modifier.fillMaxWidth().background(com.example.c001apk.compose.ui.component.design.barBackground(MiuixTheme.colorScheme.surface))
             .padding(horizontal = 12.dp, vertical = 8.dp).testTag("miuix-comment-sort"),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {
