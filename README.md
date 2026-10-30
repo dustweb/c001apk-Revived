@@ -20,6 +20,7 @@
 
 <p>
   <a href="https://t.me/c001apk_revived">Telegram 频道</a> ·
+  <a href="https://linux.do/">LINUX DO 社区</a> ·
   <a href="https://github.com/frisk1127/c001apk-Revived/releases">下载应用</a> ·
   <a href="CHANGELOG.md">更新日志</a> ·
   <a href="https://github.com/frisk1127/c001apk-Revived/issues">问题反馈</a>
@@ -89,5 +90,7 @@ Release 默认开启 R8，排查混淆问题时可使用 `assembleRelease -Pdisa
 ## 致谢与许可
 
 感谢 [c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose)、[Miuix](https://github.com/compose-miuix-ui/miuix) 及各项目贡献者。第三方组件及许可信息可在应用的开源许可证页面和 [第三方声明](THIRD_PARTY_NOTICES.md) 中查看。
+
+感谢 [LINUX DO](https://linux.do/) 社区为开源项目提供交流与展示的空间。
 
 本项目采用 [AGPL-3.0](LICENSE) 许可证。
