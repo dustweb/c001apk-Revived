@@ -60,6 +60,8 @@ import com.example.c001apk.compose.util.getShareText
 import com.example.c001apk.compose.util.makeToast
 import com.example.c001apk.compose.util.shareText
 import com.example.c001apk.compose.ui.component.MoreMenuButton
+import com.example.c001apk.compose.ui.component.design.isMiuixBlurEnabled
+import com.example.c001apk.compose.ui.theme.isMiuix
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/4
@@ -80,6 +82,8 @@ fun UserScreen(
 ) {
 
     val layoutDirection = LocalLayoutDirection.current
+    val miuix = isMiuix()
+    val blur = isMiuixBlurEnabled()
 
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -180,7 +184,12 @@ fun UserScreen(
         RefreshContainer(
             modifier = Modifier.padding(
                 start = paddingValues.calculateLeftPadding(layoutDirection),
+                end = paddingValues.calculateRightPadding(layoutDirection),
+                top = if (miuix && !blur) paddingValues.calculateTopPadding() else 0.dp,
             ),
+            indicatorTopInset = if (miuix) {
+                12.dp + if (blur) paddingValues.calculateTopPadding() else 0.dp
+            } else 0.dp,
             isRefreshing = viewModel.isRefreshing,
             onRefresh = {
                 viewModel.isPull = true
@@ -192,7 +201,10 @@ fun UserScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .nestedScroll(scrollBehavior.nestedScrollConnection),
-                contentPadding = PaddingValues(bottom = 10.dp + paddingValues.calculateBottomPadding()),
+                contentPadding = PaddingValues(
+                    top = if (blur) paddingValues.calculateTopPadding() else 0.dp,
+                    bottom = 10.dp + paddingValues.calculateBottomPadding(),
+                ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 state = lazyListState
             ) {

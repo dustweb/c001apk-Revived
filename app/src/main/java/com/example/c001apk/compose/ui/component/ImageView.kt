@@ -30,6 +30,8 @@ fun ImageView(
     isCover: Boolean = false,
     isChat: Boolean = false,
     onClearFocus: (() -> Unit)? = null,
+    imageScaleType: android.widget.ImageView.ScaleType = android.widget.ImageView.ScaleType.CENTER_CROP,
+    onImageSize: ((Int, Int) -> Unit)? = null,
 ) {
 
     val prefs = LocalUserPreferences.current
@@ -40,7 +42,7 @@ fun ImageView(
         modifier = modifier,
         factory = { context ->
             RoundedImageView(context).apply {
-                scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+                scaleType = imageScaleType
                 if (isRound) {
                     setCornerRadius(1000)
                 }
@@ -54,6 +56,7 @@ fun ImageView(
             }
         },
         update = { imageView ->
+            imageView.scaleType = imageScaleType
             imageView.setOnClickListener {
                 if (isChat) {
                     onClearFocus?.let { it() }
@@ -68,6 +71,13 @@ fun ImageView(
                 }
             }
             imageView.load(if (isChat) url else url.http2https) {
+                if (onImageSize != null) {
+                    listener(onSuccess = { _, result ->
+                        val width = result.drawable.intrinsicWidth
+                        val height = result.drawable.intrinsicHeight
+                        if (width > 0 && height > 0) onImageSize(width, height)
+                    })
+                }
                 crossfade(CrossfadeDrawable.DEFAULT_DURATION)
                 addHeader("User-Agent", prefs.userAgent)
                 if (isChat) {

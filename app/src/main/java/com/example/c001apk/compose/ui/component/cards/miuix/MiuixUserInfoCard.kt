@@ -3,6 +3,10 @@ package com.example.c001apk.compose.ui.component.cards.miuix
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,11 +27,22 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun MiuixUserInfoCard(data: HomeFeedResponse.Data, onFollow: (String, Int) -> Unit,
     onPMUser: (String, String) -> Unit, onViewFFFList: (String, String) -> Unit) {
     val context = LocalContext.current
+    var coverRatio by rememberSaveable(data.cover) { mutableFloatStateOf(0f) }
     Column(Modifier.fillMaxWidth().testTag("miuix-user-profile")) {
-        Box(Modifier.fillMaxWidth().height(190.dp)) {
-            ImageView(url = data.cover.orEmpty(), isCover = true, modifier = Modifier.fillMaxWidth().height(150.dp))
-            ImageView(url = data.userAvatar.orEmpty(), isRound = true,
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 24.dp).size(80.dp))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val coverHeight = if (coverRatio > 0f) maxWidth / coverRatio else 150.dp
+            Box(Modifier.fillMaxWidth().height(coverHeight + 40.dp)) {
+                ImageView(
+                    url = data.cover.orEmpty(), isCover = true,
+                    modifier = Modifier.fillMaxWidth().height(coverHeight),
+                    imageScaleType = android.widget.ImageView.ScaleType.FIT_CENTER,
+                    onImageSize = { width, height ->
+                        if (coverRatio == 0f) coverRatio = width.toFloat() / height
+                    },
+                )
+                ImageView(url = data.userAvatar.orEmpty(), isRound = true,
+                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 24.dp).size(80.dp))
+            }
         }
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

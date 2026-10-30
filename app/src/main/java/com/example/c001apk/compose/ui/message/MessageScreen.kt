@@ -39,6 +39,7 @@ import com.example.c001apk.compose.ui.component.cards.titleList
 import com.example.c001apk.compose.ui.notification.NoticeType
 import com.example.c001apk.compose.util.ReportType
 import com.example.c001apk.compose.util.makeToast
+import top.yukonga.miuix.kmp.basic.SmallTitle
 
 /**
  * Created by bggRGjQaUbCoE on 2024/6/2
@@ -116,36 +117,45 @@ fun MessageScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(key = "fff") {
-                        MessageFFFCard(
-                            modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
-                            fffList = viewModel.fffList,
-                            onViewFFFList = onViewFFFList,
-                        )
+                        Column {
+                            if (miuix) SmallTitle("账号概览")
+                            MessageFFFCard(
+                                modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
+                                fffList = viewModel.fffList,
+                                onViewFFFList = onViewFFFList,
+                            )
+                        }
                     }
 
                     item(key = "widget") {
-                        MessageWidgetCard(
-                            modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
-                            onViewFFFList = onViewFFFList,
-                            onViewHistory = onViewHistory,
-                        )
+                        Column {
+                            if (miuix) SmallTitle("常用功能")
+                            MessageWidgetCard(
+                                modifier = Modifier.padding(horizontal = if (miuix) 16.dp else 10.dp),
+                                onViewFFFList = onViewFFFList,
+                                onViewHistory = onViewHistory,
+                            )
+                        }
                     }
 
                     if (miuix) {
                         item(key = "notifications") {
-                            top.yukonga.miuix.kmp.basic.Card(Modifier.padding(horizontal = 16.dp)) {
-                                repeat(5) { index ->
-                                    MessageListCard(
-                                        modifier = Modifier,
-                                        background = backgroundList[index],
-                                        imageVector = iconList[index],
-                                        title = titleList[index],
-                                        count = viewModel.badgeList.getOrNull(index),
-                                        onViewNotice = {
-                                            viewModel.clearBadge(index)
-                                            onViewNotice(NoticeType.entries[index].name)
-                                        }
-                                    )
+                            Column {
+                                SmallTitle("互动通知")
+                                top.yukonga.miuix.kmp.basic.Card(Modifier.padding(horizontal = 16.dp)) {
+                                    repeat(5) { index ->
+                                        MessageListCard(
+                                            modifier = Modifier,
+                                            background = backgroundList[index],
+                                            imageVector = iconList[index],
+                                            title = titleList[index],
+                                            count = viewModel.badgeList.getOrNull(index),
+                                            onViewNotice = {
+                                                viewModel.clearBadge(index)
+                                                onViewNotice(NoticeType.entries[index].name)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -163,6 +173,10 @@ fun MessageScreen(
                                 }
                             )
                         }
+                    }
+
+                    if (miuix && prefs.isLogin) {
+                        item(key = "messagesTitle") { SmallTitle("消息") }
                     }
 
                     ItemCard(
