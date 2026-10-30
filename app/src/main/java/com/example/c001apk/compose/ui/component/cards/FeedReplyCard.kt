@@ -26,6 +26,7 @@ import com.example.c001apk.compose.ui.component.design.IconButton
 import androidx.compose.material3.MaterialTheme
 import com.example.c001apk.compose.ui.component.design.Text
 import androidx.compose.runtime.Composable
+import com.example.c001apk.compose.util.withoutImagePlaceholder
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -202,12 +203,12 @@ fun FeedReplyCard(
                 width = Dimension.fillToConstraints
             }
         LinkText(
-            text = if (isReply2Reply) replyBody(data.message)
+            text = (if (isReply2Reply) replyBody(data.message)
             else if (isLikeReply) "赞了你的${data.infoHtml}"
             else if (!isFeedReply) {
                 if (data.ruid == "0") data.message.orEmpty()
                 else "回复<a class=\"feed-link-uname\" href=\"/u/${data.ruid}\">${data.rusername}</a>: ${data.message}"
-            } else data.message.orEmpty(),
+            } else data.message.orEmpty()).withoutImagePlaceholder(!isLikeReply && !data.picArr.isNullOrEmpty()),
             modifier = messageModifier,
             lineSpacingMultiplier = 1.2f,
             onOpenLink = onOpenLink,

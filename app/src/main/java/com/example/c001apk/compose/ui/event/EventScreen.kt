@@ -44,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.takeOrElse
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.c001apk.compose.logic.model.EventDetailResponse
 import com.example.c001apk.compose.logic.state.LoadingState
@@ -225,7 +227,7 @@ private fun EventContent(
                     Text(
                         text = notice.trim(),
                         style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.25f,
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight.takeOrElse { 1.5.em } * 1.25f,
                     )
                 }
             }

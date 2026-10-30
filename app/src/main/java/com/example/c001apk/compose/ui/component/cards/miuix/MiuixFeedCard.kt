@@ -209,7 +209,8 @@ private fun MiuixFeedMessage(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (!data.messageTitle.isNullOrBlank()) ContentRichText(data.messageTitle, onOpenLink, size = 18f, bold = true)
-        if (!data.message.isNullOrBlank()) ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth().testTag("feed-body-${data.id}"))
+        if (!data.message.isNullOrBlank()) ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth().testTag("feed-body-${data.id}"),
+            imagesDisplayed = !data.picArr.isNullOrEmpty())
         if (!data.picArr.isNullOrEmpty()) NineImageView(Modifier.fillMaxWidth().squircleClip(12.dp),
             data.pic, data.picArr, data.feedType)
         if (!data.forwardSourceType.isNullOrEmpty()) {
@@ -221,9 +222,10 @@ private fun MiuixFeedMessage(
                 if (source == null) Text("动态已被删除", fontSize = 14.sp, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
                 else {
                     ContentRichText("<a href=\"/u/${source.uid}\">@${source.username}</a>：${source.messageTitle?.takeIf { it.isNotBlank() } ?: source.message.orEmpty()}",
-                        onOpenLink, size = 14f)
+                        onOpenLink, size = 14f, imagesDisplayed = !source.picArr.isNullOrEmpty())
                     if (!source.messageTitle.isNullOrEmpty() && !source.message.isNullOrEmpty())
-                        ContentRichText(source.message, onOpenLink, Modifier.padding(top = 6.dp), size = 14f)
+                        ContentRichText(source.message, onOpenLink, Modifier.padding(top = 6.dp), size = 14f,
+                            imagesDisplayed = !source.picArr.isNullOrEmpty())
                     if (!source.picArr.isNullOrEmpty()) NineImageView(
                         Modifier.fillMaxWidth().padding(top = 8.dp).squircleClip(10.dp),
                         source.pic, source.picArr, source.feedType)

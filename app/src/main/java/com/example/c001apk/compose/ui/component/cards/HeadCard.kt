@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.takeOrElse
 
 @Composable
 fun HeadCard(
@@ -40,7 +42,7 @@ fun HeadCard(
             Text(
                 text = description.trim(),
                 style = MaterialTheme.typography.bodyLarge,
-                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight.takeOrElse { 1.5.em } * 1.2f,
             )
         }
     }

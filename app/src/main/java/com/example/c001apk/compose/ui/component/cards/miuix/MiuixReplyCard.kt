@@ -41,6 +41,7 @@ import com.example.c001apk.compose.util.DateUtils.fromToday
 import com.example.c001apk.compose.util.ReportType
 import com.example.c001apk.compose.util.Utils.richToString
 import com.example.c001apk.compose.util.makeToast
+import com.example.c001apk.compose.util.withoutImagePlaceholder
 import androidx.compose.foundation.shape.RoundedCornerShape
 import top.yukonga.miuix.kmp.squircle.squircleClip
 import top.yukonga.miuix.kmp.basic.Card
@@ -147,12 +148,13 @@ fun MiuixReplyCard(
                 "回复<a href=\"/u/${data.ruid}\">${data.rusername.orEmpty()}</a>：${data.message.orEmpty()}"
             else -> data.message.orEmpty()
         }
-        ContentRichText(message, onOpenLink, Modifier.fillMaxWidth())
+        val body = message.withoutImagePlaceholder(!likeNotice && !data.picArr.isNullOrEmpty())
+        ContentRichText(body, onOpenLink, Modifier.fillMaxWidth())
         if (likeNotice) {
             ReplySource(data.username, data.message, data.pic, null, onOpenLink)
         } else {
             if (!data.picArr.isNullOrEmpty()) NineImageView(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp).squircleClip(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = if (body.isBlank()) 0.dp else 12.dp).squircleClip(12.dp),
                 pic = data.pic, picArr = data.picArr, feedType = data.feedType)
             data.feed?.let { ReplySource(it.username, it.message, it.pic, it.url, onOpenLink) }
             Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.End) {

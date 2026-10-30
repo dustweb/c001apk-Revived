@@ -57,8 +57,9 @@ internal fun MiuixHistoryCard(
             })
         }
         Spacer(Modifier.height(12.dp))
-        ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth())
         val media = remember(data.mediaJson) { com.example.c001apk.compose.logic.model.FeedMediaJson.decode(data.mediaJson) }
+        ContentRichText(data.message, onOpenLink, Modifier.fillMaxWidth(),
+            imagesDisplayed = !media?.images.isNullOrEmpty())
         if (media != null && media.images.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             com.example.c001apk.compose.ui.component.NineImageView(

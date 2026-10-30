@@ -164,7 +164,7 @@ class ReplyActivity : AppCompatActivity(),
     private val imeScrimDrawable by lazy { ColorDrawable(color) }
     private val externalLaunchScrimDrawable by lazy { ColorDrawable(color) }
     private val recentList = ArrayList<List<Pair<String, Int>>>()
-    private val list = listOf(recentList, emojiList, coolBList)
+    private val list = listOf(recentList, emojiList, coolBList, EmojiUtils.niuniuList)
     private lateinit var pickContent: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var pickDocument: ActivityResultLauncher<Array<String>>
     private var uriList: MutableList<Uri> = ArrayList()
@@ -846,7 +846,7 @@ class ReplyActivity : AppCompatActivity(),
     }
 
     private fun initEmojiPanel() {
-        for (i in 0..2) {
+        for (i in EmojiUtils.groupTitles.indices) {
             binding.indicator.addView(
                 TextView(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
@@ -856,7 +856,7 @@ class ReplyActivity : AppCompatActivity(),
                         weight = 1f
                     }
                     gravity = Gravity.CENTER
-                    text = listOf("最近", "默认", "酷币")[i]
+                    text = EmojiUtils.groupTitles[i]
                     background = AppCompatResources.getDrawable(
                         this@ReplyActivity,
                         R.drawable.selector_bg_trans
@@ -872,7 +872,7 @@ class ReplyActivity : AppCompatActivity(),
                     }
                 }
             )
-            if (i != 2) {
+            if (i != EmojiUtils.groupTitles.lastIndex) {
                 binding.indicator.addView(
                     View(this).apply {
                         layoutParams = LinearLayout.LayoutParams(

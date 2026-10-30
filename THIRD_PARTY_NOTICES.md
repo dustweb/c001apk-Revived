@@ -1,5 +1,10 @@
 # Third-party notices
 
+The Niuniu emoji images (`niuniu_emotion_*.png`) and their Chinese names come
+from the Coolapk 16.5.0 Android client (2607151). The images are included unchanged
+for displaying and composing Coolapk messages. Emoji artwork belongs to Coolapk
+and its respective rights holders; it is not covered by this project's code license.
+
 The SZLM registration wire format and the sample report in
 `app/src/main/assets/szlm_report.json` are based on
 [kongwufang/szlm_res v1.0.0](https://github.com/kongwufang/szlm_res/releases/tag/v1.0.0)

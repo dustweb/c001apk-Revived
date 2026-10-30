@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.ui.component.LinkText
 import com.example.c001apk.compose.ui.component.CoilLoader
 import com.example.c001apk.compose.ui.component.rememberHapticClick
+import com.example.c001apk.compose.util.withoutImagePlaceholder
 import androidx.compose.foundation.shape.RoundedCornerShape
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Surface
@@ -90,10 +91,13 @@ internal fun ContentRichText(
     isReply: Boolean = false,
     onShowReplies: (() -> Unit)? = null,
     images: List<String>? = null,
+    imagesDisplayed: Boolean = false,
 ) {
+    val body = text.orEmpty().withoutImagePlaceholder(imagesDisplayed)
+    if (body.isBlank()) return
     LinkText(
         modifier = modifier,
-        text = text,
+        text = body,
         textSize = size,
         isBold = bold,
         maxLines = maxLines,

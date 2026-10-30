@@ -586,7 +586,7 @@ fun ChatBottom(
         if (showEmojiPanel) {
             pagerState = rememberPagerState(
                 initialPage = if (recentList.isEmpty()) 1 else 0,
-                pageCount = { 3 }
+                pageCount = { EmojiUtils.groupTitles.size }
             )
             HorizontalPager(
                 state = pagerState,
@@ -598,8 +598,9 @@ fun ChatBottom(
                     val pagerState1 = rememberPagerState {
                         when (index) {
                             0 -> 1
-                            1 -> 4
-                            2 -> 2
+                            1 -> emojiList.size
+                            2 -> coolBList.size
+                            3 -> EmojiUtils.niuniuList.size
                             else -> 0
                         }
                     }
@@ -616,15 +617,17 @@ fun ChatBottom(
                                     0 -> recentList.getOrNull(it)?.data
                                     1 -> emojiList.getOrNull(index0)?.getOrNull(it)?.first
                                     2 -> coolBList.getOrNull(index0)?.getOrNull(it)?.first
+                                    3 -> EmojiUtils.niuniuList.getOrNull(index0)?.getOrNull(it)?.first
                                     else -> null
                                 }
                                 val emojiRes = when (index) {
                                     0 -> emojiName?.let { name ->
-                                        EmojiUtils.emojiMap.getValue(name)
+                                        EmojiUtils.emojiMap[name]
                                     }
 
                                     1 -> emojiList.getOrNull(index0)?.getOrNull(it)?.second
                                     2 -> coolBList.getOrNull(index0)?.getOrNull(it)?.second
+                                    3 -> EmojiUtils.niuniuList.getOrNull(index0)?.getOrNull(it)?.second
                                     else -> null
                                 }
                                 Box(
@@ -684,7 +687,7 @@ fun ChatBottom(
             if (com.example.c001apk.compose.ui.theme.isMiuix()) {
                 val scope = rememberCoroutineScope()
                 com.example.c001apk.compose.ui.component.design.FilledTabs(
-                    tabs = listOf("最近", "默认", "酷币"), selectedTabIndex = pagerState.currentPage,
+                    tabs = EmojiUtils.groupTitles, selectedTabIndex = pagerState.currentPage,
                     onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } },
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                 )
@@ -693,23 +696,10 @@ fun ChatBottom(
                     .fillMaxWidth()
                     .height(IntrinsicSize.Min)
             ) {
-                TextIndicator(
-                    index = 0,
-                    title = "最近",
-                    pagerState = pagerState,
-                )
-                VerticalDivider()
-                TextIndicator(
-                    index = 1,
-                    title = "默认",
-                    pagerState = pagerState,
-                )
-                VerticalDivider()
-                TextIndicator(
-                    index = 2,
-                    title = "酷币",
-                    pagerState = pagerState,
-                )
+                EmojiUtils.groupTitles.forEachIndexed { index, title ->
+                    if (index > 0) VerticalDivider()
+                    TextIndicator(index = index, title = title, pagerState = pagerState)
+                }
             }
         }
     }

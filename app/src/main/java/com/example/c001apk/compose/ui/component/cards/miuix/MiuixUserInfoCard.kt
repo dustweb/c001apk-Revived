@@ -1,14 +1,13 @@
 package com.example.c001apk.compose.ui.component.cards.miuix
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,41 +26,39 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun MiuixUserInfoCard(data: HomeFeedResponse.Data, onFollow: (String, Int) -> Unit,
     onPMUser: (String, String) -> Unit, onViewFFFList: (String, String) -> Unit) {
     val context = LocalContext.current
-    var coverRatio by rememberSaveable(data.cover) { mutableFloatStateOf(0f) }
     Column(Modifier.fillMaxWidth().testTag("miuix-user-profile")) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val coverHeight = if (coverRatio > 0f) maxWidth / coverRatio else 150.dp
-            Box(Modifier.fillMaxWidth().height(coverHeight + 40.dp)) {
-                ImageView(
-                    url = data.cover.orEmpty(), isCover = true,
-                    modifier = Modifier.fillMaxWidth().height(coverHeight),
-                    imageScaleType = android.widget.ImageView.ScaleType.FIT_CENTER,
-                    onImageSize = { width, height ->
-                        if (coverRatio == 0f) coverRatio = width.toFloat() / height
-                    },
-                )
-                ImageView(url = data.userAvatar.orEmpty(), isRound = true,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 24.dp).size(80.dp))
+        Box(Modifier.fillMaxWidth().heightIn(min = 230.dp).background(MiuixTheme.colorScheme.surfaceContainer)) {
+            ImageView(url = data.cover.orEmpty(), modifier = Modifier.matchParentSize())
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(
+                listOf(Color.Black.copy(alpha = .20f), Color.Black.copy(alpha = .68f))
+            )))
+            Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    ImageView(url = data.userAvatar.orEmpty(), isRound = true, modifier = Modifier.size(72.dp))
+                    FlowRow(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(text = "私信", onClick = {
+                            if (CookieUtil.isLogin) onPMUser(data.uid.orEmpty(), data.username.orEmpty())
+                            else context.makeToast("请先登录")
+                        })
+                        TextButton(text = if (data.isFollow == 1) "取消关注" else "关注",
+                            colors = if (data.isFollow == 1) ButtonDefaults.textButtonColors() else ButtonDefaults.textButtonColorsPrimary(),
+                            onClick = { onFollow(data.uid.orEmpty(), data.isFollow ?: 0) })
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(data.username.orEmpty(), Modifier.weight(1f).clickable { context.copyText(data.username.orEmpty()) },
+                        style = MiuixTheme.textStyles.title3, color = Color.White, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text("Lv.${data.level}", style = MiuixTheme.textStyles.footnote1, color = Color.White.copy(alpha = .85f))
+                }
+                Text("UID: ${data.uid}", Modifier.clickable { context.copyText(data.uid.orEmpty()) },
+                    style = MiuixTheme.textStyles.footnote1, color = Color.White.copy(alpha = .85f))
+                if (!data.bio.isNullOrEmpty()) Text(data.bio, style = MiuixTheme.textStyles.body1, color = Color.White)
+                Text("${fromToday(data.logintime ?: 0)}活跃", style = MiuixTheme.textStyles.footnote1,
+                    color = Color.White.copy(alpha = .85f))
             }
         }
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(data.username.orEmpty(), Modifier.weight(1f).clickable { context.copyText(data.username.orEmpty()) },
-                    style = MiuixTheme.textStyles.title3, color = MiuixTheme.colorScheme.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("Lv.${data.level}", style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.primary)
-            }
-            Text("UID: ${data.uid}", Modifier.clickable { context.copyText(data.uid.orEmpty()) },
-                style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-            if (!data.bio.isNullOrEmpty()) Text(data.bio, style = MiuixTheme.textStyles.body1, color = MiuixTheme.colorScheme.onSurface)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextButton(text = "私信", modifier = Modifier.weight(1f), onClick = {
-                    if (CookieUtil.isLogin) onPMUser(data.uid.orEmpty(), data.username.orEmpty())
-                    else context.makeToast("请先登录")
-                })
-                TextButton(text = if (data.isFollow == 1) "取消关注" else "关注", modifier = Modifier.weight(1f),
-                    colors = if (data.isFollow == 1) ButtonDefaults.textButtonColors() else ButtonDefaults.textButtonColorsPrimary(),
-                    onClick = { onFollow(data.uid.orEmpty(), data.isFollow ?: 0) })
-            }
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Card(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth()) {
                     val values = listOf((data.feed?.id ?: 0).toString(), (data.beLikeNum ?: 0).toString(), (data.follow ?: 0).toString(), (data.fans ?: 0).toString())
@@ -76,8 +73,6 @@ fun MiuixUserInfoCard(data: HomeFeedResponse.Data, onFollow: (String, Int) -> Un
                     }
                 }
             }
-            Text("${fromToday(data.logintime ?: 0)}活跃", style = MiuixTheme.textStyles.footnote1,
-                color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
         }
     }
 }
