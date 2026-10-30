@@ -1,0 +1,184 @@
+name: Personal composf release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish verified APK as a GitHub Release (false = test only)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-composf-release
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: discover
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 automation/c001/discover.py
+
+  build:
+    needs: discover
+    if: needs.discover.outputs.count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted control scripts
+        uses: actions/checkout@v4
+        with:
+          path: control
+          persist-credentials: false
+      - name: Checkout pinned upstream commit
+        uses: actions/checkout@v4
+        with:
+          repository: frisk1127/c001apk-Revived
+          ref: ${{ matrix.commit }}
+          path: upstream
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify and patch exact source
+        id: patch
+        env:
+          UPSTREAM_COMMIT: ${{ matrix.commit }}
+          RELEASE_INDEX: ${{ matrix.index }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "$UPSTREAM_COMMIT"
+          python3 control/automation/c001/patch.py upstream
+      - name: Archive corresponding modified source
+        env:
+          UPSTREAM_COMMIT: ${{ matrix.commit }}
+          UPSTREAM_TAG: ${{ matrix.tag }}
+        run: |
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path('upstream/SOURCE-INFO-PERSONAL.md')
+          if p.exists(): raise SystemExit('unexpected SOURCE-INFO file')
+          p.write_text('This source is an independently modified build of frisk1127/c001apk-Revived.\nUpstream tag: '+os.environ['UPSTREAM_TAG']+'\nUpstream commit: '+os.environ['UPSTREAM_COMMIT']+'\nApplication ID: com.example.c001apk.composf\nThe versionCode is fixed in app/build.gradle.kts. To rebuild from this archive, initialize a Git repository and commit its contents before invoking the Gradle wrapper, or apply these same source changes to the exact upstream commit. See LICENSE and THIRD_PARTY_NOTICES.md.\n')
+          PY
+          tar -C upstream --exclude='./.git' --exclude='./.gradle' --exclude='*/build' -czf "$RUNNER_TEMP/source-composf.tar.gz" .
+      - name: Build unsigned release APK without signing secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd upstream
+          chmod +x gradlew
+          ./gradlew assembleRelease -Pandroid.newDsl=false -Pandroid.builtInKotlin=false
+          shopt -s nullglob
+          files=(app/build/outputs/apk/release/*.apk)
+          test "${#files[@]}" -eq 1
+          cp "${files[0]}" "$RUNNER_TEMP/unsigned.apk"
+      - name: Upload unsigned build for isolated signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: c001-unsigned-${{ matrix.id }}
+          path: |
+            ${{ runner.temp }}/unsigned.apk
+            ${{ runner.temp }}/source-composf.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+
+  sign-and-publish:
+    needs: [discover, build]
+    if: needs.discover.outputs.count != '0'
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted release scripts
+        uses: actions/checkout@v4
+        with:
+          path: control
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: c001-unsigned-${{ matrix.id }}
+          path: ${{ runner.temp }}/incoming
+      - name: Align, sign and verify APK
+        id: verify
+        env:
+          C001_KEYSTORE_BASE64: ${{ secrets.C001_KEYSTORE_BASE64 }}
+          C001_KEYSTORE_PASSWORD: ${{ secrets.C001_KEYSTORE_PASSWORD }}
+          RELEASE_INDEX: ${{ matrix.index }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          test -n "$C001_KEYSTORE_BASE64"
+          test -n "$C001_KEYSTORE_PASSWORD"
+          key="$RUNNER_TEMP/signing.p12"
+          trap 'rm -f "$key" "$RUNNER_TEMP/aligned.apk"' EXIT
+          printf '%s' "$C001_KEYSTORE_BASE64" | base64 -d > "$key"
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          test -x "$tools/zipalign" && test -x "$tools/apksigner" && test -x "$tools/aapt"
+          mkdir -p "$RUNNER_TEMP/release-assets"
+          "$tools/zipalign" -P 16 -f 4 "$RUNNER_TEMP/incoming/unsigned.apk" "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$key" --ks-key-alias composf --ks-pass env:C001_KEYSTORE_PASSWORD --key-pass env:C001_KEYSTORE_PASSWORD --out "$RUNNER_TEMP/release-assets/c001apk-composf.apk" "$RUNNER_TEMP/aligned.apk"
+          "$tools/zipalign" -c -P 16 4 "$RUNNER_TEMP/release-assets/c001apk-composf.apk"
+          export VERSION_CODE=$((1000000 + GITHUB_RUN_NUMBER * 1000 + RELEASE_INDEX))
+          export AAPT="$tools/aapt" APKSIGNER="$tools/apksigner" APK="$RUNNER_TEMP/release-assets/c001apk-composf.apk"
+          python3 - <<'PY'
+          import os,re,subprocess
+          apk=os.environ['APK']
+          badging=subprocess.check_output([os.environ['AAPT'],'dump','badging',apk],text=True)
+          match=re.search(r"^package: name='([^']+)' versionCode='(\d+)'",badging,re.M)
+          if not match or match.groups()!=('com.example.c001apk.composf',os.environ['VERSION_CODE']): raise SystemExit('unexpected APK package/versionCode')
+          check=subprocess.check_output([os.environ['APKSIGNER'],'verify','--verbose','--print-certs',apk],text=True)
+          certs=re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)',check)
+          if len(certs)!=1 or certs[0].lower()!='e216ffe7c9e3cb470a531244adfa60b64ce1c50a735981c0cafc0952badc8f80': raise SystemExit('unexpected signing certificate')
+          print('APK package, versionCode and signing certificate verified')
+          PY
+          cp "$RUNNER_TEMP/incoming/source-composf.tar.gz" "$RUNNER_TEMP/release-assets/source-composf.tar.gz"
+          cd "$RUNNER_TEMP/release-assets"
+          sha256sum c001apk-composf.apk source-composf.tar.gz > SHA256SUMS.txt
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+      - name: Upload verified signed test files
+        uses: actions/upload-artifact@v4
+        with:
+          name: c001-verified-${{ matrix.id }}
+          path: ${{ runner.temp }}/release-assets/*
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+      - name: Publish only after independent checks
+        if: ${{ github.event_name == 'schedule' || inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_ID: ${{ matrix.id }}
+          UPSTREAM_TAG: ${{ matrix.tag }}
+          UPSTREAM_COMMIT: ${{ matrix.commit }}
+          UPSTREAM_PRERELEASE: ${{ matrix.prerelease }}
+          VERSION_CODE: ${{ steps.verify.outputs.version_code }}
+          RELEASE_ASSET_DIR: ${{ runner.temp }}/release-assets
+        run: python3 control/automation/c001/publish.py
