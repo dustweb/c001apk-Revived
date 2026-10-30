@@ -21,7 +21,7 @@ enum class LauncherIcon(
     CLASSIC(R.string.icon_classic, R.mipmap.ic_launcher, "ClassicLauncher", false);
 
     fun component(context: Context) =
-        ComponentName(context.packageName, "${context.packageName}.$alias")
+        ComponentName(context.packageName, "com.example.c001apk.compose.$alias")
 }
 
 @Singleton
