@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -42,8 +41,6 @@ import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material.icons.outlined.TravelExplore
 import com.example.c001apk.compose.ui.component.design.AlertDialog
 import androidx.compose.material3.CardDefaults
-import com.example.c001apk.compose.ui.component.design.DropdownMenu
-import com.example.c001apk.compose.ui.component.design.DropdownMenuItem
 import com.example.c001apk.compose.ui.component.design.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +88,6 @@ import com.example.c001apk.compose.logic.providable.LocalUserPreferences
 import com.example.c001apk.compose.ui.blacklist.BlackListType
 import com.example.c001apk.compose.ui.component.HtmlText
 import com.example.c001apk.compose.ui.component.LauncherIconImage
-import com.example.c001apk.compose.ui.component.MoreMenuButton
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import com.example.c001apk.compose.ui.component.icons.Swatch
 import com.example.c001apk.compose.ui.component.settings.BasicListItem
@@ -139,8 +135,6 @@ fun SettingsScreen(
     val followList by lazy { listOf("全部", "好友", "话题", "数码", "应用") }
     val hapticStrengthList by lazy { HapticStrength.options.map { it.label } }
 
-    var dropdownMenuExpanded by remember { mutableStateOf(false) }
-    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
     var showSZLMIDDialog by rememberSaveable { mutableStateOf(false) }
     var showFontScaleDialog by rememberSaveable { mutableStateOf(false) }
     var showContentScaleDialog by rememberSaveable { mutableStateOf(false) }
@@ -161,45 +155,6 @@ fun SettingsScreen(
             PreferenceTopBar(
                 title = "设置",
                 scrollBehavior = headerBehavior,
-                actions = {
-                    if (miuix) {
-                        com.example.c001apk.compose.ui.component.design.MiuixActionMenuButton(
-                            modifier = Modifier.testTag("settings-more"),
-                            actions = listOf(
-                                com.example.c001apk.compose.ui.component.design.MenuAction(stringResource(R.string.menu_feedback)) {
-                                    context.openInBrowser("$URL_SOURCE_CODE_FORK/issues")
-                                },
-                                com.example.c001apk.compose.ui.component.design.MenuAction(stringResource(R.string.menu_about)) {
-                                    showAboutDialog = true
-                                },
-                            ),
-                        )
-                    } else Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
-                        MoreMenuButton { dropdownMenuExpanded = true }
-
-                        DropdownMenu(
-                            expanded = dropdownMenuExpanded,
-                            onDismissRequest = { dropdownMenuExpanded = false }
-                        ) {
-                            listOf(
-                                stringResource(id = R.string.menu_feedback),
-                                stringResource(id = R.string.menu_about)
-                            ).forEachIndexed { index, menu ->
-                                DropdownMenuItem(
-                                    text = { Text(menu) },
-                                    onClick = {
-                                        dropdownMenuExpanded = false
-                                        when (index) {
-                                            0 -> context.openInBrowser("$URL_SOURCE_CODE_FORK/issues")
-
-                                            1 -> showAboutDialog = true
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                },
             )
         }
     ) { paddingValues ->
@@ -480,12 +435,6 @@ fun SettingsScreen(
                         }
                     },
                 )
-            }
-
-            showAboutDialog -> {
-                AboutDialog {
-                    showAboutDialog = false
-                }
             }
 
             showImageQualityDialog -> {

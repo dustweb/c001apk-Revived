@@ -25,6 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.c001apk.compose.ui.component.design.contentCard
+import com.example.c001apk.compose.ui.component.design.contentPress
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.More
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +67,7 @@ fun NotificationCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = if (miuix) 16.dp else 10.dp)
+            .contentPress(enabled = miuix)
             .contentCard()
             .combinedClickable(
                 onClick = {
@@ -96,6 +100,7 @@ fun NotificationCard(
             modifier = Modifier
                 .padding(start = 10.dp, top = 10.dp)
                 .size(30.dp)
+                .contentPress(enabled = miuix, pressedScale = .92f)
                 .clip(CircleShape)
                 .constrainAs(avatar) {
                     start.linkTo(parent.start)
@@ -156,12 +161,13 @@ fun NotificationCard(
                 }) {
 
             IconButton(
+                modifier = Modifier.contentPress(enabled = miuix, pressedScale = .92f),
                 onClick = com.example.c001apk.compose.ui.component.rememberHapticClick {
                     dropdownMenuExpanded = true
                 }
             ) {
                 Icon(
-                    imageVector = if (miuix) Icons.Default.MoreVert else Icons.Default.ExpandMore,
+                    imageVector = if (miuix) MiuixIcons.Medium.More else Icons.Default.ExpandMore,
                     contentDescription = "更多选项",
                     tint = MaterialTheme.colorScheme.outline
                 )

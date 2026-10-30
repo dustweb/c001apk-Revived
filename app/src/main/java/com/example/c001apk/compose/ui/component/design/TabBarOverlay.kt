@@ -14,6 +14,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -33,8 +34,14 @@ internal class TabBarHost(val view: View, val backdrop: PageBackdrop?) {
         try {
             val position = root.localPositionOf(child, Offset.Zero)
             val bounds = root.localBoundingBoxOf(child, clipBounds = true)
-            entry.position = IntOffset(position.x.roundToInt(), position.y.roundToInt())
-            entry.clip = Rect(bounds.left - position.x, bounds.top - position.y,
+            val pinnedTop = entry.pinnedTop.value
+            val y = if (pinnedTop != null) position.y.coerceAtLeast(pinnedTop.toFloat()) else position.y
+            entry.position = IntOffset(position.x.roundToInt(), y.roundToInt())
+            entry.clip = if (pinnedTop != null && position.y < pinnedTop) {
+                Rect((-position.x).coerceAtLeast(0f), 0f,
+                    minOf(entry.width.toFloat(), root.size.width - position.x),
+                    minOf(entry.height.toFloat(), root.size.height - y).coerceAtLeast(0f))
+            } else Rect(bounds.left - position.x, bounds.top - position.y,
                 bounds.right - position.x, bounds.bottom - position.y)
         } catch (_: IllegalStateException) {
             entry.clip = Rect.Zero
@@ -48,6 +55,7 @@ internal class TabBarEntry(
     val backdrop: PageBackdrop,
     val locals: State<CompositionLocalContext>,
     val content: State<@Composable BoxScope.() -> Unit>,
+    val pinnedTop: State<Int?>,
 ) {
     var width by mutableIntStateOf(0)
     var height by mutableIntStateOf(0)
@@ -61,6 +69,7 @@ internal class TabBarEntry(
 internal fun TabBarSurface(
     modifier: Modifier = Modifier,
     estimatedHeight: Dp = 52.dp,
+    pinnedTopInset: Dp? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val host = LocalTabBarHost.current
@@ -71,7 +80,9 @@ internal fun TabBarSurface(
     }
     val latestContent = rememberUpdatedState(content)
     val locals = rememberUpdatedState(currentCompositionLocalContext)
-    val entry = remember(host, backdrop) { TabBarEntry(backdrop, locals, latestContent) }
+    val pinnedTop = rememberUpdatedState(with(LocalDensity.current) { pinnedTopInset?.roundToPx() })
+    val entry = remember(host, backdrop) { TabBarEntry(backdrop, locals, latestContent, pinnedTop) }
+    LaunchedEffect(entry, pinnedTop.value) { host.update(entry) }
     DisposableEffect(host, entry) {
         host.entries.add(entry)
         onDispose {
@@ -104,7 +115,7 @@ internal fun TabBarOverlayHost(host: TabBarHost, modifier: Modifier = Modifier) 
             key(entry) {
                 CompositionLocalProvider(entry.locals.value) {
                     BlurredBar(entry.backdrop, Modifier
-                        .onSizeChanged { entry.height = it.height }
+                        .onSizeChanged { entry.height = it.height; host.update(entry) }
                         .drawWithContent {
                             val clip = entry.clip
                             clipRect(clip.left, clip.top, clip.right, clip.bottom) { this@drawWithContent.drawContent() }

@@ -16,6 +16,7 @@ import com.example.c001apk.compose.util.CookieUtil
 import com.example.c001apk.compose.util.decode
 import top.yukonga.miuix.kmp.basic.*
 import com.example.c001apk.compose.ui.component.design.AppGlyphs
+import com.example.c001apk.compose.ui.component.design.contentPress
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.*
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -24,7 +25,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, name: String,
     level: String, experience: String, nextLevel: String, onLogin: () -> Unit,
     onAccounts: () -> Unit, onUser: (String) -> Unit) {
-    Card(modifier.fillMaxWidth().padding(16.dp), insideMargin = PaddingValues(16.dp)) {
+    Card(modifier.fillMaxWidth().padding(16.dp).contentPress(enabled = loggedIn), insideMargin = PaddingValues(16.dp)) {
         if (!loggedIn) {
             BasicComponent(title = "登录酷安", summary = "查看关注、私信和互动消息",
                 insideMargin = PaddingValues(0.dp), endActions = {
@@ -33,7 +34,9 @@ fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, na
                 })
         } else Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            ContentAvatar(avatar, 48.dp, "account-avatar") { onUser(CookieUtil.uid) }
+            Box(Modifier.contentPress(pressedScale = .92f)) {
+                ContentAvatar(avatar, 48.dp, "account-avatar") { onUser(CookieUtil.uid) }
+            }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(name.decode, style = MiuixTheme.textStyles.title3, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("Lv.$level · $experience/$nextLevel", style = MiuixTheme.textStyles.footnote1,
@@ -41,7 +44,8 @@ fun MiuixAccountHeader(modifier: Modifier, loggedIn: Boolean, avatar: String, na
                 val total = nextLevel.toFloatOrNull()?.takeIf { it > 0f } ?: 1f
                 LinearProgressIndicator(progress = ((experience.toFloatOrNull() ?: 0f) / total).coerceIn(0f, 1f))
             }
-            IconButton(onClick = rememberHapticClick(onClick = onAccounts)) {
+            IconButton(modifier = Modifier.contentPress(pressedScale = .92f),
+                onClick = rememberHapticClick(onClick = onAccounts)) {
                 Icon(top.yukonga.miuix.kmp.icon.MiuixIcons.Medium.Contacts, "账号管理", tint = MiuixTheme.colorScheme.onSurfaceVariantActions)
             }
         }
@@ -54,7 +58,8 @@ fun MiuixAccountStats(modifier: Modifier, values: List<String>, onOpen: (String,
     Card(modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth()) {
             destinations.forEachIndexed { index, (label, type) ->
-                Column(Modifier.weight(1f).clickable(enabled = CookieUtil.isLogin, role = Role.Button) {
+                Column(Modifier.weight(1f).contentPress(enabled = CookieUtil.isLogin, pressedScale = .96f)
+                    .clickable(enabled = CookieUtil.isLogin, role = Role.Button) {
                     onOpen(CookieUtil.uid, type.name)
                 }.padding(vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -69,7 +74,7 @@ fun MiuixAccountStats(modifier: Modifier, values: List<String>, onOpen: (String,
 @Composable
 fun MiuixAccountShortcuts(modifier: Modifier, onOpen: (String?, String) -> Unit, onHistory: (String) -> Unit) {
     val labels = listOf("本地收藏", "浏览历史", "我的常去", "我的收藏", "我的赞", "我的回复")
-    val icons = listOf(MiuixIcons.Medium.Folder, MiuixIcons.Medium.Recent, MiuixIcons.Medium.Pin,
+    val icons = listOf(MiuixIcons.Medium.Folder, MiuixIcons.Regular.Recent, MiuixIcons.Medium.Pin,
         MiuixIcons.Medium.Favorites, AppGlyphs.Like, MiuixIcons.Medium.Reply)
     Card(modifier.fillMaxWidth()) {
         repeat(2) { row ->
@@ -77,7 +82,8 @@ fun MiuixAccountShortcuts(modifier: Modifier, onOpen: (String?, String) -> Unit,
                 repeat(3) { col ->
                     val index = row * 3 + col
                     val enabled = index < 2 || CookieUtil.isLogin
-                    Column(Modifier.weight(1f).clickable(enabled = enabled, role = Role.Button) {
+                    Column(Modifier.weight(1f).contentPress(enabled = enabled, pressedScale = .96f)
+                        .clickable(enabled = enabled, role = Role.Button) {
                         when (index) {
                             0 -> onHistory(HistoryType.FAV.name)
                             1 -> onHistory(HistoryType.HISTORY.name)

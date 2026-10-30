@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.c001apk.compose.R
@@ -197,10 +198,11 @@ fun FeedScreen(
         replyLauncher.launch(intent, options)
     }
 
-    val commentHeader: @Composable () -> Unit = {
+    val commentHeader: @Composable (Dp) -> Unit = { topInset ->
         FeedReplySortCard(
             replyCount = viewModel.replyCount,
             selected = selected,
+            pinnedTopInset = if (blur) topInset else null,
             updateSortReply = { index ->
                 setReplyType(index)
                 if (shouldShowSortCard) viewModel.isViewReply = true
@@ -437,8 +439,8 @@ fun FeedScreen(
                             }
                         }
 
-                        if (miuix) stickyHeader(key = "sort") { commentHeader() }
-                        else item(key = "sort") { commentHeader() }
+                        if (miuix) stickyHeader(key = "sort") { commentHeader(paddingValues.calculateTopPadding()) }
+                        else item(key = "sort") { commentHeader(0.dp) }
 
                         if (viewModel.listType == "lastupdate_desc") {
                             if (!response.topReplyRows.isNullOrEmpty()) {

@@ -40,6 +40,7 @@ internal fun miuixIcon(vector: ImageVector): ImageVector {
         "PhotoLibrary" -> MiuixIcons.Medium.Photos
         "Mail" -> MiuixIcons.Medium.Email
         "SupervisorAccount", "PersonAdd" -> MiuixIcons.Medium.Contacts
+        "Person" -> if (name.startsWith("Filled.")) MiuixIcons.Demibold.ContactsCircle else MiuixIcons.Medium.ContactsCircle
         "History", "Schedule" -> MiuixIcons.Medium.Recent
         "Update", "SystemUpdate" -> MiuixIcons.Medium.Update
         "Link" -> MiuixIcons.Medium.Link

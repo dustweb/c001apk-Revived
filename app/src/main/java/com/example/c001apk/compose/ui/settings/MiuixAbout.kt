@@ -60,6 +60,7 @@ import top.yukonga.miuix.kmp.blur.textureBlur
 
 @Composable
 internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll: ScrollState) {
+    val context = LocalContext.current
     BoxWithConstraints(Modifier.fillMaxSize().testTag("miuix-about-page")) {
         val heroHeight = (maxHeight * .46f).coerceIn(if (maxWidth > maxHeight) 260.dp else 300.dp, 480.dp)
         val heroPixels = with(LocalDensity.current) { heroHeight.toPx() }
@@ -92,6 +93,8 @@ internal fun MiuixAboutScreen(onBack: () -> Unit, onLicense: () -> Unit, scroll:
                         colors = CardDefaults.defaultColors(Color.White.copy(alpha = if (dark) .18f else .65f))) {
                         ProjectLinks()
                         ArrowPreference(title = "开源许可证", onClick = onLicense)
+                        ArrowPreference(title = "反馈", summary = "报告问题或提出建议",
+                            onClick = { context.openInBrowser("$URL_SOURCE_CODE_FORK/issues") })
                     }
                     Spacer(Modifier.height(24.dp))
                 }

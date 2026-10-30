@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.c001apk.compose.ui.component.design.contentCard
+import com.example.c001apk.compose.ui.component.design.contentPress
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -57,7 +58,7 @@ fun MessageListCard(
 
     if (com.example.c001apk.compose.ui.theme.isMiuix()) {
         top.yukonga.miuix.kmp.preference.ArrowPreference(title = title, enabled = CookieUtil.isLogin,
-            modifier = modifier, onClick = onViewNotice,
+            modifier = modifier.contentPress(enabled = CookieUtil.isLogin), onClick = onViewNotice,
             startAction = {
                 com.example.c001apk.compose.ui.component.design.Icon(imageVector, null, Modifier.padding(end = 12.dp),
                     tint = if (CookieUtil.isLogin) top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme.primary

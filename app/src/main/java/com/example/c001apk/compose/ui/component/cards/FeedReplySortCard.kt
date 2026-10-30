@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.example.c001apk.compose.ui.component.rememberHapticClick
 import com.example.c001apk.compose.ui.theme.isMiuix
@@ -33,10 +34,12 @@ fun FeedReplySortCard(
     modifier: Modifier = Modifier,
     replyCount: String,
     selected: Int = 0,
+    pinnedTopInset: Dp? = null,
     updateSortReply: (Int) -> Unit,
 ) {
     if (isMiuix()) {
-        com.example.c001apk.compose.ui.component.design.TabBarSurface(modifier.fillMaxWidth(), estimatedHeight = 100.dp) {
+        com.example.c001apk.compose.ui.component.design.TabBarSurface(modifier.fillMaxWidth(), estimatedHeight = 100.dp,
+            pinnedTopInset = pinnedTopInset) {
         Column(Modifier.fillMaxWidth().background(com.example.c001apk.compose.ui.component.design.barBackground(MiuixTheme.colorScheme.surface))
             .padding(horizontal = 12.dp, vertical = 8.dp).testTag("miuix-comment-sort"),
             verticalArrangement = Arrangement.spacedBy(10.dp)) {

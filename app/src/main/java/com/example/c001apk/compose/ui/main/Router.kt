@@ -2,8 +2,8 @@ package com.example.c001apk.compose.ui.main
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.automirrored.outlined.Message
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
@@ -34,9 +34,9 @@ sealed class Router(
 
     data object MESSAGE : Router(
         name = "MESSAGE",
-        stringId = R.string.message,
-        unselectedIcon = Icons.AutoMirrored.Outlined.Message,
-        selectedIcon = Icons.AutoMirrored.Filled.Message
+        stringId = R.string.mine,
+        unselectedIcon = Icons.Outlined.Person,
+        selectedIcon = Icons.Default.Person
     )
 
     data object SETTINGS : Router(

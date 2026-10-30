@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.AllInclusive
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.ForkRight
 import androidx.compose.material.icons.outlined.Source
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.c001apk.compose.ui.component.design.HorizontalDivider
 import com.example.c001apk.compose.ui.component.design.Scaffold
@@ -106,6 +107,13 @@ fun AboutScreen(
                 headlineText = "开源许可证"
             ) {
                 onLicenseClick()
+            }
+            BasicListItem(
+                leadingImageVector = Icons.Outlined.Feedback,
+                headlineText = "反馈",
+                supportingText = "报告问题或提出建议",
+            ) {
+                context.openInBrowser("$URL_SOURCE_CODE_FORK/issues")
             }
 
         }

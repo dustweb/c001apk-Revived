@@ -2,6 +2,7 @@
     <string name="app_name">c001apk-Revived</string>
     <string name="home">首页</string>
     <string name="message">消息</string>
+    <string name="mine">我的</string>
     <string name="settings">设置</string>
     <string name="app_icon">应用图标</string>
     <string name="icon_revived">Revived</string>
