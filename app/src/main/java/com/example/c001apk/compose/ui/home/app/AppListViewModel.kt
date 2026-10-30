@@ -43,7 +43,7 @@ class AppListViewModel : ViewModel() {
                 if (((info.flags and ApplicationInfo.FLAG_SYSTEM) != ApplicationInfo.FLAG_SYSTEM)) {
                     val packageInfo = pm.getPackageInfo(info.packageName, 0)
 
-                    if (info.packageName != "com.example.c001apk.compose") {
+                    if (info.packageName != c001Application.packageName) {
                         val appItem = AppItem(
                             label = info.loadLabel(pm).toString(),
                             packageInfo = packageInfo
