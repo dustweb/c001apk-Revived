@@ -30,6 +30,23 @@
 
 在 [c001apk-compose](https://github.com/bggRGjQaUbCoE/c001apk-compose) 的基础上继续维护，提供 MD3 与 miuix 两种界面，支持多账号切换、动态浏览、图文发布、评论回复、消息与私信，以及实况图片、HDR 显示、产品参数对比和收藏备份。
 
+## 界面预览
+
+miuix 深色模式，点击图片可查看原图。
+
+<table>
+  <tr>
+    <th align="center">首页</th>
+    <th align="center">我的</th>
+    <th align="center">设置</th>
+  </tr>
+  <tr>
+    <td align="center" width="33%"><a href="docs/assets/screenshots/miuix-home.jpg"><img src="docs/assets/screenshots/miuix-home.jpg" width="260" alt="miuix 首页：板块标签、推荐内容和动态列表"></a></td>
+    <td align="center" width="33%"><a href="docs/assets/screenshots/miuix-mine.jpg"><img src="docs/assets/screenshots/miuix-mine.jpg" width="260" alt="miuix 我的页面：账号概览、常用功能和互动通知"></a></td>
+    <td align="center" width="33%"><a href="docs/assets/screenshots/miuix-settings.jpg"><img src="docs/assets/screenshots/miuix-settings.jpg" width="260" alt="miuix 设置页面：界面风格、主题设置和浏览选项"></a></td>
+  </tr>
+</table>
+
 ## 功能
 
 - **双界面** — MD3／miuix 可即时切换，无需重启。miuix 覆盖首页、动态、评论、私信、登录和设置等页面，并提供按压缩放、返回动效及动态渐变关于页。
