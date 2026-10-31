@@ -26,15 +26,20 @@ def releases(repo):
 def discover():
     existing={r.get('tag_name') for r in releases(FORK) if not r.get('draft')}
     pending=[]
+    hotfix=os.environ.get('C001_HOTFIX') == 'true'
+    if hotfix and 'composf-upstream-429222606-fix-update-v1' in existing:
+        raise ValueError('updater hotfix is already published')
     for r in releases(UPSTREAM):
         if r.get('draft') or not r.get('published_at') or r['published_at']<CUTOFF: continue
         rid=r.get('id'); tag=r.get('tag_name')
         if not isinstance(rid,int) or not isinstance(tag,str) or not tag or len(tag)>180: raise ValueError('bad release id or tag')
         dest='composf-upstream-'+str(rid)
-        if dest in existing: continue
+        if hotfix and rid != 429222606: continue
+        if not hotfix and dest in existing: continue
         commit=api('/repos/'+UPSTREAM+'/commits/'+urllib.parse.quote(tag,safe='')).get('sha','')
         if not re.fullmatch('[0-9a-f]{40}',commit): raise ValueError('bad upstream commit')
-        pending.append({'id':rid,'tag':tag,'commit':commit,'prerelease':bool(r.get('prerelease')),'published':r['published_at']})
+        pending.append({'id':rid,'tag':tag,'commit':commit,'prerelease':bool(r.get('prerelease')),'published':r['published_at'],'hotfix':hotfix})
+    if hotfix and len(pending) != 1: raise ValueError('original upstream release not found')
     pending.sort(key=lambda r:(r['published'],r['id']))
     if len(pending)>100: raise RuntimeError('over 100 pending releases; manual review required')
     for index,r in enumerate(pending): r['index']=index
