@@ -9,6 +9,10 @@ on:
         description: 'Publish verified APK as a GitHub Release (false = test only)'
         type: boolean
         default: false
+      updater_hotfix:
+        description: 'One-time updater fix for upstream 332 (separate tag, no overwrite)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -30,6 +34,7 @@ jobs:
       - id: discover
         env:
           GH_TOKEN: ${{ github.token }}
+          C001_HOTFIX: ${{ inputs.updater_hotfix }}
         run: python3 automation/c001/discover.py
 
   build:
@@ -87,6 +92,7 @@ jobs:
           set -euo pipefail
           cd upstream
           chmod +x gradlew
+          ./gradlew :app:testDebugUnitTest --tests 'com.example.c001apk.compose.logic.model.PersonalClientReleaseTest' -Pandroid.newDsl=false -Pandroid.builtInKotlin=false
           ./gradlew assembleRelease -Pandroid.newDsl=false -Pandroid.builtInKotlin=false
           shopt -s nullglob
           files=(app/build/outputs/apk/release/*.apk)
@@ -183,4 +189,5 @@ jobs:
           UPSTREAM_PRERELEASE: ${{ matrix.prerelease }}
           VERSION_CODE: ${{ steps.verify.outputs.version_code }}
           RELEASE_ASSET_DIR: ${{ runner.temp }}/release-assets
+          C001_HOTFIX: ${{ matrix.hotfix }}
         run: python3 control/automation/c001/publish.py
