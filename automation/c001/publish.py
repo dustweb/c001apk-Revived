@@ -5,6 +5,9 @@ FORK='dustweb/c001apk-Revived'; UP='frisk1127/c001apk-Revived'
 rid=int(os.environ['UPSTREAM_ID']); tag=os.environ['UPSTREAM_TAG']; commit=os.environ['UPSTREAM_COMMIT']
 pre=os.environ['UPSTREAM_PRERELEASE']=='true'; code=int(os.environ['VERSION_CODE'])
 name='composf-upstream-'+str(rid)
+if os.environ.get('C001_HOTFIX')=='true':
+    if rid!=429222606: raise ValueError('unexpected updater hotfix upstream release')
+    name += '-fix-update-v1'
 if not re.fullmatch('[0-9a-f]{40}',commit): raise ValueError('invalid commit')
 
 def gh(*args):
